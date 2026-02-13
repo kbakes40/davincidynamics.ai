@@ -86,3 +86,5 @@
 - [x] Add smooth slide-out transition when closing Sophia
 - [x] Add smooth scale-up entrance animation for Sophia (reverse of close animation)
 - [x] Make welcome message type out character-by-character as widget appears (ChatGPT-style)
+- [x] Update Sophia's personality to be funny and sarcastic
+- [x] Fix booking flow - immediately provide booking link when user says yes to availability
