@@ -8,12 +8,19 @@ import { Check, ArrowRight, Zap, Shield, TrendingUp, Bot } from "lucide-react";
 import { useLocation } from "wouter";
 import Navigation from "@/components/Navigation";
 import CostSavingsCalculator from "@/components/CostSavingsCalculator";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useChat } from "@/contexts/ChatContext";
+import { useScrollFade } from "@/hooks/useScrollFade";
 
 export default function Home() {
   const [, setLocation] = useLocation();
   const { openChat } = useChat();
+  
+  // Scroll fade hooks for each section
+  const calculatorSection = useScrollFade();
+  const problemSection = useScrollFade();
+  const whoSection = useScrollFade();
+  const ctaSection = useScrollFade();
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
@@ -97,16 +104,22 @@ export default function Home() {
         </section>
 
         {/* Cost Savings Calculator Section */}
-        <section className="container mx-auto px-4 py-16">
+        <section 
+          ref={calculatorSection.ref as React.RefObject<HTMLElement>}
+          className={`container mx-auto px-4 py-16 scroll-fade-section ${calculatorSection.isVisible ? 'visible' : ''}`}
+        >
           <div className="max-w-4xl mx-auto">
             <CostSavingsCalculator />
           </div>
         </section>
 
         {/* Problem Section */}
-        <section className="container mx-auto px-4 py-16">
+        <section 
+          ref={problemSection.ref as React.RefObject<HTMLElement>}
+          className={`container mx-auto px-4 py-16 scroll-fade-section ${problemSection.isVisible ? 'visible' : ''}`}
+        >
           <div className="max-w-4xl mx-auto">
-            <div className="bg-card rounded-xl p-8 lg:p-12 border border-accent/30 shadow-2xl"
+            <div className="glass-card-intense rounded-xl p-8 lg:p-12"
               style={{
                 backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
                 backgroundSize: 'cover',
@@ -174,7 +187,10 @@ export default function Home() {
         </section>
 
         {/* Who This Is For */}
-        <section className="container mx-auto px-4 py-16">
+        <section 
+          ref={whoSection.ref as React.RefObject<HTMLElement>}
+          className={`container mx-auto px-4 py-16 scroll-fade-section ${whoSection.isVisible ? 'visible' : ''}`}
+        >
           <div className="max-w-6xl mx-auto">
             <h2 className="font-display font-bold text-3xl lg:text-4xl text-center text-neon mb-12">
               Perfect For Small Sellers & Private Retailers
@@ -200,7 +216,7 @@ export default function Home() {
               ].map((item, idx) => (
                 <div
                   key={idx}
-                  className="bg-card rounded-xl p-6 border border-border/50 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(0,217,255,0.15)]"
+                  className="glass-card rounded-xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(0,217,255,0.25)] hover:border-accent/40"
                   style={{
                     backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
                     backgroundSize: 'cover',
@@ -216,9 +232,12 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="container mx-auto px-4 py-16 mb-24">
+        <section 
+          ref={ctaSection.ref as React.RefObject<HTMLElement>}
+          className={`container mx-auto px-4 py-16 mb-24 scroll-fade-section ${ctaSection.isVisible ? 'visible' : ''}`}
+        >
           <div className="max-w-4xl mx-auto text-center">
-            <div className="bg-card rounded-xl p-8 lg:p-12 border border-accent/30 shadow-2xl neon-glow"
+            <div className="glass-card-intense rounded-xl p-8 lg:p-12 neon-glow"
               style={{
                 backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEplLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
                 backgroundSize: 'cover',

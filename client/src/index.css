@@ -191,4 +191,38 @@
     height: 4px;
     border-radius: 2px;
   }
+  
+  /* Scroll-based fade animations */
+  .scroll-fade-section {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .scroll-fade-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Glassmorphism effect */
+  .glass-card {
+    background: rgba(26, 26, 26, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 217, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(0, 217, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  .glass-card-intense {
+    background: rgba(26, 26, 26, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 217, 255, 0.3);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6),
+                0 0 30px rgba(0, 217, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
 }

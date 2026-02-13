@@ -101,3 +101,5 @@
 - [x] Fix SEO: Add meta description (50-160 characters)
 - [x] Fix SEO: Optimize title to 30-60 characters)
 - [x] Fix SEO: Add keywords to page content
+- [x] Add scroll-based fade transitions (sections fade out at top, fade in from below)
+- [x] Add glassmorphism, shadows, and glow effects to home page sections
