@@ -129,3 +129,6 @@
 - [x] Update Telegram notification to show department
 - [x] Add "General Inquiry" department option (routes to info@davincidynamics.ai)
 - [x] Rename "Support" to "Technical Support"
+- [x] Debug Telegram bot notifications not sending
+- [x] Check TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID configuration
+- [x] Review backend error logs for Telegram API errors
