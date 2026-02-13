@@ -58,4 +58,4 @@
 - [x] Revert links back to @DaVinciAssistBot (correct bot name)
 - [x] Set up TELEGRAM_BOT_TOKEN for @DaVinciAssistBot
 - [x] Deploy bot handler and test responses
-- [ ] Remove embedded chat widget - only use Telegram
+- [x] Remove embedded chat widget - only use Telegram
