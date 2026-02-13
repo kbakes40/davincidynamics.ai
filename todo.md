@@ -47,3 +47,7 @@
 - [x] Integrate chat with existing AI handler
 - [x] Make chat widget draggable
 - [x] Test embedded chat functionality
+- [x] Update all links from old domain to davincidynamics.ai
+- [x] Implement post-booking chat flow with thank-you message
+- [x] Add context passing from booking form to chat
+- [x] Test post-booking chat flow

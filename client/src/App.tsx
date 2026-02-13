@@ -14,6 +14,7 @@ import Contact from "./pages/Contact";
 import PlatformDemo from "./pages/PlatformDemo";
 import BotAnalytics from "./pages/BotAnalytics";
 import EmbeddedChatWidget from "./components/EmbeddedChatWidget";
+import { BookingProvider, useBooking } from "./contexts/BookingContext";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -35,16 +36,23 @@ function Router() {
   );
 }
 
+function ChatWidgetWithContext() {
+  const { bookingData } = useBooking();
+  return <EmbeddedChatWidget bookingContext={bookingData || undefined} />;
+}
+
 function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-          <SpotifyBottomPlayer />
-          <EmbeddedChatWidget />
-        </TooltipProvider>
+        <BookingProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+            <SpotifyBottomPlayer />
+            <ChatWidgetWithContext />
+          </TooltipProvider>
+        </BookingProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

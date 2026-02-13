@@ -10,10 +10,12 @@ import { Check, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { useBooking } from "@/contexts/BookingContext";
 
 type PackageTier = "starter" | "growth" | "scale" | null;
 
 export default function Booking() {
+  const { setBookingData } = useBooking();
   const [selectedTier, setSelectedTier] = useState<PackageTier>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -57,6 +59,16 @@ export default function Booking() {
       toast.success("Demo Request Submitted!", {
         description: "We'll contact you within 24 hours to schedule your demo.",
       });
+      
+      // Set booking context for chat widget
+      setBookingData({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        package: selectedTier ? getTierName(selectedTier) : "Not selected",
+        message: formData.notes,
+      });
+      
       // Reset form
       setFormData({
         name: "",

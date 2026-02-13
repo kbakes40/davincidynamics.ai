@@ -303,7 +303,7 @@ export class BotAIHandler {
       return `I'd love to show you our platform! We have mobile and desktop demos available. You can also book a personalized demo with our team. Which would you prefer?`;
     }
 
-    return `Great question! I'd like to give you the most accurate answer. Could you book a quick call with our team? They can address your specific needs: https://3000-ivffr5j7qq1mb9nvb9hdg-c6ade6a9.us2.manus.computer/booking`;
+    return `Great question! I'd like to give you the most accurate answer. Could you book a quick call with our team? They can address your specific needs: https://www.davincidynamics.ai/booking`;
   }
 
   /**

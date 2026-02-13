@@ -17,16 +17,37 @@ interface Message {
   timestamp: Date;
 }
 
-export default function EmbeddedChatWidget() {
+interface EmbeddedChatWidgetProps {
+  bookingContext?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    package?: string;
+    message?: string;
+  };
+}
+
+export default function EmbeddedChatWidget({ bookingContext }: EmbeddedChatWidgetProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "👋 **Welcome to DaVinci Dynamics!**\n\nI'm your AI assistant. I can help you with:\n\n💰 Pricing & packages\n🎥 Platform demos\n🚀 How it works\n📞 Booking consultations\n\nWhat would you like to know?",
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (bookingContext) {
+      return [
+        {
+          role: "assistant",
+          content: `🎉 **Thank you so much for choosing DaVinci Dynamics, ${bookingContext.name || 'valued customer'}!**\n\nWe're absolutely thrilled to have you on board! Your ${bookingContext.package || 'selected package'} is an excellent choice.\n\n**What happens next:**\n\n✅ Our team will reach out within 24 hours to confirm your setup details\n📅 We'll schedule your platform onboarding session\n🚀 Your custom e-commerce platform will be ready in 7-10 business days\n\nIn the meantime, feel free to ask me any questions about your new platform. We're here to make this transition as smooth as possible!\n\nWelcome to the DaVinci family! 🙌`,
+          timestamp: new Date(),
+        },
+      ];
+    }
+    return [
+      {
+        role: "assistant",
+        content: "👋 **Welcome to DaVinci Dynamics!**\n\nI'm your AI assistant. I can help you with:\n\n💰 Pricing & packages\n🎥 Platform demos\n🚀 How it works\n📞 Booking consultations\n\nWhat would you like to know?",
+        timestamp: new Date(),
+      },
+    ];
+  });
   const [input, setInput] = useState("");
   const [position, setPosition] = useState({ x: window.innerWidth - 420, y: window.innerHeight - 600 });
   const [isDragging, setIsDragging] = useState(false);
