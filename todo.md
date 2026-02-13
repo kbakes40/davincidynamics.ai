@@ -120,3 +120,5 @@
 - [x] Create XML sitemap
 - [ ] Submit sitemap to Search Console (user action required)
 - [x] Update contact email to info@davincidynamics.ai
+- [x] Add enterprise department contact form with routing (sales@, projects@, support@)
+- [x] Implement backend email routing logic
