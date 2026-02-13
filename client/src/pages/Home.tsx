@@ -7,9 +7,31 @@
  */
 
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Check, Upload, Video } from "lucide-react";
+import { useState } from "react";
 
 export default function Home() {
+  const [mobileVideoUrl, setMobileVideoUrl] = useState("");
+  const [desktopVideoUrl, setDesktopVideoUrl] = useState("");
+  const [mobileVideoFile, setMobileVideoFile] = useState<File | null>(null);
+  const [desktopVideoFile, setDesktopVideoFile] = useState<File | null>(null);
+
+  const handleMobileFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setMobileVideoFile(file);
+      setMobileVideoUrl(""); // Clear URL if file is uploaded
+    }
+  };
+
+  const handleDesktopFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setDesktopVideoFile(file);
+      setDesktopVideoUrl(""); // Clear URL if file is uploaded
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
       {/* Background glow effects */}
@@ -39,6 +61,151 @@ export default function Home() {
           </div>
         </header>
 
+        {/* Video Upload Section */}
+        <section className="mb-12 max-w-5xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <div className="bg-card rounded-xl p-6 lg:p-8 border border-accent/30 shadow-2xl"
+            style={{
+              backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
+              backgroundSize: 'cover',
+            }}
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <Video className="w-6 h-6 text-accent" />
+              <h2 className="font-heading font-bold text-2xl text-foreground">Upload Promo Videos</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Mobile Video Upload (9:16) */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-heading font-semibold text-lg text-foreground">Mobile Video (9:16)</h3>
+                  <span className="text-xs text-muted-foreground font-heading">Max 10GB</span>
+                </div>
+                
+                {/* Google Drive Link Input */}
+                <div>
+                  <label className="block text-sm font-heading text-muted-foreground mb-2">
+                    Google Drive Link
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Paste Google Drive link..."
+                    value={mobileVideoUrl}
+                    onChange={(e) => {
+                      setMobileVideoUrl(e.target.value);
+                      setMobileVideoFile(null); // Clear file if URL is entered
+                    }}
+                    className="w-full px-4 py-3 bg-background/50 border border-border/50 rounded-lg text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors font-heading text-sm"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-border/50" />
+                  <span className="text-xs text-muted-foreground font-heading">OR</span>
+                  <div className="flex-1 h-px bg-border/50" />
+                </div>
+
+                {/* File Upload */}
+                <div>
+                  <label className="block text-sm font-heading text-muted-foreground mb-2">
+                    Upload Video File
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={handleMobileFileUpload}
+                      className="hidden"
+                      id="mobile-video-upload"
+                    />
+                    <label
+                      htmlFor="mobile-video-upload"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-6 bg-background/50 border-2 border-dashed border-accent/30 rounded-lg cursor-pointer hover:border-accent/60 hover:bg-accent/5 transition-all"
+                    >
+                      <Upload className="w-5 h-5 text-accent" />
+                      <span className="font-heading text-sm text-foreground">
+                        {mobileVideoFile ? mobileVideoFile.name : "Click to upload"}
+                      </span>
+                    </label>
+                  </div>
+                  {mobileVideoFile && (
+                    <p className="text-xs text-accent mt-2 font-heading">
+                      ✓ {(mobileVideoFile.size / (1024 * 1024)).toFixed(2)} MB
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Desktop Video Upload (16:9) */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-heading font-semibold text-lg text-foreground">Desktop Video (16:9)</h3>
+                  <span className="text-xs text-muted-foreground font-heading">Max 10GB</span>
+                </div>
+                
+                {/* Google Drive Link Input */}
+                <div>
+                  <label className="block text-sm font-heading text-muted-foreground mb-2">
+                    Google Drive Link
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Paste Google Drive link..."
+                    value={desktopVideoUrl}
+                    onChange={(e) => {
+                      setDesktopVideoUrl(e.target.value);
+                      setDesktopVideoFile(null); // Clear file if URL is entered
+                    }}
+                    className="w-full px-4 py-3 bg-background/50 border border-border/50 rounded-lg text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors font-heading text-sm"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-border/50" />
+                  <span className="text-xs text-muted-foreground font-heading">OR</span>
+                  <div className="flex-1 h-px bg-border/50" />
+                </div>
+
+                {/* File Upload */}
+                <div>
+                  <label className="block text-sm font-heading text-muted-foreground mb-2">
+                    Upload Video File
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={handleDesktopFileUpload}
+                      className="hidden"
+                      id="desktop-video-upload"
+                    />
+                    <label
+                      htmlFor="desktop-video-upload"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-6 bg-background/50 border-2 border-dashed border-accent/30 rounded-lg cursor-pointer hover:border-accent/60 hover:bg-accent/5 transition-all"
+                    >
+                      <Upload className="w-5 h-5 text-accent" />
+                      <span className="font-heading text-sm text-foreground">
+                        {desktopVideoFile ? desktopVideoFile.name : "Click to upload"}
+                      </span>
+                    </label>
+                  </div>
+                  {desktopVideoFile && (
+                    <p className="text-xs text-accent mt-2 font-heading">
+                      ✓ {(desktopVideoFile.size / (1024 * 1024)).toFixed(2)} MB
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-border/30">
+              <p className="text-xs text-muted-foreground font-heading text-center">
+                Videos will be displayed above the pricing cards. Mobile video shows on portrait devices, desktop video on landscape.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Pricing Cards - Horizontal Layout for Desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-8 lg:mb-12 max-w-7xl mx-auto">
           {/* Card 1: Starter Launch */}
@@ -47,7 +214,7 @@ export default function Home() {
             style={{
               backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
               backgroundSize: 'cover',
-              animationDelay: '0.1s'
+              animationDelay: '0.2s'
             }}
           >
             <h3 className="font-heading font-bold text-xl lg:text-2xl mb-3 text-foreground">Starter Launch</h3>
@@ -87,7 +254,7 @@ export default function Home() {
             style={{
               backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
               backgroundSize: 'cover',
-              animationDelay: '0.2s'
+              animationDelay: '0.3s'
             }}
           >
             {/* Most Popular Badge */}
@@ -133,7 +300,7 @@ export default function Home() {
             style={{
               backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
               backgroundSize: 'cover',
-              animationDelay: '0.3s'
+              animationDelay: '0.4s'
             }}
           >
             <h3 className="font-heading font-bold text-xl lg:text-2xl mb-3 text-foreground">Scale Partner</h3>
@@ -169,7 +336,7 @@ export default function Home() {
         </div>
 
         {/* Bottom Section */}
-        <footer className="text-center space-y-6 animate-fade-in-up max-w-2xl mx-auto" style={{ animationDelay: '0.4s' }}>
+        <footer className="text-center space-y-6 animate-fade-in-up max-w-2xl mx-auto" style={{ animationDelay: '0.5s' }}>
           <p className="text-sm text-muted-foreground font-heading mb-2">
             Own your customer data. Automate fulfillment. Scale smarter.
           </p>
