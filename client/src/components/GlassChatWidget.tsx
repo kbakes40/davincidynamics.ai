@@ -140,27 +140,7 @@ export default function GlassChatWidget() {
   }, [isDragging, dragOffset]);
 
   if (!isOpen) {
-    return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-[9999] group"
-        style={{
-          background: 'rgba(0, 217, 255, 0.1)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(0, 217, 255, 0.2)',
-        }}
-        aria-label="Open chat"
-      >
-        <div className="relative w-16 h-16 rounded-full flex items-center justify-center">
-          {/* Glow effect */}
-          <div className="absolute inset-0 rounded-full bg-[#00D9FF] opacity-20 blur-xl group-hover:opacity-30 transition-opacity" />
-          
-          {/* Icon */}
-          <MessageCircle className="w-7 h-7 text-[#00D9FF] relative z-10" />
-        </div>
-      </button>
-    );
+    return null;
   }
 
   return (

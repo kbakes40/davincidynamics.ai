@@ -71,3 +71,4 @@
 - [x] Replace all Telegram bot links with chat widget
 - [x] Update AI to be more sales-pushy
 - [x] Add dynamic pricing shock responses
+- [x] Hide floating chat bubble - only show when triggered by buttons
