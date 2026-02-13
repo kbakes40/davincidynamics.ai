@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Play, Pause, SkipForward } from 'lucide-react';
-import { redirectToSpotifyAuth, exchangeCodeForToken, saveTokenToStorage, getTokenFromStorage, clearTokenFromStorage } from '@/lib/spotifyAuth';
+import { redirectToSpotifyAuth, exchangeCodeForToken } from '@/lib/spotifyAuth';
 
 interface SpotifyPlayer {
   connect: () => Promise<boolean>;
@@ -49,6 +49,8 @@ export default function SpotifyBottomPlayer() {
   const [albumArtUrl, setAlbumArtUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [volume, setVolume] = useState(80); // 80% default
+  const [currentPosition, setCurrentPosition] = useState(0); // Current position in ms
+  const [duration, setDuration] = useState(0); // Track duration in ms
   const playerRef = useRef<SpotifyPlayer | null>(null);
 
   // Load Spotify SDK
@@ -72,11 +74,13 @@ export default function SpotifyBottomPlayer() {
     };
   }, []);
 
-  // Check for existing token on mount
+  // Pick up temporary token from callback redirect
   useEffect(() => {
-    const token = getTokenFromStorage();
-    if (token) {
-      setAccessToken(token);
+    const tempToken = sessionStorage.getItem('spotify_temp_token');
+    if (tempToken) {
+      setAccessToken(tempToken);
+      // Clear immediately after reading
+      sessionStorage.removeItem('spotify_temp_token');
     }
   }, []);
 
@@ -106,12 +110,12 @@ export default function SpotifyBottomPlayer() {
         setErrorMessage('Spotify player unavailable. Please reconnect.');
       });
 
-      spotifyPlayer.addListener('player_state_changed', (state: PlayerState | null) => {
+      spotifyPlayer.addListener('player_state_changed', (state: any) => {
         if (!state) return;
 
         setIsPaused(state.paused);
         setTrackName(state.track_window.current_track.name);
-        setArtistName(state.track_window.current_track.artists.map(a => a.name).join(', '));
+        setArtistName(state.track_window.current_track.artists.map((a: any) => a.name).join(', '));
         
         // Get smallest album art (64x64 typically)
         const albumImages = state.track_window.current_track.album.images;
@@ -119,6 +123,10 @@ export default function SpotifyBottomPlayer() {
           // Use the smallest image (last in array)
           setAlbumArtUrl(albumImages[albumImages.length - 1].url);
         }
+
+        // Update position and duration
+        setCurrentPosition(state.position);
+        setDuration(state.duration);
       });
 
       spotifyPlayer.connect().catch((err) => {
@@ -242,15 +250,64 @@ export default function SpotifyBottomPlayer() {
     }
   };
 
+  const handleSeek = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPosition = parseInt(e.target.value);
+    setCurrentPosition(newPosition);
+    
+    if (accessToken && deviceId) {
+      try {
+        await fetch(`https://api.spotify.com/v1/me/player/seek?position_ms=${newPosition}&device_id=${deviceId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
+      } catch (err) {
+        console.error('Seek error:', err);
+      }
+    }
+  };
+
+  // Format time in mm:ss
+  const formatTime = (ms: number): string => {
+    const seconds = Math.floor(ms / 1000);
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-[9999] flex items-center gap-4 px-4 py-3 border-t"
+      className="fixed bottom-0 left-0 right-0 z-[9999] border-t"
       style={{
-        height: '80px',
         background: '#0b0b0f',
         borderTopColor: 'rgba(255,255,255,0.08)',
       }}
     >
+      {/* Progress Bar */}
+      {accessToken && duration > 0 && (
+        <div className="px-4 pt-2">
+          <div className="flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
+            <span className="w-10 text-right">{formatTime(currentPosition)}</span>
+            <input
+              type="range"
+              min="0"
+              max={duration}
+              value={currentPosition}
+              onChange={handleSeek}
+              className="flex-1 h-1 rounded-full appearance-none cursor-pointer"
+              style={{
+                background: `linear-gradient(to right, #1DB954 0%, #1DB954 ${(currentPosition / duration) * 100}%, rgba(255,255,255,0.2) ${(currentPosition / duration) * 100}%, rgba(255,255,255,0.2) 100%)`
+              }}
+            />
+            <span className="w-10">{formatTime(duration)}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Main Player Controls */}
+      <div className="flex items-center gap-4 px-4 py-3">
+
       {/* Left: Album Art + Track Info */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {albumArtUrl && (
@@ -361,6 +418,7 @@ export default function SpotifyBottomPlayer() {
             </button>
           </>
         )}
+      </div>
       </div>
     </div>
   );

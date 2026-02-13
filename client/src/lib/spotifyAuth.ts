@@ -2,6 +2,7 @@
  * Spotify OAuth PKCE Flow Utilities
  * Implements Authorization Code with PKCE for secure client-side authentication
  * Uses full-page redirect for better compatibility and reliability
+ * NO PERSISTENCE - tokens are session-only and cleared on page refresh
  */
 
 // Generate a random code verifier for PKCE
@@ -45,9 +46,9 @@ export async function redirectToSpotifyAuth(params: SpotifyAuthParams): Promise<
   const codeVerifier = generateRandomString(64);
   const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-  // Store code verifier and return path for later use
-  localStorage.setItem('spotify_code_verifier', codeVerifier);
-  localStorage.setItem('spotify_return_path', window.location.pathname);
+  // Store code verifier ONLY for the OAuth flow (temporary)
+  sessionStorage.setItem('spotify_code_verifier', codeVerifier);
+  sessionStorage.setItem('spotify_return_path', window.location.pathname);
 
   const authUrl = new URL('https://accounts.spotify.com/authorize');
   authUrl.searchParams.append('client_id', params.clientId);
@@ -74,7 +75,7 @@ export async function exchangeCodeForToken(
   clientId: string,
   redirectUri: string
 ): Promise<TokenResponse> {
-  const codeVerifier = localStorage.getItem('spotify_code_verifier');
+  const codeVerifier = sessionStorage.getItem('spotify_code_verifier');
   if (!codeVerifier) {
     throw new Error('Code verifier not found');
   }
@@ -102,40 +103,9 @@ export async function exchangeCodeForToken(
 
   const data: TokenResponse = await response.json();
   
-  // Clean up code verifier
-  localStorage.removeItem('spotify_code_verifier');
+  // Clean up code verifier immediately after use
+  sessionStorage.removeItem('spotify_code_verifier');
+  sessionStorage.removeItem('spotify_return_path');
   
   return data;
-}
-
-export function saveTokenToStorage(token: TokenResponse): void {
-  localStorage.setItem('spotify_access_token', token.access_token);
-  localStorage.setItem('spotify_token_expires_at', String(Date.now() + token.expires_in * 1000));
-  if (token.refresh_token) {
-    localStorage.setItem('spotify_refresh_token', token.refresh_token);
-  }
-}
-
-export function getTokenFromStorage(): string | null {
-  const token = localStorage.getItem('spotify_access_token');
-  const expiresAt = localStorage.getItem('spotify_token_expires_at');
-  
-  if (!token || !expiresAt) {
-    return null;
-  }
-  
-  // Check if token is expired
-  if (Date.now() >= parseInt(expiresAt)) {
-    clearTokenFromStorage();
-    return null;
-  }
-  
-  return token;
-}
-
-export function clearTokenFromStorage(): void {
-  localStorage.removeItem('spotify_access_token');
-  localStorage.removeItem('spotify_token_expires_at');
-  localStorage.removeItem('spotify_refresh_token');
-  localStorage.removeItem('spotify_return_path');
 }

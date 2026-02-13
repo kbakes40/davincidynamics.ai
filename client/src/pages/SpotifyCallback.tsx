@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
-import { exchangeCodeForToken, saveTokenToStorage } from '@/lib/spotifyAuth';
+import { exchangeCodeForToken } from '@/lib/spotifyAuth';
 
 export default function SpotifyCallback() {
   const [, setLocation] = useLocation();
@@ -38,12 +38,14 @@ export default function SpotifyCallback() {
         console.log('[Spotify Callback] Exchanging code for token...');
         const token = await exchangeCodeForToken(code, clientId, redirectUri);
         
-        console.log('[Spotify Callback] Token received, saving to storage');
-        saveTokenToStorage(token);
+        console.log('[Spotify Callback] Token received, passing to home page');
         
-        // Redirect back to home page
-        const returnPath = localStorage.getItem('spotify_return_path') || '/';
-        localStorage.removeItem('spotify_return_path');
+        // Pass token via URL hash (temporary, cleared on page load)
+        const returnPath = sessionStorage.getItem('spotify_return_path') || '/';
+        sessionStorage.removeItem('spotify_return_path');
+        
+        // Store token temporarily in sessionStorage just for the redirect
+        sessionStorage.setItem('spotify_temp_token', token.access_token);
         
         console.log('[Spotify Callback] Redirecting to:', returnPath);
         setLocation(returnPath);
