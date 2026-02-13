@@ -7,3 +7,4 @@
 - [x] Update Spotify player to use smooth jazz playlist
 - [x] Update Spotify player to use upbeat house music playlist
 - [x] Add descriptive titles above video placeholders
+- [x] Add clickable links to open demo websites (mobile: davincidynamics.site, desktop: bosshookah.site)

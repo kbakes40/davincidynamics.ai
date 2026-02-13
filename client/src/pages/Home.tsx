@@ -186,6 +186,13 @@ export default function Home() {
                   </div>
                 </div>
               )}
+              <Button 
+                variant="outline" 
+                className="mt-6 border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
+                onClick={() => window.open('https://www.davincidynamics.site/', '_blank')}
+              >
+                View Live Mobile Demo →
+              </Button>
             </div>
 
             {/* Right: Desktop Video (16:9) */}
@@ -247,6 +254,13 @@ export default function Home() {
                   </div>
                 </div>
               )}
+              <Button 
+                variant="outline" 
+                className="mt-6 border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
+                onClick={() => window.open('https://www.bosshookah.site/', '_blank')}
+              >
+                View Live Desktop Demo →
+              </Button>
             </div>
           </div>
         </section>
