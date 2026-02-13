@@ -136,3 +136,9 @@
 - [x] Revert entrance animation changes that broke home screen Sophia
 - [x] Add clickable link to mobile demo video (opens davincidynamics.site)
 - [x] Add clickable link to desktop demo video (opens bosshookah.site)
+
+## Copy Revisions - All-in-One Service Model
+- [x] Update Home page hero section to remove "You own it" messaging
+- [x] Revise pricing card copy to reflect transparent monthly fees (covers hosting + ad management)
+- [x] Update Platform Demo page copy to match new service model
+- [x] Review all pages for any remaining "ownership" or "no platform fees" language

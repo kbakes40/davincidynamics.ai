@@ -64,7 +64,7 @@ export default function CostSavingsCalculator() {
           />
         </div>
         <p className="text-sm text-muted-foreground font-heading mt-2">
-          Include platform fees, payment processing, apps, and marketing tools
+          Include all current costs: platform fees, payment processing, apps, and marketing tools
         </p>
       </div>
 

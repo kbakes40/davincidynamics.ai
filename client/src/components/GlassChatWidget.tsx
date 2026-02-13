@@ -47,7 +47,7 @@ export default function GlassChatWidget() {
         setIsEntering(false);
         setHasTypedWelcome(true);
         
-        const welcomeText = "Hi! I'm Sophia, your DaVinci Dynamics business consultant. I help entrepreneurs like you stop throwing money away on platform fees. What are you currently paying monthly for your e-commerce platform?";
+        const welcomeText = "Hi! I'm Sophia, your DaVinci Dynamics business consultant. I help entrepreneurs like you save money with transparent all-in-one pricing. What are you currently paying monthly for your e-commerce platform?";
         const messageId = "welcome";
         
         // Add empty message placeholder

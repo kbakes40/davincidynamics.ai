@@ -587,7 +587,7 @@ export default function Booking() {
               Ready to Transform Your Retail Business?
             </h2>
             <p className="text-muted-foreground font-heading mb-6">
-              Join dozens of store owners who've cut their monthly platform fees by 60%+ while owning their customer data and automating operations.
+              Join dozens of store owners who've cut their costs by 60%+ with transparent all-in-one pricing that covers hosting, ads, and automation.
             </p>
             <Button
               size="lg"

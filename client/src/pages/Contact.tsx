@@ -64,7 +64,7 @@ export default function Contact() {
             Get In Touch
           </h1>
           <p className="font-heading text-lg text-muted-foreground mb-12 text-center max-w-2xl mx-auto">
-            Ready to stop paying platform fees? Contact us for a free consultation.
+            Ready for transparent all-in-one pricing? Contact us for a free consultation.
           </p>
 
           <div className="grid lg:grid-cols-2 gap-8">

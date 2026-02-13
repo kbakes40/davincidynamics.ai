@@ -34,9 +34,9 @@ export default function About() {
                 Square, and payment processors—just to have a basic online store.
               </p>
               <p className="font-heading text-lg text-foreground">
-                We knew there was a better way. Instead of renting a platform forever, we build you a custom 
-                e-commerce solution that you actually own. Lower fees, more control, and all the features you need 
-                to compete with the big brands—without the enterprise price tag.
+                We knew there was a better way. We provide an all-in-one e-commerce service with transparent monthly pricing 
+                that covers hosting, ad management, and platform maintenance. Lower fees, more control, and all the features you need 
+                to compete with the big brands—without hidden costs or enterprise price tags.
               </p>
             </div>
 
@@ -50,7 +50,7 @@ export default function About() {
               <ul className="space-y-3 font-heading text-lg text-foreground">
                 <li className="flex items-start gap-2">
                   <span className="text-accent font-bold">→</span>
-                  <span><strong>You own it:</strong> No monthly platform fees eating your profits forever</span>
+                  <span><strong>Transparent pricing:</strong> One monthly fee covers hosting, ads, and platform management</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-accent font-bold">→</span>
@@ -62,7 +62,7 @@ export default function About() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-accent font-bold">→</span>
-                  <span><strong>Full service:</strong> We handle setup, hosting, and ongoing support</span>
+                  <span><strong>Full service:</strong> We handle setup, hosting, ad management, and ongoing support</span>
                 </li>
               </ul>
             </div>
