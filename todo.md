@@ -51,3 +51,4 @@
 - [x] Implement post-booking chat flow with thank-you message
 - [x] Add context passing from booking form to chat
 - [x] Test post-booking chat flow
+- [x] Fix chat widget visibility - ensure floating button appears on screen

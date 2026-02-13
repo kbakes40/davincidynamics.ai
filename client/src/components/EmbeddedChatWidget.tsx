@@ -155,7 +155,7 @@ export default function EmbeddedChatWidget({ bookingContext }: EmbeddedChatWidge
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50"
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-[9999]"
         size="icon"
       >
         <MessageCircle className="h-6 w-6" />
@@ -166,7 +166,7 @@ export default function EmbeddedChatWidget({ bookingContext }: EmbeddedChatWidge
   return (
     <div
       ref={widgetRef}
-      className="fixed z-50"
+      className="fixed z-[9999]"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
