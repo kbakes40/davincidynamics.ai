@@ -26,7 +26,7 @@ export default function Home() {
         {/* Header Section */}
         <header className="text-center mb-12 animate-fade-in-up">
           <h1 className="font-display font-black text-4xl md:text-5xl mb-4 leading-tight tracking-tight text-foreground">
-            Turn Your Hookah Shop Into a{" "}
+            Turn Your Business Into a{" "}
             <span className="text-neon">Revenue Machine</span>
           </h1>
           <p className="font-heading text-base md:text-lg text-muted-foreground mb-8 font-medium">
