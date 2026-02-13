@@ -6,11 +6,16 @@
  * - Orbitron Bold for headlines, Rajdhani for subheadings
  */
 
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Check, Upload, Video, Play, Pause } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 export default function Home() {
+  // The userAuth hooks provides authentication state
+  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
+  let { user, loading, error, isAuthenticated, logout } = useAuth();
+
   const [mobileVideoUrl, setMobileVideoUrl] = useState("");
   const [desktopVideoUrl, setDesktopVideoUrl] = useState("");
   const [mobileVideoFile, setMobileVideoFile] = useState<File | null>(null);

@@ -1,18 +1,24 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
+import SpotifyCallback from "@/pages/SpotifyCallback";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
+import SpotifyBottomPlayer from "./components/SpotifyBottomPlayer";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      <Route component={NotFound} />
-    </Switch>
+    <div className="pb-20 md:pb-20">
+      <Switch>
+        <Route path={"/"} component={Home} />
+        <Route path={"/spotify-callback"} component={SpotifyCallback} />
+        <Route path={"/404"} component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </div>
   );
 }
 
@@ -23,6 +29,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <SpotifyBottomPlayer />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
