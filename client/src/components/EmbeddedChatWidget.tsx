@@ -43,7 +43,7 @@ export default function EmbeddedChatWidget({ bookingContext }: EmbeddedChatWidge
     return [
       {
         role: "assistant",
-        content: "👋 **Welcome to DaVinci Dynamics!**\n\nI'm your AI assistant. I can help you with:\n\n💰 Pricing & packages\n🎥 Platform demos\n🚀 How it works\n📞 Booking consultations\n\nWhat would you like to know?",
+        content: "👋 **Welcome to DaVinci Dynamics!**\n\nI'm here to help you navigate the website.\n\n**For detailed questions about:**\n💰 Pricing & packages\n🎥 Platform features\n🚀 How it works\n📞 Custom solutions\n\n**Please chat with our AI assistant on Telegram:**\n[Open @DaVinciAssistBot](https://t.me/DaVinciAssistBot?start=site_chat)\n\n**I can help you with:**\n📍 Navigate to booking page\n📍 View platform demo\n📍 Calculate savings\n📍 Contact information",
         timestamp: new Date(),
       },
     ];

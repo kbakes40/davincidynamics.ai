@@ -52,3 +52,5 @@
 - [x] Add context passing from booking form to chat
 - [x] Test post-booking chat flow
 - [x] Fix chat widget visibility - ensure floating button appears on screen
+- [x] Update embedded chat to redirect pricing/complex questions to @DaVinciAssistBot
+- [x] Simplify embedded chat to navigation helper only

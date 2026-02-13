@@ -22,8 +22,27 @@ export const botRouter = router({
       message: z.string(),
     }))
     .mutation(async ({ input }) => {
-      const response = await botAI.handleMessage(input.telegramUser, input.message);
-      return response;
+      const msg = input.message.toLowerCase();
+      
+      // Navigation helpers
+      if (msg.includes('book') || msg.includes('demo') || msg.includes('schedule')) {
+        return "I can help you get to the booking page! [Click here to book a demo](/booking)\n\nFor detailed questions about pricing and packages, please chat with our AI assistant: [Open @DaVinciAssistBot](https://t.me/DaVinciAssistBot?start=site_chat)";
+      }
+      
+      if (msg.includes('demo') || msg.includes('video') || msg.includes('watch')) {
+        return "Check out our platform demos! [View Platform Demo](/platform-demo)\n\nFor specific questions about features, chat with: [Open @DaVinciAssistBot](https://t.me/DaVinciAssistBot?start=site_chat)";
+      }
+      
+      if (msg.includes('calculat') || msg.includes('saving') || msg.includes('cost')) {
+        return "Use our savings calculator on the [home page](/) to see how much you'll save!\n\nFor custom pricing quotes, please chat with: [Open @DaVinciAssistBot](https://t.me/DaVinciAssistBot?start=site_chat)";
+      }
+      
+      if (msg.includes('contact') || msg.includes('email') || msg.includes('phone')) {
+        return "Visit our [contact page](/contact) for all contact information.\n\nFor immediate assistance, chat with: [Open @DaVinciAssistBot](https://t.me/DaVinciAssistBot?start=site_chat)";
+      }
+      
+      // Default: redirect to Telegram bot for all other questions
+      return "For detailed questions about pricing, features, and custom solutions, please chat with our AI assistant on Telegram:\n\n[Open @DaVinciAssistBot](https://t.me/DaVinciAssistBot?start=site_chat)\n\n**I can help you navigate to:**\n📍 [Booking page](/booking)\n📍 [Platform demo](/platform-demo)\n📍 [Savings calculator](/)\n📍 [Contact info](/contact)";
     }),
 
   /**
