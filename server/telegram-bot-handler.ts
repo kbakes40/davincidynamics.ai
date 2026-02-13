@@ -1,8 +1,9 @@
 /**
- * Integrated Telegram Bot Handler
+ * Integrated Telegram Bot Handler (Webhook-based)
  * Runs alongside the main server to handle @DaVinciAssistBot messages
  */
 
+import type { Express } from 'express';
 import { botAI } from './bot-ai-handler';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -28,7 +29,7 @@ interface TelegramUpdate {
   };
 }
 
-let lastUpdateId = 0;
+const processedMessages = new Set<number>();
 
 /**
  * Send message to Telegram user
@@ -60,6 +61,19 @@ async function sendMessage(chatId: number, text: string) {
 async function processMessage(message: TelegramUpdate['message']) {
   if (!message || !message.text || message.from.is_bot) return;
   
+  // Prevent duplicate processing
+  if (processedMessages.has(message.message_id)) {
+    console.log(`[Telegram Bot] Skipping duplicate message ${message.message_id}`);
+    return;
+  }
+  processedMessages.add(message.message_id);
+  
+  // Clean up old message IDs (keep last 1000)
+  if (processedMessages.size > 1000) {
+    const toDelete = Array.from(processedMessages).slice(0, 100);
+    toDelete.forEach(id => processedMessages.delete(id));
+  }
+  
   const chatId = message.chat.id;
   const userMessage = message.text;
   
@@ -85,55 +99,51 @@ async function processMessage(message: TelegramUpdate['message']) {
 }
 
 /**
- * Poll for updates using long polling
+ * Delete webhook (cleanup)
  */
-async function pollUpdates() {
-  if (!TELEGRAM_BOT_TOKEN) {
-    console.error('[Telegram Bot] TELEGRAM_BOT_TOKEN not configured');
-    return;
-  }
-  
+async function deleteWebhook() {
   try {
-    const response = await fetch(`${TELEGRAM_API}/getUpdates?offset=${lastUpdateId + 1}&timeout=30`);
-    
-    if (!response.ok) {
-      console.error('[Telegram Bot] Get updates failed:', response.statusText);
-      return;
-    }
-    
-    const data = await response.json();
-    
-    if (data.ok && data.result.length > 0) {
-      for (const update of data.result) {
-        lastUpdateId = update.update_id;
-        if (update.message) {
-          await processMessage(update.message);
-        }
-      }
-    }
+    await fetch(`${TELEGRAM_API}/deleteWebhook`);
+    console.log('[Telegram Bot] Webhook deleted');
   } catch (error) {
-    console.error('[Telegram Bot] Poll updates error:', error);
+    console.error('[Telegram Bot] Delete webhook error:', error);
   }
 }
 
 /**
- * Start the bot
+ * Start the bot with webhook
  */
-export function startTelegramBot() {
+export function startTelegramBot(app: Express, publicUrl?: string) {
   if (!TELEGRAM_BOT_TOKEN) {
     console.warn('[Telegram Bot] Skipping bot start - TELEGRAM_BOT_TOKEN not set');
     return;
   }
   
-  console.log('[Telegram Bot] Starting @DaVinciAssistBot...');
+  console.log('[Telegram Bot] Starting @DaVinciAssistBot with webhook...');
   
-  // Start polling loop
-  const poll = async () => {
-    await pollUpdates();
-    setTimeout(poll, 100); // Poll immediately after each response
-  };
+  // Delete any existing webhook first
+  deleteWebhook();
   
-  poll();
+  // Webhook endpoint
+  app.post(`/api/telegram-webhook/${TELEGRAM_BOT_TOKEN}`, async (req, res) => {
+    try {
+      const update: TelegramUpdate = req.body;
+      
+      if (update.message) {
+        // Process message asynchronously
+        processMessage(update.message).catch(err => {
+          console.error('[Telegram Bot] Async process error:', err);
+        });
+      }
+      
+      // Respond immediately to Telegram
+      res.status(200).send('OK');
+    } catch (error) {
+      console.error('[Telegram Bot] Webhook error:', error);
+      res.status(500).send('Error');
+    }
+  });
   
-  console.log('[Telegram Bot] @DaVinciAssistBot is now running');
+  console.log('[Telegram Bot] @DaVinciAssistBot webhook endpoint ready');
+  console.log('[Telegram Bot] Webhook URL will be set after deployment');
 }

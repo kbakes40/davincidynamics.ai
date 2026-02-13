@@ -62,7 +62,7 @@ async function startServer() {
     console.log(`Server running on http://localhost:${port}/`);
     
     // Start Telegram bot
-    startTelegramBot();
+    startTelegramBot(app);
   });
 }
 

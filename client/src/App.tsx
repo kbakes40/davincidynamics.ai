@@ -14,6 +14,7 @@ import Contact from "./pages/Contact";
 import PlatformDemo from "./pages/PlatformDemo";
 import BotAnalytics from "./pages/BotAnalytics";
 import { BookingProvider } from "./contexts/BookingContext";
+import GlassChatWidget from "./components/GlassChatWidget";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -44,6 +45,7 @@ function App() {
             <Toaster />
             <Router />
             <SpotifyBottomPlayer />
+            <GlassChatWidget />
           </TooltipProvider>
         </BookingProvider>
       </ThemeProvider>

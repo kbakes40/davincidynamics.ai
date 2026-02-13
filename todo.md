@@ -59,3 +59,7 @@
 - [x] Set up TELEGRAM_BOT_TOKEN for @DaVinciAssistBot
 - [x] Deploy bot handler and test responses
 - [x] Remove embedded chat widget - only use Telegram
+- [ ] Fix bot duplicate message issue - sends 3-4 same messages
+- [x] Create Apple-style glassmorphic chat widget with dark tinted glass
+- [x] Make chat widget draggable around the screen
+- [x] Integrate chat widget with AI backend
