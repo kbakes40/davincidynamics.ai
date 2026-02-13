@@ -85,7 +85,7 @@ export default function SpotifyBottomPlayer() {
         getOAuthToken: (cb) => {
           cb(accessToken);
         },
-        volume: 0.5,
+        volume: 0.8,
       });
 
       spotifyPlayer.addListener('ready', ({ device_id }: { device_id: string }) => {
