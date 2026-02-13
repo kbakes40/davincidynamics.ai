@@ -1,7 +1,7 @@
 /**
  * Spotify OAuth PKCE Flow Utilities
  * Implements Authorization Code with PKCE for secure client-side authentication
- * Uses popup window with postMessage for cross-origin communication
+ * Uses full-page redirect for better compatibility and reliability
  */
 
 // Generate a random code verifier for PKCE
@@ -41,12 +41,13 @@ export interface SpotifyAuthParams {
   scopes: string[];
 }
 
-export async function openSpotifyAuthPopup(params: SpotifyAuthParams): Promise<string> {
+export async function redirectToSpotifyAuth(params: SpotifyAuthParams): Promise<void> {
   const codeVerifier = generateRandomString(64);
   const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-  // Store code verifier for later use
+  // Store code verifier and return path for later use
   localStorage.setItem('spotify_code_verifier', codeVerifier);
+  localStorage.setItem('spotify_return_path', window.location.pathname);
 
   const authUrl = new URL('https://accounts.spotify.com/authorize');
   authUrl.searchParams.append('client_id', params.clientId);
@@ -56,62 +57,8 @@ export async function openSpotifyAuthPopup(params: SpotifyAuthParams): Promise<s
   authUrl.searchParams.append('code_challenge', codeChallenge);
   authUrl.searchParams.append('scope', params.scopes.join(' '));
 
-  // Open popup window
-  const width = 500;
-  const height = 700;
-  const left = window.screenX + (window.outerWidth - width) / 2;
-  const top = window.screenY + (window.outerHeight - height) / 2;
-  
-  const popup = window.open(
-    authUrl.toString(),
-    'Spotify Login',
-    `width=${width},height=${height},left=${left},top=${top},popup=yes`
-  );
-
-  if (!popup) {
-    throw new Error('Failed to open popup. Please allow popups for this site.');
-  }
-
-  // Wait for postMessage from callback page
-  return new Promise((resolve, reject) => {
-    const messageHandler = (event: MessageEvent) => {
-      // Verify origin for security
-      if (event.origin !== window.location.origin) {
-        return;
-      }
-
-      if (event.data.type === 'spotify-auth-success' && event.data.code) {
-        window.removeEventListener('message', messageHandler);
-        popup.close();
-        resolve(event.data.code);
-      } else if (event.data.type === 'spotify-auth-error') {
-        window.removeEventListener('message', messageHandler);
-        popup.close();
-        reject(new Error(event.data.error || 'Authentication failed'));
-      }
-    };
-
-    window.addEventListener('message', messageHandler);
-
-    // Check if popup was closed manually
-    const checkInterval = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(checkInterval);
-        window.removeEventListener('message', messageHandler);
-        reject(new Error('Authentication cancelled'));
-      }
-    }, 1000);
-
-    // Timeout after 5 minutes
-    setTimeout(() => {
-      clearInterval(checkInterval);
-      window.removeEventListener('message', messageHandler);
-      if (!popup.closed) {
-        popup.close();
-      }
-      reject(new Error('Authentication timeout'));
-    }, 5 * 60 * 1000);
-  });
+  // Redirect to Spotify authorization page
+  window.location.href = authUrl.toString();
 }
 
 export interface TokenResponse {
@@ -190,4 +137,5 @@ export function clearTokenFromStorage(): void {
   localStorage.removeItem('spotify_access_token');
   localStorage.removeItem('spotify_token_expires_at');
   localStorage.removeItem('spotify_refresh_token');
+  localStorage.removeItem('spotify_return_path');
 }

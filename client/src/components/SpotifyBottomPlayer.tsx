@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Play, Pause, SkipForward } from 'lucide-react';
-import { openSpotifyAuthPopup, exchangeCodeForToken, saveTokenToStorage, getTokenFromStorage, clearTokenFromStorage } from '@/lib/spotifyAuth';
+import { redirectToSpotifyAuth, exchangeCodeForToken, saveTokenToStorage, getTokenFromStorage, clearTokenFromStorage } from '@/lib/spotifyAuth';
 
 interface SpotifyPlayer {
   connect: () => Promise<boolean>;
@@ -200,10 +200,8 @@ export default function SpotifyBottomPlayer() {
 
     try {
       setErrorMessage(null);
-      const code = await openSpotifyAuthPopup({ clientId, redirectUri, scopes });
-      const token = await exchangeCodeForToken(code, clientId, redirectUri);
-      saveTokenToStorage(token);
-      setAccessToken(token.access_token);
+      // Redirect to Spotify auth (will return to callback page)
+      await redirectToSpotifyAuth({ clientId, redirectUri, scopes });
     } catch (err) {
       console.error('Authentication error:', err);
       setErrorMessage(err instanceof Error ? err.message : 'Failed to authenticate with Spotify');
