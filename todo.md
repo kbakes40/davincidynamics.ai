@@ -54,3 +54,7 @@
 - [x] Fix chat widget visibility - ensure floating button appears on screen
 - [x] Update embedded chat to redirect pricing/complex questions to @DaVinciAssistBot
 - [x] Simplify embedded chat to navigation helper only
+- [x] Update all links from @DaVinciAssistBot to @DaVinciAssistantBot
+- [x] Revert links back to @DaVinciAssistBot (correct bot name)
+- [x] Set up TELEGRAM_BOT_TOKEN for @DaVinciAssistBot
+- [x] Deploy bot handler and test responses
