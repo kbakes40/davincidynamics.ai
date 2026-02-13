@@ -103,3 +103,4 @@
 - [x] Fix SEO: Add keywords to page content
 - [x] Add scroll-based fade transitions (sections fade out at top, fade in from below)
 - [x] Add glassmorphism, shadows, and glow effects to home page sections
+- [x] Add scroll fade effect to pricing sheet on Platform Demo page (fades in after videos)
