@@ -22,7 +22,7 @@ export default function GlassChatWidget() {
     y: (window.innerHeight - 500) / 2 
   });
   const [isAnimating, setIsAnimating] = useState(false);
-  const [isEntering, setIsEntering] = useState(true);
+  const [isEntering, setIsEntering] = useState(false);
   const [hasTypedWelcome, setHasTypedWelcome] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -36,15 +36,23 @@ export default function GlassChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Reset entrance animation when chat opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsEntering(true);
+      setIsAnimating(false);
+      // Complete entrance animation
+      setTimeout(() => {
+        setIsEntering(false);
+      }, 100);
+    }
+  }, [isOpen]);
+
   // Welcome message with typing animation
   useEffect(() => {
     if (isOpen && messages.length === 0 && !hasTypedWelcome) {
-      // Start entrance animation
-      setIsEntering(true);
-      
       // Wait for entrance animation to complete, then start typing
       setTimeout(async () => {
-        setIsEntering(false);
         setHasTypedWelcome(true);
         
         const welcomeText = "Hi! I'm Sophia, your DaVinci Dynamics business consultant. I help entrepreneurs like you stop throwing money away on platform fees. What are you currently paying monthly for your e-commerce platform?";

@@ -132,3 +132,4 @@
 - [x] Debug Telegram bot notifications not sending
 - [x] Check TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID configuration
 - [x] Review backend error logs for Telegram API errors
+- [x] Fix Sophia chat widget not appearing on Platform Demo page when clicking Start Chat Now
