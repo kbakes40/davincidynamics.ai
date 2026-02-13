@@ -75,6 +75,7 @@ export default function Home() {
             <Button 
               variant="outline" 
               className="w-full border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
+              onClick={() => window.open('https://www.davincidynamics.ai', '_blank')}
             >
               Launch Online
             </Button>
@@ -120,6 +121,7 @@ export default function Home() {
             
             <Button 
               className="w-full bg-accent text-background hover:bg-accent/90 font-heading font-bold transition-all duration-300 neon-glow-intense"
+              onClick={() => window.open('https://www.davincidynamics.ai', '_blank')}
             >
               Build Revenue
             </Button>
@@ -159,6 +161,7 @@ export default function Home() {
             <Button 
               variant="outline" 
               className="w-full border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
+              onClick={() => window.open('https://www.davincidynamics.ai', '_blank')}
             >
               Scale With Us
             </Button>
@@ -174,6 +177,7 @@ export default function Home() {
           <Button 
             size="lg"
             className="w-full lg:w-auto lg:px-16 bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base lg:text-lg py-6 transition-all duration-300 neon-glow-intense"
+            onClick={() => window.open('https://www.davincidynamics.ai', '_blank')}
           >
             Book Strategy Call
           </Button>
