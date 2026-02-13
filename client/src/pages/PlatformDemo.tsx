@@ -167,7 +167,15 @@ export default function PlatformDemo() {
                 Platform Mobile Demo: Retail E-commerce
               </h2>
               {mobileVideoUrl ? (
-                <div className="w-full max-w-sm relative group">
+                <a 
+                  href="https://davincidynamics.site" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-full max-w-sm relative group block cursor-pointer"
+                  onClick={(e) => {
+                    trackButtonClick('Mobile Demo Video', { location: 'platform_demo', destination: 'davincidynamics.site' });
+                  }}
+                >
                   <video
                     ref={mobileVideoRef}
                     src={mobileVideoUrl}
@@ -176,7 +184,7 @@ export default function PlatformDemo() {
                     muted
                     playsInline
                     controls
-                    className="w-full h-auto rounded-xl shadow-2xl border border-accent/30 neon-glow"
+                    className="w-full h-auto rounded-xl shadow-2xl border border-accent/30 neon-glow pointer-events-none"
                     style={{ aspectRatio: '9/16' }}
                   />
                   {/* Play/Pause Overlay */}
@@ -190,7 +198,7 @@ export default function PlatformDemo() {
                       <Play className="w-8 h-8 text-accent" />
                     )}
                   </button>
-                </div>
+                </a>
               ) : (
                 <div className="w-full max-w-sm bg-card rounded-xl p-8 border-2 border-dashed border-accent/30 shadow-2xl"
                   style={{
@@ -235,7 +243,15 @@ export default function PlatformDemo() {
                 Desktop Version: Retail E-commerce Platform Full Walkthrough
               </h2>
               {desktopVideoUrl ? (
-                <div className="w-full relative group">
+                <a 
+                  href="https://bosshookah.site" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-full relative group block cursor-pointer"
+                  onClick={(e) => {
+                    trackButtonClick('Desktop Demo Video', { location: 'platform_demo', destination: 'bosshookah.site' });
+                  }}
+                >
                   <video
                     ref={desktopVideoRef}
                     src={desktopVideoUrl}
@@ -244,7 +260,7 @@ export default function PlatformDemo() {
                     muted
                     playsInline
                     controls
-                    className="w-full h-auto rounded-xl shadow-2xl border border-accent/30 neon-glow"
+                    className="w-full h-auto rounded-xl shadow-2xl border border-accent/30 neon-glow pointer-events-none"
                     style={{ aspectRatio: '16/9' }}
                   />
                   {/* Play/Pause Overlay */}
@@ -258,7 +274,7 @@ export default function PlatformDemo() {
                       <Play className="w-8 h-8 text-accent" />
                     )}
                   </button>
-                </div>
+                </a>
               ) : (
                 <div className="w-full bg-card rounded-xl p-8 border-2 border-dashed border-accent/30 shadow-2xl"
                   style={{

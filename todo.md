@@ -134,3 +134,5 @@
 - [x] Review backend error logs for Telegram API errors
 - [x] Fix Sophia chat widget not appearing on Platform Demo page when clicking Start Chat Now
 - [x] Revert entrance animation changes that broke home screen Sophia
+- [x] Add clickable link to mobile demo video (opens davincidynamics.site)
+- [x] Add clickable link to desktop demo video (opens bosshookah.site)
