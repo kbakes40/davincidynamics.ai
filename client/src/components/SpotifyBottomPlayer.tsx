@@ -174,6 +174,7 @@ export default function SpotifyBottomPlayer() {
 
   const handleConnect = async () => {
     const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID || '';
+    console.log('Spotify Client ID:', clientId ? 'Found' : 'Missing', 'Length:', clientId.length);
     const redirectUri = `${window.location.origin}/spotify-callback`;
     const scopes = [
       'streaming',

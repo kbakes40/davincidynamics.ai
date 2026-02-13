@@ -1,7 +1,7 @@
 /**
  * Spotify OAuth PKCE Flow Utilities
  * Implements Authorization Code with PKCE for secure client-side authentication
- * Uses popup window approach to avoid browser security restrictions
+ * Uses popup window with postMessage for cross-origin communication
  */
 
 // Generate a random code verifier for PKCE
@@ -72,42 +72,40 @@ export async function openSpotifyAuthPopup(params: SpotifyAuthParams): Promise<s
     throw new Error('Failed to open popup. Please allow popups for this site.');
   }
 
-  // Wait for the callback to complete
+  // Wait for postMessage from callback page
   return new Promise((resolve, reject) => {
-    const checkInterval = setInterval(() => {
-      try {
-        if (popup.closed) {
-          clearInterval(checkInterval);
-          reject(new Error('Authentication cancelled'));
-          return;
-        }
-
-        // Check if popup has navigated to our callback URL
-        if (popup.location.href.includes(params.redirectUri)) {
-          const url = new URL(popup.location.href);
-          const code = url.searchParams.get('code');
-          const error = url.searchParams.get('error');
-
-          clearInterval(checkInterval);
-          popup.close();
-
-          if (error) {
-            reject(new Error(`Spotify authorization failed: ${error}`));
-          } else if (code) {
-            resolve(code);
-          } else {
-            reject(new Error('No authorization code received'));
-          }
-        }
-      } catch (e) {
-        // Cross-origin error - popup hasn't navigated to callback yet
-        // This is expected, just keep checking
+    const messageHandler = (event: MessageEvent) => {
+      // Verify origin for security
+      if (event.origin !== window.location.origin) {
+        return;
       }
-    }, 500);
+
+      if (event.data.type === 'spotify-auth-success' && event.data.code) {
+        window.removeEventListener('message', messageHandler);
+        popup.close();
+        resolve(event.data.code);
+      } else if (event.data.type === 'spotify-auth-error') {
+        window.removeEventListener('message', messageHandler);
+        popup.close();
+        reject(new Error(event.data.error || 'Authentication failed'));
+      }
+    };
+
+    window.addEventListener('message', messageHandler);
+
+    // Check if popup was closed manually
+    const checkInterval = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkInterval);
+        window.removeEventListener('message', messageHandler);
+        reject(new Error('Authentication cancelled'));
+      }
+    }, 1000);
 
     // Timeout after 5 minutes
     setTimeout(() => {
       clearInterval(checkInterval);
+      window.removeEventListener('message', messageHandler);
       if (!popup.closed) {
         popup.close();
       }
