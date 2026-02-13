@@ -30,3 +30,5 @@
 - [x] Add "Platform Demo" link to navigation menu
 - [x] Add automated notification features section to Solutions page (SMS, Telegram, WhatsApp)
 - [x] Update home page to highlight bot automation capabilities
+- [x] Create interactive cost savings calculator component
+- [x] Integrate calculator into home page with 12/24-month projections

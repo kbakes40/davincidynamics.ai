@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, Zap, Shield, TrendingUp, Bot } from "lucide-react";
 import { useLocation } from "wouter";
 import Navigation from "@/components/Navigation";
+import CostSavingsCalculator from "@/components/CostSavingsCalculator";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -89,6 +90,13 @@ export default function Home() {
                 <span>You own everything</span>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Cost Savings Calculator Section */}
+        <section className="container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto">
+            <CostSavingsCalculator />
           </div>
         </section>
 
