@@ -13,6 +13,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import PlatformDemo from "./pages/PlatformDemo";
 import BotAnalytics from "./pages/BotAnalytics";
+import EmbeddedChatWidget from "./components/EmbeddedChatWidget";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -42,6 +43,7 @@ function App() {
           <Toaster />
           <Router />
           <SpotifyBottomPlayer />
+          <EmbeddedChatWidget />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

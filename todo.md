@@ -42,3 +42,8 @@
 - [x] Sprint 1: Integrate AI into existing bot
 - [x] Sprint 1: Add analytics tracking
 - [x] Sprint 1: Test AI responses and deploy
+- [x] Create embedded AI chat widget component
+- [x] Add floating chat button to all pages
+- [x] Integrate chat with existing AI handler
+- [x] Make chat widget draggable
+- [x] Test embedded chat functionality
