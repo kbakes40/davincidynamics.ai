@@ -7,14 +7,32 @@
  */
 
 import { Button } from "@/components/ui/button";
-import { Check, Upload, Video } from "lucide-react";
-import { useState } from "react";
+import { Check, Upload, Video, Play, Pause } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Home() {
   const [mobileVideoUrl, setMobileVideoUrl] = useState("");
   const [desktopVideoUrl, setDesktopVideoUrl] = useState("");
   const [mobileVideoFile, setMobileVideoFile] = useState<File | null>(null);
   const [desktopVideoFile, setDesktopVideoFile] = useState<File | null>(null);
+  const [mobileIsPlaying, setMobileIsPlaying] = useState(true);
+  const [desktopIsPlaying, setDesktopIsPlaying] = useState(true);
+  
+  const mobileVideoRef = useRef<HTMLVideoElement>(null);
+  const desktopVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Load videos from localStorage on mount
+  useEffect(() => {
+    const savedMobileVideo = localStorage.getItem('mobileVideoUrl');
+    const savedDesktopVideo = localStorage.getItem('desktopVideoUrl');
+    
+    if (savedMobileVideo) {
+      setMobileVideoUrl(savedMobileVideo);
+    }
+    if (savedDesktopVideo) {
+      setDesktopVideoUrl(savedDesktopVideo);
+    }
+  }, []);
 
   const handleMobileFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -22,6 +40,14 @@ export default function Home() {
       setMobileVideoFile(file);
       const url = URL.createObjectURL(file);
       setMobileVideoUrl(url);
+      
+      // Save to localStorage
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        localStorage.setItem('mobileVideoUrl', base64String);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -31,6 +57,36 @@ export default function Home() {
       setDesktopVideoFile(file);
       const url = URL.createObjectURL(file);
       setDesktopVideoUrl(url);
+      
+      // Save to localStorage
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        localStorage.setItem('desktopVideoUrl', base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const toggleMobilePlay = () => {
+    if (mobileVideoRef.current) {
+      if (mobileIsPlaying) {
+        mobileVideoRef.current.pause();
+      } else {
+        mobileVideoRef.current.play();
+      }
+      setMobileIsPlaying(!mobileIsPlaying);
+    }
+  };
+
+  const toggleDesktopPlay = () => {
+    if (desktopVideoRef.current) {
+      if (desktopIsPlaying) {
+        desktopVideoRef.current.pause();
+      } else {
+        desktopVideoRef.current.play();
+      }
+      setDesktopIsPlaying(!desktopIsPlaying);
     }
   };
 
@@ -40,7 +96,7 @@ export default function Home() {
       <div 
         className="absolute inset-0 opacity-30 pointer-events-none"
         style={{
-          backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-1_1770941420000_na1fn_aGVyby1iZy1nbG93.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTFfMTc3MDk0MTQyMDAwMF9uYTFmbl9hR1Z5YnkxaVp5MW5iRzkzLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=dHPo7BMuVgOtAoVJlcG3ePx0xJCKglhBmAGlrGpzU5C29BHU2Ou1j~Z4Up2-lVV~hyfGgiaBXsyzcq2tEPvV6FK3Aw7fv2iGswyOP912OHtzOUdsoJ8S4KXVz0NWnU70KqCAdLluLzKHtUSMadP4l3f-VkfwBT6zuixZdWffTAIh2IaqnI20EUfwfqX9sa5xHdluauJw7CbWsmZRqZqVM0r3YX2vNsLZFGlvF13LJYjBWOdDjhRmBVWArqoRYWH5bRBd6Xaheb9ar73zVwC7g8MhBuC5AvfG0NTXQh-p-roW2HlHjRMz7uidb4QbyqyZy39UDy91wrD8iL-7eEAUGA__')`,
+          backgroundImage: "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80')",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
@@ -69,16 +125,29 @@ export default function Home() {
             {/* Left: Mobile Video (9:16) */}
             <div className="flex flex-col items-center justify-center">
               {mobileVideoUrl ? (
-                <div className="w-full max-w-sm">
+                <div className="w-full max-w-sm relative group">
                   <video
+                    ref={mobileVideoRef}
                     src={mobileVideoUrl}
                     autoPlay
                     loop
                     muted
                     playsInline
+                    controls
                     className="w-full h-auto rounded-xl shadow-2xl border border-accent/30 neon-glow"
                     style={{ aspectRatio: '9/16' }}
                   />
+                  {/* Play/Pause Overlay */}
+                  <button
+                    onClick={toggleMobilePlay}
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/90 p-4 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 neon-glow"
+                  >
+                    {mobileIsPlaying ? (
+                      <Pause className="w-8 h-8 text-accent" />
+                    ) : (
+                      <Play className="w-8 h-8 text-accent" />
+                    )}
+                  </button>
                 </div>
               ) : (
                 <div className="w-full max-w-sm bg-card rounded-xl p-8 border-2 border-dashed border-accent/30 shadow-2xl"
@@ -114,16 +183,29 @@ export default function Home() {
             {/* Right: Desktop Video (16:9) */}
             <div className="flex flex-col items-center justify-center">
               {desktopVideoUrl ? (
-                <div className="w-full">
+                <div className="w-full relative group">
                   <video
+                    ref={desktopVideoRef}
                     src={desktopVideoUrl}
                     autoPlay
                     loop
                     muted
                     playsInline
+                    controls
                     className="w-full h-auto rounded-xl shadow-2xl border border-accent/30 neon-glow"
                     style={{ aspectRatio: '16/9' }}
                   />
+                  {/* Play/Pause Overlay */}
+                  <button
+                    onClick={toggleDesktopPlay}
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/90 p-4 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 neon-glow"
+                  >
+                    {desktopIsPlaying ? (
+                      <Pause className="w-8 h-8 text-accent" />
+                    ) : (
+                      <Play className="w-8 h-8 text-accent" />
+                    )}
+                  </button>
                 </div>
               ) : (
                 <div className="w-full bg-card rounded-xl p-8 border-2 border-dashed border-accent/30 shadow-2xl"
