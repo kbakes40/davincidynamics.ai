@@ -152,3 +152,4 @@
 
 ## SEO Improvements
 - [x] Fix home page title length (currently 26 chars, needs 30-60 chars)
+- [x] Fix video links not navigating properly - mobile to davincidynamics.site, desktop to bosshookah.site

@@ -189,7 +189,11 @@ export default function PlatformDemo() {
                   />
                   {/* Play/Pause Overlay */}
                   <button
-                    onClick={toggleMobilePlay}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleMobilePlay();
+                    }}
                     className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/90 p-4 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 neon-glow"
                   >
                     {mobileIsPlaying ? (
@@ -265,7 +269,11 @@ export default function PlatformDemo() {
                   />
                   {/* Play/Pause Overlay */}
                   <button
-                    onClick={toggleDesktopPlay}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleDesktopPlay();
+                    }}
                     className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/90 p-4 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 neon-glow"
                   >
                     {desktopIsPlaying ? (
