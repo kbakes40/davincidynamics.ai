@@ -6,3 +6,4 @@
 - [x] Replace Spotify Web Playback SDK with embedded iframe player (no auth required)
 - [x] Update Spotify player to use smooth jazz playlist
 - [x] Update Spotify player to use upbeat house music playlist
+- [x] Add descriptive titles above video placeholders
