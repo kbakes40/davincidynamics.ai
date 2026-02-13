@@ -105,3 +105,5 @@
 - [x] Add glassmorphism, shadows, and glow effects to home page sections
 - [x] Add scroll fade effect to pricing sheet on Platform Demo page (fades in after videos)
 - [x] Connect "Start Chat Now" button on Platform Demo to open Sophia chat widget
+- [x] Reduce keywords from 11 to 3-8 focused terms
+- [x] Optimize title to 30-60 characters
