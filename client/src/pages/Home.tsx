@@ -9,9 +9,11 @@ import { useLocation } from "wouter";
 import Navigation from "@/components/Navigation";
 import CostSavingsCalculator from "@/components/CostSavingsCalculator";
 import { useEffect } from "react";
+import { useChat } from "@/contexts/ChatContext";
 
 export default function Home() {
   const [, setLocation] = useLocation();
+  const { openChat } = useChat();
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
@@ -242,10 +244,7 @@ export default function Home() {
                   size="lg"
                   variant="outline"
                   className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold text-lg px-8 py-6"
-                  onClick={() => {
-                    const chatButton = document.querySelector('[aria-label="Open chat"]') as HTMLButtonElement;
-                    if (chatButton) chatButton.click();
-                  }}
+                  onClick={openChat}
                 >
                   Chat with Sophia
                 </Button>

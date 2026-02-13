@@ -11,11 +11,13 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { useBooking } from "@/contexts/BookingContext";
+import { useChat } from "@/contexts/ChatContext";
 
 type PackageTier = "starter" | "growth" | "scale" | null;
 
 export default function Booking() {
   const { setBookingData } = useBooking();
+  const { openChat } = useChat();
   const [selectedTier, setSelectedTier] = useState<PackageTier>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -354,10 +356,7 @@ export default function Booking() {
                 <Button
                   variant="default"
                   className="bg-accent text-background hover:bg-accent/90 font-heading font-bold"
-                  onClick={() => {
-                    const chatButton = document.querySelector('[aria-label="Open chat"]') as HTMLButtonElement;
-                    if (chatButton) chatButton.click();
-                  }}
+                  onClick={openChat}
                 >
                   Chat with Sophia
                 </Button>

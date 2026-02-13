@@ -79,3 +79,4 @@
 - [x] Position widget in center initially, then allow dragging
 - [x] Add semi-transparent backdrop behind chat widget
 - [x] Dim background when Sophia appears
+- [x] Fix chat widget not opening when "Chat with Sophia" is clicked

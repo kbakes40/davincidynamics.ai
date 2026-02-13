@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Send, Minimize2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useChat } from "@/contexts/ChatContext";
 
 interface Message {
   id: string;
@@ -10,7 +11,7 @@ interface Message {
 }
 
 export default function GlassChatWidget() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, closeChat } = useChat();
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -160,7 +161,7 @@ export default function GlassChatWidget() {
           WebkitBackdropFilter: 'blur(4px)',
           opacity: isAnimating ? 0 : 1,
         }}
-        onClick={() => setIsOpen(false)}
+        onClick={closeChat}
       />
       
       {/* Chat widget */}
@@ -216,7 +217,7 @@ export default function GlassChatWidget() {
               <Minimize2 className="w-4 h-4 text-gray-400" />
             </button>
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={closeChat}
               className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors"
             >
               <X className="w-4 h-4 text-gray-400" />

@@ -14,6 +14,7 @@ import Contact from "./pages/Contact";
 import PlatformDemo from "./pages/PlatformDemo";
 import BotAnalytics from "./pages/BotAnalytics";
 import { BookingProvider } from "./contexts/BookingContext";
+import { ChatProvider } from "./contexts/ChatContext";
 import GlassChatWidget from "./components/GlassChatWidget";
 
 function Router() {
@@ -40,14 +41,16 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
-        <BookingProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-            <SpotifyBottomPlayer />
-            <GlassChatWidget />
-          </TooltipProvider>
-        </BookingProvider>
+        <ChatProvider>
+          <BookingProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+              <SpotifyBottomPlayer />
+              <GlassChatWidget />
+            </TooltipProvider>
+          </BookingProvider>
+        </ChatProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
