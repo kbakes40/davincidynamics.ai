@@ -27,7 +27,7 @@ export const appRouter = router({
           name: z.string().min(1),
           email: z.string().email(),
           company: z.string().optional(),
-          department: z.enum(["sales", "projects", "support", "billing"]),
+          department: z.enum(["general", "sales", "projects", "support", "billing"]),
           message: z.string().min(1),
         })
       )
@@ -42,13 +42,15 @@ export const appRouter = router({
         }
 
         const departmentNames = {
+          general: "General Inquiry",
           sales: "Sales Inquiry",
           projects: "Active Project",
-          support: "Support",
+          support: "Technical Support",
           billing: "Billing and invoices",
         };
 
         const departmentEmails = {
+          general: "info@davincidynamics.ai",
           sales: "sales@davincidynamics.ai",
           projects: "projects@davincidynamics.ai",
           support: "support@davincidynamics.ai",

@@ -17,7 +17,7 @@ export default function Contact() {
     name: string;
     email: string;
     company: string;
-    department: "sales" | "projects" | "support" | "billing" | "";
+    department: "general" | "sales" | "projects" | "support" | "billing" | "";
     message: string;
   }>({
     name: "",
@@ -49,7 +49,7 @@ export default function Contact() {
       name: formData.name,
       email: formData.email,
       company: formData.company || undefined,
-      department: formData.department as "sales" | "projects" | "support" | "billing",
+      department: formData.department as "general" | "sales" | "projects" | "support" | "billing",
       message: formData.message,
     });
   };
@@ -186,16 +186,17 @@ export default function Contact() {
                   </label>
                   <Select
                     value={formData.department}
-                    onValueChange={(value) => setFormData({ ...formData, department: value as "sales" | "projects" | "support" | "billing" })}
+                    onValueChange={(value) => setFormData({ ...formData, department: value as "general" | "sales" | "projects" | "support" | "billing" })}
                     required
                   >
                     <SelectTrigger className="bg-background/50 border-accent/30 focus:border-accent font-heading">
                       <SelectValue placeholder="Select a department" />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-accent/30">
+                      <SelectItem value="general" className="font-heading">General Inquiry</SelectItem>
                       <SelectItem value="sales" className="font-heading">Sales Inquiry</SelectItem>
                       <SelectItem value="projects" className="font-heading">Active Project</SelectItem>
-                      <SelectItem value="support" className="font-heading">Support</SelectItem>
+                      <SelectItem value="support" className="font-heading">Technical Support</SelectItem>
                       <SelectItem value="billing" className="font-heading">Billing and invoices</SelectItem>
                     </SelectContent>
                   </Select>

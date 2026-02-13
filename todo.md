@@ -127,3 +127,5 @@
 - [x] Add Billing and invoices department option
 - [x] Hide "Routes to:" text from dropdown
 - [x] Update Telegram notification to show department
+- [x] Add "General Inquiry" department option (routes to info@davincidynamics.ai)
+- [x] Rename "Support" to "Technical Support"
