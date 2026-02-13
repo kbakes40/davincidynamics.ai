@@ -7,22 +7,27 @@ export default function SpotifyCallback() {
       const code = params.get('code');
       const error = params.get('error');
 
+      console.log('[Spotify Callback] Code:', code, 'Error:', error, 'Has opener:', !!window.opener);
+      
       if (window.opener) {
         if (error) {
+          console.log('[Spotify Callback] Sending error to opener:', error);
           window.opener.postMessage({
             type: 'spotify-auth-error',
             error: error
-          }, window.location.origin);
+          }, '*');
         } else if (code) {
+          console.log('[Spotify Callback] Sending code to opener');
           window.opener.postMessage({
             type: 'spotify-auth-success',
             code: code
-          }, window.location.origin);
+          }, '*');
         } else {
+          console.log('[Spotify Callback] No code or error found');
           window.opener.postMessage({
             type: 'spotify-auth-error',
             error: 'No authorization code received'
-          }, window.location.origin);
+          }, '*');
         }
         
         // Close the popup after sending message
