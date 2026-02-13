@@ -116,3 +116,6 @@
 - [x] Add event tracking for video interactions
 - [x] Add event tracking for Sophia chat opens/closes
 - [x] Update GA4 Measurement ID to G-X1X67V64XP
+- [x] Add Google Search Console verification meta tag
+- [x] Create XML sitemap
+- [ ] Submit sitemap to Search Console (user action required)
