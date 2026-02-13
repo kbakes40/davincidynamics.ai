@@ -8,7 +8,7 @@ export default function SpotifyBottomPlayer() {
   
   // Extract playlist ID from URI (format: spotify:playlist:ID or full URL)
   const getPlaylistId = (uri: string): string => {
-    if (!uri) return '37i9dQZF1DXcBWIGoYBM5M'; // Default fallback playlist
+    if (!uri) return '37i9dQZEVXbKM896FDX8L1'; // Smooth Jazz playlist
     
     // Handle spotify:playlist:ID format
     if (uri.startsWith('spotify:playlist:')) {
@@ -18,7 +18,7 @@ export default function SpotifyBottomPlayer() {
     // Handle full Spotify URL
     if (uri.includes('open.spotify.com/playlist/')) {
       const match = uri.match(/playlist\/([a-zA-Z0-9]+)/);
-      return match ? match[1] : '37i9dQZF1DXcBWIGoYBM5M';
+      return match ? match[1] : '37i9dQZEVXbKM896FDX8L1';
     }
     
     // Assume it's just the ID
@@ -45,7 +45,7 @@ export default function SpotifyBottomPlayer() {
           frameBorder="0"
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
           loading="lazy"
-          title="Boss Hookah Radio"
+          title="Smooth Jazz Radio"
         />
       </div>
     </div>
