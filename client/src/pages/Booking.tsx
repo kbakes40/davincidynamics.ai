@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Check, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 type PackageTier = "starter" | "growth" | "scale" | null;
 
@@ -51,31 +52,45 @@ export default function Booking() {
     setFormData({ ...formData, phone: formatted });
   };
 
+  const submitBooking = trpc.booking.submit.useMutation({
+    onSuccess: () => {
+      toast.success("Demo Request Submitted!", {
+        description: "We'll contact you within 24 hours to schedule your demo.",
+      });
+      // Reset form
+      setFormData({
+        name: "",
+        businessName: "",
+        email: "",
+        phone: "",
+        cityState: "",
+        meetingType: "Phone",
+        notes: "",
+      });
+      setSelectedTier(null);
+    },
+    onError: (error) => {
+      toast.error("Submission Failed", {
+        description: error.message || "Please try again later.",
+      });
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate required fields
-    if (!formData.name || !formData.email || !formData.phone) {
+    if (!formData.name || !formData.businessName || !formData.email || !formData.phone || !formData.cityState) {
       toast.error("Missing Information", {
         description: "Please fill in all required fields.",
       });
       return;
     }
 
-    // Show success toast
-    toast.success("Demo Request Submitted!", {
-      description: "We'll contact you within 24 hours to schedule your demo.",
-    });
-
-    // Reset form
-    setFormData({
-      name: "",
-      businessName: "",
-      email: "",
-      phone: "",
-      cityState: "",
-      meetingType: "Phone",
-      notes: "",
+    // Submit to backend
+    submitBooking.mutate({
+      ...formData,
+      preferredPackage: selectedTier ? getTierName(selectedTier) : "Not selected",
     });
   };
 

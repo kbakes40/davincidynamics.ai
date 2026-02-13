@@ -14,3 +14,4 @@
 - [x] Fix React Hooks violation in Book a Demo button (move useLocation to component top level)
 - [x] Rebrand from hookah-specific to general ecommerce platform for all retail sellers
 - [x] Update all instances of 'Ecommerce' to 'E-commerce' with hyphenation
+- [x] Integrate Telegram bot to receive booking form submissions
