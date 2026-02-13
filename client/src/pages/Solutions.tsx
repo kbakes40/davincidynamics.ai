@@ -4,7 +4,7 @@
 
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, Bot, MessageSquare, Zap } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function Solutions() {
@@ -96,6 +96,78 @@ export default function Solutions() {
                 </ul>
               </div>
             ))}
+          </div>
+
+          {/* Bot Automation Section */}
+          <div className="bg-gradient-to-br from-accent/10 to-accent/5 rounded-2xl p-8 lg:p-12 border-2 border-accent/50 mb-16">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <Bot className="w-10 h-10 text-accent" />
+              <h2 className="font-display font-black text-3xl lg:text-4xl text-accent">Bot Automation</h2>
+            </div>
+            <p className="font-heading text-xl text-center text-foreground mb-8 max-w-3xl mx-auto">
+              Bots handle all the heavy lifting so you can focus on what's most important: <span className="text-accent font-bold">the profit</span>
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-card/80 rounded-xl p-6 border border-accent/30">
+                <MessageSquare className="w-8 h-8 text-accent mb-4" />
+                <h4 className="font-heading font-bold text-lg text-accent mb-2">SMS Updates</h4>
+                <p className="text-muted-foreground font-heading text-sm">
+                  Automated text notifications for order confirmations, shipping updates, and delivery alerts
+                </p>
+              </div>
+              
+              <div className="bg-card/80 rounded-xl p-6 border border-accent/30">
+                <MessageSquare className="w-8 h-8 text-accent mb-4" />
+                <h4 className="font-heading font-bold text-lg text-accent mb-2">Telegram Integration</h4>
+                <p className="text-muted-foreground font-heading text-sm">
+                  Instant order notifications to your phone, customer support bot, and automated responses
+                </p>
+              </div>
+              
+              <div className="bg-card/80 rounded-xl p-6 border border-accent/30">
+                <MessageSquare className="w-8 h-8 text-accent mb-4" />
+                <h4 className="font-heading font-bold text-lg text-accent mb-2">WhatsApp Business</h4>
+                <p className="text-muted-foreground font-heading text-sm">
+                  Reach customers on their preferred platform with order updates and support messages
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-card rounded-xl p-6 border border-accent/50">
+              <div className="flex items-start gap-3 mb-4">
+                <Zap className="w-6 h-6 text-accent mt-1 flex-shrink-0" />
+                <div>
+                  <h4 className="font-heading font-bold text-lg text-accent mb-2">What Gets Automated:</h4>
+                  <ul className="space-y-2 text-foreground font-heading">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+                      <span>Order confirmations sent instantly to customers</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+                      <span>Shipping and delivery status updates</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+                      <span>Abandoned cart recovery messages</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+                      <span>Customer support inquiries and FAQs</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+                      <span>New product announcements and promotions</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+                      <span>Owner notifications for new orders (Telegram)</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* CTA */}

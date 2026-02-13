@@ -4,7 +4,7 @@
  */
 
 import { Button } from "@/components/ui/button";
-import { Check, ArrowRight, Zap, Shield, TrendingUp } from "lucide-react";
+import { Check, ArrowRight, Zap, Shield, TrendingUp, Bot } from "lucide-react";
 import { useLocation } from "wouter";
 import Navigation from "@/components/Navigation";
 
@@ -46,6 +46,14 @@ export default function Home() {
               We build you a <span className="text-accent font-semibold">custom e-commerce platform</span> that you own—
               with in-store pickup, shipping, and payment processing that actually works for small sellers.
             </p>
+            
+            {/* Bot Automation Highlight */}
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/30 rounded-xl px-6 py-4 mb-8 animate-fade-in-up" style={{ animationDelay: '0.25s' }}>
+              <Bot className="w-6 h-6 text-accent flex-shrink-0" />
+              <p className="font-heading text-base text-foreground">
+                <span className="text-accent font-bold">Bots handle the heavy lifting</span> — automated SMS, Telegram & WhatsApp notifications so you focus on profits
+              </p>
+            </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               <Button

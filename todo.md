@@ -28,3 +28,5 @@
 - [x] Fix nested anchor tag error in Navigation component
 - [x] Restore original e-commerce promo page as a new navigation page
 - [x] Add "Platform Demo" link to navigation menu
+- [x] Add automated notification features section to Solutions page (SMS, Telegram, WhatsApp)
+- [x] Update home page to highlight bot automation capabilities
