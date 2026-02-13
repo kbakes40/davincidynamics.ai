@@ -11,6 +11,7 @@ import Booking from "./pages/Booking";
 import Solutions from "./pages/Solutions";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import PlatformDemo from "./pages/PlatformDemo";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -21,6 +22,7 @@ function Router() {
         <Route path={"/solutions"} component={Solutions} />
         <Route path={"/about"} component={About} />
         <Route path={"/contact"} component={Contact} />
+        <Route path={"/platform-demo"} component={PlatformDemo} />
         <Route path={"/booking"} component={Booking} />
         <Route path={"/spotify-callback"} component={SpotifyCallback} />
         <Route path={"/404"} component={NotFound} />

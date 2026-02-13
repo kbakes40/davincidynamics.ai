@@ -26,3 +26,5 @@
 - [x] Replace existing Home page with new DaVinci home
 - [x] Update App.tsx routing
 - [x] Fix nested anchor tag error in Navigation component
+- [x] Restore original e-commerce promo page as a new navigation page
+- [x] Add "Platform Demo" link to navigation menu
