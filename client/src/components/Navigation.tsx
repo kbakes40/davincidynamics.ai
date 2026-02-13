@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "wouter";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { trackButtonClick, trackConversion } from "@/lib/analytics";
 
 export default function Navigation() {
   const [location] = useLocation();
@@ -50,6 +51,10 @@ export default function Navigation() {
               href="https://www.fiverr.com/davincidynamics/build-a-revenue-optimized-ecommerce-system-with-automation" 
               target="_blank" 
               rel="noopener noreferrer"
+              onClick={() => {
+                trackButtonClick('Hire via Fiverr', { location: 'header' });
+                trackConversion('fiverr_click');
+              }}
             >
               <Button
                 size="sm"
@@ -63,6 +68,10 @@ export default function Navigation() {
               <Button
                 size="sm"
                 className="bg-accent text-background hover:bg-accent/90 font-heading font-bold neon-glow"
+                onClick={() => {
+                  trackButtonClick('Book Demo', { location: 'header' });
+                  trackConversion('demo_booking');
+                }}
               >
                 Book Demo
               </Button>

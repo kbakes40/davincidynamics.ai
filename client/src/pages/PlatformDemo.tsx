@@ -15,6 +15,7 @@ import Navigation from "@/components/Navigation";
 import { useScrollFade } from "@/hooks/useScrollFade";
 import { useChat } from "@/contexts/ChatContext";
 import { Helmet } from "react-helmet-async";
+import { trackVideoEvent, trackButtonClick } from "@/lib/analytics";
 
 export default function PlatformDemo() {
   // The userAuth hooks provides authentication state
@@ -87,8 +88,10 @@ export default function PlatformDemo() {
     if (mobileVideoRef.current) {
       if (mobileIsPlaying) {
         mobileVideoRef.current.pause();
+        trackVideoEvent('pause', 'Mobile Demo Video');
       } else {
         mobileVideoRef.current.play();
+        trackVideoEvent('play', 'Mobile Demo Video');
       }
       setMobileIsPlaying(!mobileIsPlaying);
     }
@@ -98,8 +101,10 @@ export default function PlatformDemo() {
     if (desktopVideoRef.current) {
       if (desktopIsPlaying) {
         desktopVideoRef.current.pause();
+        trackVideoEvent('pause', 'Desktop Demo Video');
       } else {
         desktopVideoRef.current.play();
+        trackVideoEvent('play', 'Desktop Demo Video');
       }
       setDesktopIsPlaying(!desktopIsPlaying);
     }
@@ -439,7 +444,10 @@ export default function PlatformDemo() {
             <Button 
               size="lg"
               className="w-full sm:w-auto lg:px-16 bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base lg:text-lg py-6 transition-all duration-300 neon-glow-intense"
-              onClick={openChat}
+              onClick={() => {
+                trackButtonClick('Start Chat Now', { location: 'platform_demo' });
+                openChat();
+              }}
             >
               Start Chat Now
             </Button>
@@ -447,7 +455,10 @@ export default function PlatformDemo() {
               size="lg"
               variant="outline"
               className="w-full sm:w-auto lg:px-16 border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-bold text-base lg:text-lg py-6 transition-all duration-300"
-              onClick={() => setLocation('/booking')}
+              onClick={() => {
+                trackButtonClick('Book Demo', { location: 'platform_demo' });
+                setLocation('/booking');
+              }}
             >
               Book a Demo
             </Button>

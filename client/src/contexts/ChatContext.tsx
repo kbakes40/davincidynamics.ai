@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from "react";
+import { trackChatEvent, trackConversion } from "@/lib/analytics";
 
 interface ChatContextType {
   isOpen: boolean;
@@ -11,8 +12,16 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const openChat = () => setIsOpen(true);
-  const closeChat = () => setIsOpen(false);
+  const openChat = () => {
+    setIsOpen(true);
+    trackChatEvent('open');
+    trackConversion('chat_started');
+  };
+  
+  const closeChat = () => {
+    setIsOpen(false);
+    trackChatEvent('close');
+  };
 
   return (
     <ChatContext.Provider value={{ isOpen, openChat, closeChat }}>

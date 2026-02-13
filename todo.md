@@ -110,3 +110,8 @@
 - [x] Create social preview image for Open Graph
 - [x] Add Open Graph meta tags to home page
 - [x] Add Open Graph meta tags to Platform Demo page
+- [x] Add GA4 tracking script to index.html
+- [x] Create GA4 event tracking utility
+- [x] Add event tracking for button clicks (Book Demo, Hire via Fiverr, Start Chat)
+- [x] Add event tracking for video interactions
+- [x] Add event tracking for Sophia chat opens/closes
