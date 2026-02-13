@@ -16,6 +16,11 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const { openChat } = useChat();
   
+  // Set SEO-optimized page title
+  useEffect(() => {
+    document.title = "Stop Paying Platform Fees - Own Your Ecommerce Business";
+  }, []);
+  
   // Scroll fade hooks for each section
   const calculatorSection = useScrollFade();
   const problemSection = useScrollFade();

@@ -149,3 +149,6 @@
 ## Revert Changes
 - [x] Revert Home page wording back to original version (before all-in-one service changes)
 - [x] Revert Sophia's welcome message back to original version (before all-in-one service changes)
+
+## SEO Improvements
+- [x] Fix home page title length (currently 26 chars, needs 30-60 chars)
