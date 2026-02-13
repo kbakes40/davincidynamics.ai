@@ -41,8 +41,7 @@ export default function DaVinciHome() {
             
             <p className="font-heading text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               Stop losing 60%+ of your profits to Shopify, Square, and payment processors. 
-              We build you a <span className="text-accent font-semibold">custom e-commerce platform</span> that you own—
-              with in-store pickup, shipping, and payment processing that actually works for small sellers.
+              We build you a <span className="text-accent font-semibold">custom e-commerce platform</span> with in-store pickup, shipping, and payment processing that actually works for small sellers.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
@@ -174,7 +173,7 @@ export default function DaVinciHome() {
                 {
                   icon: <TrendingUp className="w-8 h-8 text-accent" />,
                   title: "Boutiques & Local Retailers",
-                  description: "Compete with big brands while keeping more profit—no monthly subscriptions eating your margins"
+                  description: "Compete with big brands while keeping more profit. No monthly subscriptions eating your margins."
                 },
               ].map((item, idx) => (
                 <div

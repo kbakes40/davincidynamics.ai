@@ -142,3 +142,6 @@
 - [x] Revise pricing card copy to reflect transparent monthly fees (covers hosting + ad management)
 - [x] Update Platform Demo page copy to match new service model
 - [x] Review all pages for any remaining "ownership" or "no platform fees" language
+
+## Grammar Improvements
+- [x] Remove all em dashes (—) and replace with proper grammar/punctuation across all pages

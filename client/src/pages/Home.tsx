@@ -54,15 +54,14 @@ export default function Home() {
             
             <p className="font-heading text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               Stop losing 60%+ of your profits to Shopify, Square, and payment processors. 
-              We build you a <span className="text-accent font-semibold">custom e-commerce platform</span> that you own—
-              with in-store pickup, shipping, and payment processing that actually works for small sellers.
+              We build you a <span className="text-accent font-semibold">custom e-commerce platform</span> with in-store pickup, shipping, and payment processing that actually works for small sellers.
             </p>
             
             {/* Bot Automation Highlight */}
             <div className="inline-flex items-center gap-3 bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/30 rounded-xl px-6 py-4 mb-8 animate-fade-in-up" style={{ animationDelay: '0.25s' }}>
               <Bot className="w-6 h-6 text-accent flex-shrink-0" />
               <p className="font-heading text-base text-foreground">
-                <span className="text-accent font-bold">Bots handle the heavy lifting</span> — automated SMS, Telegram & WhatsApp notifications so you focus on profits
+                <span className="text-accent font-bold">Bots handle the heavy lifting</span>: automated SMS, Telegram & WhatsApp notifications so you focus on profits
               </p>
             </div>
 
@@ -211,7 +210,7 @@ export default function Home() {
                 {
                   icon: <TrendingUp className="w-8 h-8 text-accent" />,
                   title: "Boutiques & Local Retailers",
-                  description: "Compete with big brands while keeping more profit—one transparent monthly fee covers everything"
+                  description: "Compete with big brands while keeping more profit. One transparent monthly fee covers everything."
                 },
               ].map((item, idx) => (
                 <div

@@ -31,12 +31,12 @@ export default function About() {
               <p className="font-heading text-lg text-foreground mb-4">
                 We built DaVinci Dynamics because we saw small business owners getting crushed by platform fees. 
                 Facebook sellers, TikTok shops, and local retailers were losing 60-80% of their profits to Shopify, 
-                Square, and payment processors—just to have a basic online store.
+                Square, and payment processors just to have a basic online store.
               </p>
               <p className="font-heading text-lg text-foreground">
                 We knew there was a better way. We provide an all-in-one e-commerce service with transparent monthly pricing 
                 that covers hosting, ad management, and platform maintenance. Lower fees, more control, and all the features you need 
-                to compete with the big brands—without hidden costs or enterprise price tags.
+                to compete with the big brands without hidden costs or enterprise price tags.
               </p>
             </div>
 

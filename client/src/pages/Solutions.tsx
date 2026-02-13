@@ -20,7 +20,7 @@ export default function Solutions() {
             Your Complete E-commerce Solution
           </h1>
           <p className="font-heading text-lg text-muted-foreground mb-12 text-center max-w-2xl mx-auto">
-            Everything you need to run a professional online store—with transparent all-in-one pricing
+            Everything you need to run a professional online store with transparent all-in-one pricing
           </p>
 
           {/* Core Features */}
