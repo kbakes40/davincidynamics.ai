@@ -133,3 +133,4 @@
 - [x] Check TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID configuration
 - [x] Review backend error logs for Telegram API errors
 - [x] Fix Sophia chat widget not appearing on Platform Demo page when clicking Start Chat Now
+- [x] Revert entrance animation changes that broke home screen Sophia
