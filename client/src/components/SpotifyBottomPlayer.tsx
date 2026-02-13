@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Play, Pause, SkipForward } from 'lucide-react';
-import { redirectToSpotifyAuth, exchangeCodeForToken } from '@/lib/spotifyAuth';
+import { trpc } from '@/lib/trpc';
 
 interface SpotifyPlayer {
   connect: () => Promise<boolean>;
@@ -74,13 +74,18 @@ export default function SpotifyBottomPlayer() {
     };
   }, []);
 
-  // Pick up temporary token from callback redirect
+  // Check for token in URL hash (from callback)
   useEffect(() => {
-    const tempToken = sessionStorage.getItem('spotify_temp_token');
-    if (tempToken) {
-      setAccessToken(tempToken);
-      // Clear immediately after reading
-      sessionStorage.removeItem('spotify_temp_token');
+    const hash = window.location.hash;
+    if (hash) {
+      const params = new URLSearchParams(hash.substring(1));
+      const token = params.get('access_token');
+      if (token) {
+        console.log('[SpotifyPlayer] Found token in URL hash');
+        setAccessToken(token);
+        // Clear the hash
+        window.history.replaceState(null, '', window.location.pathname);
+      }
     }
   }, []);
 
@@ -194,9 +199,12 @@ export default function SpotifyBottomPlayer() {
       });
   }, [deviceId, accessToken]);
 
+  const getAuthUrlMutation = trpc.spotify.getAuthUrl.useMutation();
+
   const handleConnect = async () => {
+    console.log('[SpotifyPlayer] Connect button clicked');
     const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID || '';
-    console.log('Spotify Client ID:', clientId ? 'Found' : 'Missing', 'Length:', clientId.length);
+    console.log('[SpotifyPlayer] Client ID:', clientId ? 'Found' : 'Missing');
     const redirectUri = `${window.location.origin}/spotify-callback`;
     const scopes = [
       'streaming',
@@ -208,10 +216,24 @@ export default function SpotifyBottomPlayer() {
 
     try {
       setErrorMessage(null);
-      // Redirect to Spotify auth (will return to callback page)
-      await redirectToSpotifyAuth({ clientId, redirectUri, scopes });
+      console.log('[SpotifyPlayer] Calling backend to get auth URL...');
+      
+      const result = await getAuthUrlMutation.mutateAsync({
+        clientId,
+        redirectUri,
+        scopes,
+      });
+
+      console.log('[SpotifyPlayer] Got auth URL from backend, redirecting...');
+      console.log('[SpotifyPlayer] Auth URL:', result.authUrl);
+      
+      // Store state for callback verification
+      sessionStorage.setItem('spotify_oauth_state', result.state);
+      
+      // Redirect to Spotify authorization page
+      window.location.href = result.authUrl;
     } catch (err) {
-      console.error('Authentication error:', err);
+      console.error('[SpotifyPlayer] Authentication error:', err);
       setErrorMessage(err instanceof Error ? err.message : 'Failed to authenticate with Spotify');
     }
   };
@@ -382,44 +404,22 @@ export default function SpotifyBottomPlayer() {
           <>
             <button
               onClick={handleTogglePlay}
-              className="flex items-center justify-center px-4 py-2 rounded-xl transition-colors"
-              style={{
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.10)',
-                color: 'rgba(255,255,255,0.92)',
-                height: '40px',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.10)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
-              }}
+              className="p-2 rounded-full hover:bg-white/10 transition-colors"
+              style={{ color: 'rgba(255,255,255,0.92)' }}
             >
-              {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+              {isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
             </button>
             <button
               onClick={handleNext}
-              className="flex items-center justify-center px-4 py-2 rounded-xl transition-colors"
-              style={{
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.10)',
-                color: 'rgba(255,255,255,0.92)',
-                height: '40px',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.10)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
-              }}
+              className="p-2 rounded-full hover:bg-white/10 transition-colors"
+              style={{ color: 'rgba(255,255,255,0.92)' }}
             >
-              <SkipForward className="w-4 h-4" />
+              <SkipForward className="w-5 h-5" />
             </button>
           </>
         )}
       </div>
-      </div>
+    </div>
     </div>
   );
 }
