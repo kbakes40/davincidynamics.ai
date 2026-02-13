@@ -72,3 +72,5 @@
 - [x] Update AI to be more sales-pushy
 - [x] Add dynamic pricing shock responses
 - [x] Hide floating chat bubble - only show when triggered by buttons
+- [x] Generate new Sophia avatar with glasses - more sophisticated look
+- [x] Update avatar in chat widget
