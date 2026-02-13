@@ -150,17 +150,31 @@ export default function GlassChatWidget() {
   }
 
   return (
-    <div
-      ref={widgetRef}
-      className="fixed z-[9999] select-none"
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        width: '400px',
-        height: isMinimized ? 'auto' : '600px',
-      }}
-      onMouseDown={handleMouseDown}
-    >
+    <>
+      {/* Backdrop overlay */}
+      <div
+        className="fixed inset-0 z-[9998] transition-opacity duration-500"
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
+          opacity: isAnimating ? 0 : 1,
+        }}
+        onClick={() => setIsOpen(false)}
+      />
+      
+      {/* Chat widget */}
+      <div
+        ref={widgetRef}
+        className="fixed z-[9999] select-none"
+        style={{
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          width: '400px',
+          height: isMinimized ? 'auto' : '600px',
+        }}
+        onMouseDown={handleMouseDown}
+      >
       {/* Glass container */}
       <div
         className="rounded-2xl overflow-hidden shadow-2xl transition-all duration-500"
@@ -308,5 +322,6 @@ export default function GlassChatWidget() {
         )}
       </div>
     </div>
+    </>
   );
 }

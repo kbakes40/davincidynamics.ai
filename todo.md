@@ -77,3 +77,5 @@
 - [x] Fix chat widget to appear when "Chat with Sophia" is clicked
 - [x] Add dramatic center-screen entrance animation
 - [x] Position widget in center initially, then allow dragging
+- [x] Add semi-transparent backdrop behind chat widget
+- [x] Dim background when Sophia appears
