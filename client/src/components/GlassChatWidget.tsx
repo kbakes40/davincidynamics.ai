@@ -37,8 +37,6 @@ export default function GlassChatWidget() {
   // Welcome message and entrance animation
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      setIsAnimating(true);
-      setTimeout(() => setIsAnimating(false), 600);
       setMessages([{
         id: "welcome",
         role: "assistant",
@@ -47,6 +45,15 @@ export default function GlassChatWidget() {
       }]);
     }
   }, [isOpen]);
+
+  // Exit animation
+  const handleClose = () => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      closeChat();
+      setIsAnimating(false);
+    }, 400);
+  };
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
@@ -161,7 +168,7 @@ export default function GlassChatWidget() {
           WebkitBackdropFilter: 'blur(4px)',
           opacity: isAnimating ? 0 : 1,
         }}
-        onClick={closeChat}
+        onClick={handleClose}
       />
       
       {/* Chat widget */}
@@ -178,15 +185,16 @@ export default function GlassChatWidget() {
       >
       {/* Glass container */}
       <div
-        className="rounded-2xl overflow-hidden shadow-2xl transition-all duration-500"
+        className="rounded-2xl overflow-hidden shadow-2xl"
         style={{
           background: 'rgba(10, 10, 15, 0.85)',
           backdropFilter: 'blur(40px) saturate(180%)',
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
           border: '1px solid rgba(0, 217, 255, 0.15)',
           boxShadow: '0 8px 32px rgba(0, 217, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-          transform: isAnimating ? 'scale(0.8)' : 'scale(1)',
+          transform: isAnimating ? 'scale(0.9) translateY(20px)' : 'scale(1) translateY(0)',
           opacity: isAnimating ? 0 : 1,
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
         {/* Header */}
@@ -217,7 +225,7 @@ export default function GlassChatWidget() {
               <Minimize2 className="w-4 h-4 text-gray-400" />
             </button>
             <button
-              onClick={closeChat}
+              onClick={handleClose}
               className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors"
             >
               <X className="w-4 h-4 text-gray-400" />

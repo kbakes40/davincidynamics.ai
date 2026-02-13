@@ -82,3 +82,5 @@
 - [x] Fix chat widget not opening when "Chat with Sophia" is clicked
 - [x] Fix Sophia widget size - make it smaller and usable
 - [x] Fix Sophia positioning - center it perfectly on screen
+- [x] Fix Sophia entrance animation - remove fade-out/fade-in loop
+- [x] Add smooth slide-out transition when closing Sophia
