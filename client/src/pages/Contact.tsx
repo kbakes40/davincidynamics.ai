@@ -13,39 +13,24 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    company: string;
+    department: "sales" | "projects" | "support" | "billing" | "";
+    message: string;
+  }>({
     name: "",
     email: "",
     company: "",
-    message: "",
-  });
-
-  const [departmentForm, setDepartmentForm] = useState<{
-    fullName: string;
-    email: string;
-    department: "sales" | "projects" | "support" | "";
-    message: string;
-  }>({
-    fullName: "",
-    email: "",
     department: "",
     message: "",
-  });
-
-  const submitDepartment = trpc.booking.submitDepartment.useMutation({
-    onSuccess: () => {
-      toast.success("Message sent! We'll route it to the appropriate department.");
-      setDepartmentForm({ fullName: "", email: "", department: "", message: "" });
-    },
-    onError: (error: any) => {
-      toast.error(error.message || "Failed to send message. Please try again.");
-    },
   });
 
   const submitInquiry = trpc.booking.submit.useMutation({
     onSuccess: () => {
       toast.success("Message sent! We'll get back to you within 24 hours.");
-      setFormData({ name: "", email: "", company: "", message: "" });
+      setFormData({ name: "", email: "", company: "", department: "", message: "" });
     },
     onError: (error: any) => {
       toast.error(error.message || "Failed to send message. Please try again.");
@@ -55,20 +40,17 @@ export default function Contact() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.message) {
+    if (!formData.name || !formData.email || !formData.department || !formData.message) {
       toast.error("Please fill in all required fields");
       return;
     }
 
     submitInquiry.mutate({
       name: formData.name,
-      businessName: formData.company || "Not provided",
       email: formData.email,
-      phone: "Not provided",
-      cityState: "Not provided",
-      preferredPackage: "General Inquiry",
-      meetingType: "Email",
-      notes: formData.message,
+      company: formData.company || undefined,
+      department: formData.department as "sales" | "projects" | "support" | "billing",
+      message: formData.message,
     });
   };
 
@@ -199,6 +181,27 @@ export default function Contact() {
                 </div>
 
                 <div>
+                  <label htmlFor="department" className="block font-heading font-semibold text-foreground mb-2">
+                    Department *
+                  </label>
+                  <Select
+                    value={formData.department}
+                    onValueChange={(value) => setFormData({ ...formData, department: value as "sales" | "projects" | "support" | "billing" })}
+                    required
+                  >
+                    <SelectTrigger className="bg-background/50 border-accent/30 focus:border-accent font-heading">
+                      <SelectValue placeholder="Select a department" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-accent/30">
+                      <SelectItem value="sales" className="font-heading">Sales Inquiry</SelectItem>
+                      <SelectItem value="projects" className="font-heading">Active Project</SelectItem>
+                      <SelectItem value="support" className="font-heading">Support</SelectItem>
+                      <SelectItem value="billing" className="font-heading">Billing and invoices</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
                   <label htmlFor="message" className="block font-heading font-semibold text-foreground mb-2">
                     Message *
                   </label>
@@ -222,115 +225,10 @@ export default function Contact() {
               </form>
             </div>
           </div>
-
-          {/* Department Contact Form */}
-          <div className="mt-12 bg-card rounded-xl p-6 lg:p-8 border border-accent/30 shadow-xl"
-            style={{
-              backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEplLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
-              backgroundSize: 'cover',
-            }}
-          >
-            <div className="max-w-3xl mx-auto">
-              <h2 className="font-heading font-bold text-3xl text-accent mb-3 text-center">Send a Message</h2>
-              <p className="font-heading text-muted-foreground mb-8 text-center">
-                Select the appropriate department and we'll route your message correctly.
-              </p>
-              
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                if (!departmentForm.fullName || !departmentForm.email || !departmentForm.department || !departmentForm.message) {
-                  toast.error("Please fill in all required fields");
-                  return;
-                }
-                submitDepartment.mutate({
-                  ...departmentForm,
-                  department: departmentForm.department as "sales" | "projects" | "support",
-                });
-              }} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="dept-name" className="block font-heading font-semibold text-foreground mb-2">
-                      Full Name <span className="text-accent">*</span>
-                    </label>
-                    <Input
-                      id="dept-name"
-                      type="text"
-                      placeholder="John Smith"
-                      value={departmentForm.fullName}
-                      onChange={(e) => setDepartmentForm({ ...departmentForm, fullName: e.target.value })}
-                      className="bg-background/50 border-accent/30 focus:border-accent font-heading"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="dept-email" className="block font-heading font-semibold text-foreground mb-2">
-                      Email Address <span className="text-accent">*</span>
-                    </label>
-                    <Input
-                      id="dept-email"
-                      type="email"
-                      placeholder="john@company.com"
-                      value={departmentForm.email}
-                      onChange={(e) => setDepartmentForm({ ...departmentForm, email: e.target.value })}
-                      className="bg-background/50 border-accent/30 focus:border-accent font-heading"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="dept-department" className="block font-heading font-semibold text-foreground mb-2">
-                    Department <span className="text-accent">*</span>
-                  </label>
-                  <Select
-                    value={departmentForm.department}
-                    onValueChange={(value) => setDepartmentForm({ ...departmentForm, department: value as "sales" | "projects" | "support" })}
-                    required
-                  >
-                    <SelectTrigger className="bg-background/50 border-accent/30 focus:border-accent font-heading">
-                      <SelectValue placeholder="Select a department" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-card border-accent/30">
-                      <SelectItem value="sales" className="font-heading">Sales Inquiry</SelectItem>
-                      <SelectItem value="projects" className="font-heading">Active Project</SelectItem>
-                      <SelectItem value="support" className="font-heading">Support</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-sm text-muted-foreground mt-2 font-heading">
-                    {departmentForm.department === "sales" && "Routes to: sales@davincidynamics.ai"}
-                    {departmentForm.department === "projects" && "Routes to: projects@davincidynamics.ai"}
-                    {departmentForm.department === "support" && "Routes to: support@davincidynamics.ai"}
-                  </p>
-                </div>
-
-                <div>
-                  <label htmlFor="dept-message" className="block font-heading font-semibold text-foreground mb-2">
-                    Message <span className="text-accent">*</span>
-                  </label>
-                  <Textarea
-                    id="dept-message"
-                    placeholder="Provide details about your inquiry..."
-                    value={departmentForm.message}
-                    onChange={(e) => setDepartmentForm({ ...departmentForm, message: e.target.value })}
-                    className="bg-background/50 border-accent/30 focus:border-accent min-h-[150px] font-heading"
-                    required
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="w-full bg-accent text-background hover:bg-accent/90 font-heading font-bold text-lg py-6"
-                  disabled={submitDepartment.isPending}
-                >
-                  {submitDepartment.isPending ? "Sending..." : "Submit Message"}
-                </Button>
-              </form>
-            </div>
-          </div>
         </div>
       </main>
     </div>
   );
 }
+
+

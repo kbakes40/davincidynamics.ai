@@ -101,10 +101,13 @@ export default function Booking() {
       return;
     }
 
-    // Submit to backend
+    // Submit to backend - map to contact form format with sales department
     submitBooking.mutate({
-      ...formData,
-      preferredPackage: selectedTier ? getTierName(selectedTier) : "Not selected",
+      name: formData.name,
+      email: formData.email,
+      company: formData.businessName,
+      department: "sales" as const,
+      message: `Demo Request\n\nPhone: ${formData.phone}\nLocation: ${formData.cityState}\nPreferred Package: ${selectedTier ? getTierName(selectedTier) : "Not selected"}\nMeeting Type: ${formData.meetingType}${formData.notes ? `\n\nNotes: ${formData.notes}` : ""}`,
     });
   };
 

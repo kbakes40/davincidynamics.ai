@@ -122,3 +122,8 @@
 - [x] Update contact email to info@davincidynamics.ai
 - [x] Add enterprise department contact form with routing (sales@, projects@, support@)
 - [x] Implement backend email routing logic
+- [x] Remove separate department form box
+- [x] Add department dropdown to existing "Send Us a Message" form
+- [x] Add Billing and invoices department option
+- [x] Hide "Routes to:" text from dropdown
+- [x] Update Telegram notification to show department

@@ -25,13 +25,10 @@ export const appRouter = router({
       .input(
         z.object({
           name: z.string().min(1),
-          businessName: z.string().min(1),
           email: z.string().email(),
-          phone: z.string().min(1),
-          cityState: z.string().min(1),
-          preferredPackage: z.string().min(1),
-          meetingType: z.string().min(1),
-          notes: z.string().optional(),
+          company: z.string().optional(),
+          department: z.enum(["sales", "projects", "support", "billing"]),
+          message: z.string().min(1),
         })
       )
       .mutation(async ({ input }) => {
@@ -44,15 +41,27 @@ export const appRouter = router({
           return { success: false, error: "Notification service not configured" };
         }
 
-        const message = `🆕 New Demo Request\n\n` +
+        const departmentNames = {
+          sales: "Sales Inquiry",
+          projects: "Active Project",
+          support: "Support",
+          billing: "Billing and invoices",
+        };
+
+        const departmentEmails = {
+          sales: "sales@davincidynamics.ai",
+          projects: "projects@davincidynamics.ai",
+          support: "support@davincidynamics.ai",
+          billing: "billing@davincidynamics.ai",
+        };
+
+        const message = `📨 New Contact Form Message\n\n` +
+          `🏷️ Department: ${departmentNames[input.department]}\n` +
+          `📧 Routes to: ${departmentEmails[input.department]}\n\n` +
           `👤 Name: ${input.name}\n` +
-          `🏢 Business: ${input.businessName}\n` +
           `📧 Email: ${input.email}\n` +
-          `📱 Phone: ${input.phone}\n` +
-          `📍 Location: ${input.cityState}\n` +
-          `📦 Package: ${input.preferredPackage}\n` +
-          `💬 Meeting: ${input.meetingType}\n` +
-          (input.notes ? `📝 Notes: ${input.notes}` : "");
+          (input.company ? `🏢 Company: ${input.company}\n` : "") +
+          `\n💬 Message:\n${input.message}`;
 
         try {
           const response = await fetch(
@@ -74,72 +83,6 @@ export const appRouter = router({
           }
 
           return { success: true };
-        } catch (error) {
-          console.error("Error sending Telegram message:", error);
-          return { success: false, error: "Failed to send notification" };
-        }
-      }),
-    
-    submitDepartment: publicProcedure
-      .input(
-        z.object({
-          fullName: z.string().min(1),
-          email: z.string().email(),
-          department: z.enum(["sales", "projects", "support"]),
-          message: z.string().min(1),
-        })
-      )
-      .mutation(async ({ input }) => {
-        // Map department to email
-        const departmentEmails = {
-          sales: "sales@davincidynamics.ai",
-          projects: "projects@davincidynamics.ai",
-          support: "support@davincidynamics.ai",
-        };
-
-        const targetEmail = departmentEmails[input.department];
-        const departmentNames = {
-          sales: "Sales Inquiry",
-          projects: "Active Project",
-          support: "Support",
-        };
-
-        // Send to Telegram
-        const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-        const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
-
-        if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-          console.error("Telegram credentials not configured");
-          return { success: false, error: "Notification service not configured" };
-        }
-
-        const message = `📨 New Department Message\n\n` +
-          `🏷️ Department: ${departmentNames[input.department]}\n` +
-          `📧 Routes to: ${targetEmail}\n\n` +
-          `👤 From: ${input.fullName}\n` +
-          `📧 Email: ${input.email}\n\n` +
-          `💬 Message:\n${input.message}`;
-
-        try {
-          const response = await fetch(
-            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                chat_id: TELEGRAM_CHAT_ID,
-                text: message,
-                parse_mode: "HTML",
-              }),
-            }
-          );
-
-          if (!response.ok) {
-            console.error("Telegram API error:", await response.text());
-            return { success: false, error: "Failed to send notification" };
-          }
-
-          return { success: true, routedTo: targetEmail };
         } catch (error) {
           console.error("Error sending Telegram message:", error);
           return { success: false, error: "Failed to send notification" };
