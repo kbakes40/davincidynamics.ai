@@ -121,40 +121,7 @@ export default function Booking() {
       />
 
       <main className="relative z-10 container mx-auto px-4 py-8 lg:py-12">
-        {/* Hero Section */}
-        <header className="text-center mb-12 lg:mb-16 animate-fade-in-up">
-          <h1 className="font-display font-black text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 leading-tight tracking-tight text-foreground">
-            Book Your <span className="text-neon">E-commerce Platform Demo</span>
-          </h1>
-          <p className="font-heading text-sm md:text-base lg:text-lg text-muted-foreground mb-8 font-medium max-w-3xl mx-auto">
-            See the complete ordering flow, in-store pickup, shipping, payment processing, and inventory management—then get a custom build plan in one call.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="lg"
-              className="bg-accent text-background hover:bg-accent/90 font-heading font-bold neon-glow-intense"
-              onClick={() => scrollToSection("booking-section")}
-            >
-              Schedule Demo
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold"
-              onClick={() => scrollToSection("packages-section")}
-            >
-              View Packages
-            </Button>
-          </div>
-
-          {/* Glowing divider */}
-          <div className="relative h-px w-full max-w-md mx-auto mt-8">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent to-transparent neon-glow" />
-          </div>
-        </header>
-
-        {/* Packages Section */}
+        {/* Packages Section - Now Hero */}
         <section id="packages-section" className="mb-16 max-w-7xl mx-auto">
           <h2 className="font-display font-bold text-2xl lg:text-3xl text-center text-neon mb-8">
             Choose Your Package
