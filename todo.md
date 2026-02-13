@@ -11,3 +11,4 @@
 - [x] Create new /booking page with hero, packages, booking form, and FAQ sections
 - [x] Add /booking route to App.tsx
 - [x] Add single "Book a Demo" button to promo page (no other changes)
+- [x] Fix React Hooks violation in Book a Demo button (move useLocation to component top level)

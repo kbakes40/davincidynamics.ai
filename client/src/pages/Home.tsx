@@ -16,6 +16,7 @@ export default function Home() {
   // The userAuth hooks provides authentication state
   // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
   let { user, loading, error, isAuthenticated, logout } = useAuth();
+  const [, setLocation] = useLocation();
 
   const [mobileVideoUrl, setMobileVideoUrl] = useState("");
   const [desktopVideoUrl, setDesktopVideoUrl] = useState("");
@@ -416,7 +417,7 @@ export default function Home() {
               size="lg"
               variant="outline"
               className="w-full sm:w-auto lg:px-16 border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-bold text-base lg:text-lg py-6 transition-all duration-300"
-              onClick={() => useLocation()[1]('/booking')}
+              onClick={() => setLocation('/booking')}
             >
               Book a Demo
             </Button>
