@@ -91,3 +91,4 @@
 - [x] Update Sophia to extract and remember key customer facts (spending, business type, pain points)
 - [x] Add defensive sarcastic responses when customers get mean - use their own information against them
 - [x] Ensure Sophia never asks the same question twice by checking conversation history
+- [x] Add "Hire via Fiverr" button next to "Book Demo" in header navigation (link: https://www.fiverr.com/s/8z7qA0g)

@@ -46,6 +46,19 @@ export default function Navigation() {
                 {item.name}
               </Link>
             ))}
+            <a 
+              href="https://www.fiverr.com/s/8z7qA0g" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-accent/50 text-accent hover:bg-accent/10 font-heading font-bold"
+              >
+                Hire via Fiverr
+              </Button>
+            </a>
             <Link href="/booking">
               <Button
                 size="sm"
@@ -83,6 +96,20 @@ export default function Navigation() {
                   {item.name}
                 </Link>
               ))}
+              <a 
+                href="https://www.fiverr.com/s/8z7qA0g" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-accent/50 text-accent hover:bg-accent/10 font-heading font-bold w-full"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Hire via Fiverr
+                </Button>
+              </a>
               <Link href="/booking">
                 <Button
                   size="sm"
