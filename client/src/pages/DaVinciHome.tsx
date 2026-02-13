@@ -5,15 +5,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, Zap, Shield, TrendingUp } from "lucide-react";
-import { useLocation } from "wouter";
-import Navigation from "@/components/Navigation";
+import { Link, useLocation } from "wouter";
 
-export default function Home() {
+export default function DaVinciHome() {
   const [, setLocation] = useLocation();
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
-      <Navigation />
       {/* Background glow effects */}
       <div 
         className="absolute inset-0 opacity-30 pointer-events-none"

@@ -19,3 +19,9 @@
 - [x] Replace mobile video placeholder with Google Drive video and enable autoplay
 - [x] Download and integrate desktop demo video with autoplay
 - [x] Add DaVinci Assist Bot chat option alongside booking form
+- [x] Research current davincidynamics.ai site for contact information
+- [x] Create new home page targeting small business owners and private sellers
+- [x] Create navigation header component
+- [x] Build Solutions, About, and Contact pages
+- [x] Replace existing Home page with new DaVinci home
+- [x] Update App.tsx routing
