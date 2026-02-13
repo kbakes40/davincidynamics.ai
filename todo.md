@@ -34,3 +34,11 @@
 - [x] Integrate calculator into home page with 12/24-month projections
 - [x] Create Telegram bot handler script with start command responses
 - [x] Add deployment instructions for bot handler
+- [x] Develop comprehensive bot expansion plan with AI integration
+- [x] Design advanced bot features architecture
+- [x] Sprint 1: Set up database schema for bot conversations
+- [x] Sprint 1: Implement AI handler with Manus LLM integration
+- [x] Sprint 1: Add conversation memory management
+- [x] Sprint 1: Integrate AI into existing bot
+- [x] Sprint 1: Add analytics tracking
+- [x] Sprint 1: Test AI responses and deploy
