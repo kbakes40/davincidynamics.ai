@@ -88,8 +88,8 @@ export default function Contact() {
                     <Mail className="w-5 h-5 text-accent mt-1" />
                     <div>
                       <p className="font-heading font-semibold text-foreground">Email</p>
-                      <a href="mailto:info@davincidynamics.com" className="font-heading text-muted-foreground hover:text-accent transition-colors">
-                        info@davincidynamics.com
+                      <a href="mailto:info@davincidynamics.ai" className="font-heading text-muted-foreground hover:text-accent transition-colors">
+                        info@davincidynamics.ai
                       </a>
                     </div>
                   </div>

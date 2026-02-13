@@ -119,3 +119,4 @@
 - [x] Add Google Search Console verification meta tag
 - [x] Create XML sitemap
 - [ ] Submit sitemap to Search Console (user action required)
+- [x] Update contact email to info@davincidynamics.ai
