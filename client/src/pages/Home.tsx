@@ -10,6 +10,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Check, Upload, Video, Play, Pause } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useLocation } from "wouter";
 
 export default function Home() {
   // The userAuth hooks provides authentication state
@@ -403,13 +404,23 @@ export default function Home() {
             💬 Click below to chat instantly with our team
           </p>
           
-          <Button 
-            size="lg"
-            className="w-full lg:w-auto lg:px-16 bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base lg:text-lg py-6 transition-all duration-300 neon-glow-intense"
-            onClick={() => window.open('https://www.davincidynamics.ai', '_blank')}
-          >
-            Start Chat Now
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg"
+              className="w-full sm:w-auto lg:px-16 bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base lg:text-lg py-6 transition-all duration-300 neon-glow-intense"
+              onClick={() => window.open('https://www.davincidynamics.ai', '_blank')}
+            >
+              Start Chat Now
+            </Button>
+            <Button 
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto lg:px-16 border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-bold text-base lg:text-lg py-6 transition-all duration-300"
+              onClick={() => useLocation()[1]('/booking')}
+            >
+              Book a Demo
+            </Button>
+          </div>
         </footer>
       </main>
     </div>

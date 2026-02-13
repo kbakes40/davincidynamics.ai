@@ -8,3 +8,6 @@
 - [x] Update Spotify player to use upbeat house music playlist
 - [x] Add descriptive titles above video placeholders
 - [x] Add clickable links to open demo websites (mobile: davincidynamics.site, desktop: bosshookah.site)
+- [x] Create new /booking page with hero, packages, booking form, and FAQ sections
+- [x] Add /booking route to App.tsx
+- [x] Add single "Book a Demo" button to promo page (no other changes)

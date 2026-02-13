@@ -7,6 +7,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import SpotifyBottomPlayer from "./components/SpotifyBottomPlayer";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Booking from "./pages/Booking";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -14,6 +15,7 @@ function Router() {
     <div className="pb-20 md:pb-20">
       <Switch>
         <Route path={"/"} component={Home} />
+        <Route path={"/booking"} component={Booking} />
         <Route path={"/spotify-callback"} component={SpotifyCallback} />
         <Route path={"/404"} component={NotFound} />
         <Route component={NotFound} />
