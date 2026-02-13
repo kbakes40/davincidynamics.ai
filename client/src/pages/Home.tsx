@@ -1,7 +1,7 @@
 /**
  * Design Philosophy: Cyberpunk Luxury
  * - High-contrast neon blue (#00D9FF) against pure black
- * - Horizontal three-column layout for desktop, stacked for mobile
+ * - Split-screen video layout: mobile (9:16) left, desktop (16:9) right
  * - Electric glow effects and deep shadows
  * - Orbitron Bold for headlines, Rajdhani for subheadings
  */
@@ -20,7 +20,8 @@ export default function Home() {
     const file = e.target.files?.[0];
     if (file) {
       setMobileVideoFile(file);
-      setMobileVideoUrl(""); // Clear URL if file is uploaded
+      const url = URL.createObjectURL(file);
+      setMobileVideoUrl(url);
     }
   };
 
@@ -28,7 +29,8 @@ export default function Home() {
     const file = e.target.files?.[0];
     if (file) {
       setDesktopVideoFile(file);
-      setDesktopVideoUrl(""); // Clear URL if file is uploaded
+      const url = URL.createObjectURL(file);
+      setDesktopVideoUrl(url);
     }
   };
 
@@ -61,56 +63,34 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Video Upload Section */}
-        <section className="mb-12 max-w-5xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-          <div className="bg-card rounded-xl p-6 lg:p-8 border border-accent/30 shadow-2xl"
-            style={{
-              backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
-              backgroundSize: 'cover',
-            }}
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <Video className="w-6 h-6 text-accent" />
-              <h2 className="font-heading font-bold text-2xl text-foreground">Upload Promo Videos</h2>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Mobile Video Upload (9:16) */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-heading font-semibold text-lg text-foreground">Mobile Video (9:16)</h3>
-                  <span className="text-xs text-muted-foreground font-heading">Max 10GB</span>
-                </div>
-                
-                {/* Google Drive Link Input */}
-                <div>
-                  <label className="block text-sm font-heading text-muted-foreground mb-2">
-                    Google Drive Link
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Paste Google Drive link..."
-                    value={mobileVideoUrl}
-                    onChange={(e) => {
-                      setMobileVideoUrl(e.target.value);
-                      setMobileVideoFile(null); // Clear file if URL is entered
-                    }}
-                    className="w-full px-4 py-3 bg-background/50 border border-border/50 rounded-lg text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors font-heading text-sm"
+        {/* Video Display Section - Split Screen */}
+        <section className="mb-12 max-w-7xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            {/* Left: Mobile Video (9:16) */}
+            <div className="flex flex-col items-center justify-center">
+              {mobileVideoUrl ? (
+                <div className="w-full max-w-sm">
+                  <video
+                    src={mobileVideoUrl}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-auto rounded-xl shadow-2xl border border-accent/30 neon-glow"
+                    style={{ aspectRatio: '9/16' }}
                   />
                 </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-border/50" />
-                  <span className="text-xs text-muted-foreground font-heading">OR</span>
-                  <div className="flex-1 h-px bg-border/50" />
-                </div>
-
-                {/* File Upload */}
-                <div>
-                  <label className="block text-sm font-heading text-muted-foreground mb-2">
-                    Upload Video File
-                  </label>
-                  <div className="relative">
+              ) : (
+                <div className="w-full max-w-sm bg-card rounded-xl p-8 border-2 border-dashed border-accent/30 shadow-2xl"
+                  style={{
+                    backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
+                    backgroundSize: 'cover',
+                    aspectRatio: '9/16'
+                  }}
+                >
+                  <div className="flex flex-col items-center justify-center h-full space-y-4">
+                    <Video className="w-12 h-12 text-accent" />
+                    <h3 className="font-heading font-semibold text-lg text-foreground text-center">Mobile Video (9:16)</h3>
                     <input
                       type="file"
                       accept="video/*"
@@ -120,58 +100,42 @@ export default function Home() {
                     />
                     <label
                       htmlFor="mobile-video-upload"
-                      className="flex items-center justify-center gap-2 w-full px-4 py-6 bg-background/50 border-2 border-dashed border-accent/30 rounded-lg cursor-pointer hover:border-accent/60 hover:bg-accent/5 transition-all"
+                      className="flex items-center justify-center gap-2 px-6 py-3 bg-accent/10 border border-accent/50 rounded-lg cursor-pointer hover:bg-accent/20 hover:border-accent transition-all"
                     >
-                      <Upload className="w-5 h-5 text-accent" />
-                      <span className="font-heading text-sm text-foreground">
-                        {mobileVideoFile ? mobileVideoFile.name : "Click to upload"}
-                      </span>
+                      <Upload className="w-4 h-4 text-accent" />
+                      <span className="font-heading text-sm text-accent">Upload Video</span>
                     </label>
+                    <p className="text-xs text-muted-foreground font-heading text-center">Max 10GB</p>
                   </div>
-                  {mobileVideoFile && (
-                    <p className="text-xs text-accent mt-2 font-heading">
-                      ✓ {(mobileVideoFile.size / (1024 * 1024)).toFixed(2)} MB
-                    </p>
-                  )}
                 </div>
-              </div>
+              )}
+            </div>
 
-              {/* Desktop Video Upload (16:9) */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-heading font-semibold text-lg text-foreground">Desktop Video (16:9)</h3>
-                  <span className="text-xs text-muted-foreground font-heading">Max 10GB</span>
-                </div>
-                
-                {/* Google Drive Link Input */}
-                <div>
-                  <label className="block text-sm font-heading text-muted-foreground mb-2">
-                    Google Drive Link
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Paste Google Drive link..."
-                    value={desktopVideoUrl}
-                    onChange={(e) => {
-                      setDesktopVideoUrl(e.target.value);
-                      setDesktopVideoFile(null); // Clear file if URL is entered
-                    }}
-                    className="w-full px-4 py-3 bg-background/50 border border-border/50 rounded-lg text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors font-heading text-sm"
+            {/* Right: Desktop Video (16:9) */}
+            <div className="flex flex-col items-center justify-center">
+              {desktopVideoUrl ? (
+                <div className="w-full">
+                  <video
+                    src={desktopVideoUrl}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-auto rounded-xl shadow-2xl border border-accent/30 neon-glow"
+                    style={{ aspectRatio: '16/9' }}
                   />
                 </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-border/50" />
-                  <span className="text-xs text-muted-foreground font-heading">OR</span>
-                  <div className="flex-1 h-px bg-border/50" />
-                </div>
-
-                {/* File Upload */}
-                <div>
-                  <label className="block text-sm font-heading text-muted-foreground mb-2">
-                    Upload Video File
-                  </label>
-                  <div className="relative">
+              ) : (
+                <div className="w-full bg-card rounded-xl p-8 border-2 border-dashed border-accent/30 shadow-2xl"
+                  style={{
+                    backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
+                    backgroundSize: 'cover',
+                    aspectRatio: '16/9'
+                  }}
+                >
+                  <div className="flex flex-col items-center justify-center h-full space-y-4">
+                    <Video className="w-12 h-12 text-accent" />
+                    <h3 className="font-heading font-semibold text-lg text-foreground text-center">Desktop Video (16:9)</h3>
                     <input
                       type="file"
                       accept="video/*"
@@ -181,27 +145,15 @@ export default function Home() {
                     />
                     <label
                       htmlFor="desktop-video-upload"
-                      className="flex items-center justify-center gap-2 w-full px-4 py-6 bg-background/50 border-2 border-dashed border-accent/30 rounded-lg cursor-pointer hover:border-accent/60 hover:bg-accent/5 transition-all"
+                      className="flex items-center justify-center gap-2 px-6 py-3 bg-accent/10 border border-accent/50 rounded-lg cursor-pointer hover:bg-accent/20 hover:border-accent transition-all"
                     >
-                      <Upload className="w-5 h-5 text-accent" />
-                      <span className="font-heading text-sm text-foreground">
-                        {desktopVideoFile ? desktopVideoFile.name : "Click to upload"}
-                      </span>
+                      <Upload className="w-4 h-4 text-accent" />
+                      <span className="font-heading text-sm text-accent">Upload Video</span>
                     </label>
+                    <p className="text-xs text-muted-foreground font-heading text-center">Max 10GB</p>
                   </div>
-                  {desktopVideoFile && (
-                    <p className="text-xs text-accent mt-2 font-heading">
-                      ✓ {(desktopVideoFile.size / (1024 * 1024)).toFixed(2)} MB
-                    </p>
-                  )}
                 </div>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-6 border-t border-border/30">
-              <p className="text-xs text-muted-foreground font-heading text-center">
-                Videos will be displayed above the pricing cards. Mobile video shows on portrait devices, desktop video on landscape.
-              </p>
+              )}
             </div>
           </div>
         </section>
