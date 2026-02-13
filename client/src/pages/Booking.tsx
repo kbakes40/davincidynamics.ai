@@ -109,10 +109,10 @@ export default function Booking() {
         {/* Hero Section */}
         <header className="text-center mb-12 lg:mb-16 animate-fade-in-up">
           <h1 className="font-display font-black text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 leading-tight tracking-tight text-foreground">
-            Book Your <span className="text-neon">Hookah Ecommerce Demo</span>
+            Book Your <span className="text-neon">Ecommerce Platform Demo</span>
           </h1>
           <p className="font-heading text-sm md:text-base lg:text-lg text-muted-foreground mb-8 font-medium max-w-3xl mx-auto">
-            See the full ordering flow, in store pickup, shipping, and payment options, then get a build plan in one call.
+            See the complete ordering flow, in-store pickup, shipping, payment processing, and inventory management—then get a custom build plan in one call.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -543,10 +543,10 @@ export default function Booking() {
             }}
           >
             <h2 className="font-display font-bold text-2xl lg:text-3xl text-neon mb-4">
-              Ready to Transform Your Hookah Business?
+              Ready to Transform Your Retail Business?
             </h2>
             <p className="text-muted-foreground font-heading mb-6">
-              Join dozens of hookah shops already using our platform to increase revenue and streamline operations.
+              Join dozens of store owners who've cut their monthly platform fees by 60%+ while owning their customer data and automating operations.
             </p>
             <Button
               size="lg"

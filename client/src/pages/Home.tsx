@@ -132,7 +132,7 @@ export default function Home() {
             {/* Left: Mobile Video (9:16) */}
             <div className="flex flex-col items-center justify-center">
               <h2 className="font-heading font-bold text-xl lg:text-2xl text-neon mb-6 text-center">
-                Platform Mobile Demo: Hookah Shop Ecommerce
+                Platform Mobile Demo: Retail Ecommerce
               </h2>
               {mobileVideoUrl ? (
                 <div className="w-full max-w-sm relative group">
@@ -200,7 +200,7 @@ export default function Home() {
             {/* Right: Desktop Video (16:9) */}
             <div className="flex flex-col items-center justify-center">
               <h2 className="font-heading font-bold text-xl lg:text-2xl text-neon mb-6 text-center">
-                Desktop Version: Hookah Shop Ecommerce Platform Full Walkthrough
+                Desktop Version: Retail Ecommerce Platform Full Walkthrough
               </h2>
               {desktopVideoUrl ? (
                 <div className="w-full relative group">
