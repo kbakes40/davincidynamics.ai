@@ -93,3 +93,5 @@
 - [x] Ensure Sophia never asks the same question twice by checking conversation history
 - [x] Add "Hire via Fiverr" button next to "Book Demo" in header navigation (link: https://www.fiverr.com/s/8z7qA0g)
 - [x] Update Sophia to share Fiverr link when customers ask about builds/custom work/development
+- [x] Update Hire via Fiverr button to use specific gig link (https://www.fiverr.com/davincidynamics/build-a-revenue-optimized-ecommerce-system-with-automation)
+- [x] Update Sophia to share new Fiverr gig link

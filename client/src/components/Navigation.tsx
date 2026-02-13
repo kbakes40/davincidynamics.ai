@@ -47,7 +47,7 @@ export default function Navigation() {
               </Link>
             ))}
             <a 
-              href="https://www.fiverr.com/s/8z7qA0g" 
+              href="https://www.fiverr.com/davincidynamics/build-a-revenue-optimized-ecommerce-system-with-automation" 
               target="_blank" 
               rel="noopener noreferrer"
             >
@@ -97,7 +97,7 @@ export default function Navigation() {
                 </Link>
               ))}
               <a 
-                href="https://www.fiverr.com/s/8z7qA0g" 
+                href="https://www.fiverr.com/davincidynamics/build-a-revenue-optimized-ecommerce-system-with-automation" 
                 target="_blank" 
                 rel="noopener noreferrer"
               >
