@@ -148,3 +148,4 @@
 
 ## Revert Changes
 - [x] Revert Home page wording back to original version (before all-in-one service changes)
+- [x] Revert Sophia's welcome message back to original version (before all-in-one service changes)
