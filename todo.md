@@ -74,3 +74,6 @@
 - [x] Hide floating chat bubble - only show when triggered by buttons
 - [x] Generate new Sophia avatar with glasses - more sophisticated look
 - [x] Update avatar in chat widget
+- [x] Fix chat widget to appear when "Chat with Sophia" is clicked
+- [x] Add dramatic center-screen entrance animation
+- [x] Position widget in center initially, then allow dragging

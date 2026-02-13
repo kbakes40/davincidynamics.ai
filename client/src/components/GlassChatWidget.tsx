@@ -16,7 +16,11 @@ export default function GlassChatWidget() {
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState("");
-  const [position, setPosition] = useState({ x: window.innerWidth - 420, y: window.innerHeight - 620 });
+  const [position, setPosition] = useState({ 
+    x: (window.innerWidth - 400) / 2, 
+    y: (window.innerHeight - 600) / 2 
+  });
+  const [isAnimating, setIsAnimating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   
@@ -29,9 +33,11 @@ export default function GlassChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Welcome message
+  // Welcome message and entrance animation
   useEffect(() => {
     if (isOpen && messages.length === 0) {
+      setIsAnimating(true);
+      setTimeout(() => setIsAnimating(false), 600);
       setMessages([{
         id: "welcome",
         role: "assistant",
@@ -157,13 +163,15 @@ export default function GlassChatWidget() {
     >
       {/* Glass container */}
       <div
-        className="rounded-2xl overflow-hidden shadow-2xl"
+        className="rounded-2xl overflow-hidden shadow-2xl transition-all duration-500"
         style={{
           background: 'rgba(10, 10, 15, 0.85)',
           backdropFilter: 'blur(40px) saturate(180%)',
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
           border: '1px solid rgba(0, 217, 255, 0.15)',
           boxShadow: '0 8px 32px rgba(0, 217, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+          transform: isAnimating ? 'scale(0.8)' : 'scale(1)',
+          opacity: isAnimating ? 0 : 1,
         }}
       >
         {/* Header */}
