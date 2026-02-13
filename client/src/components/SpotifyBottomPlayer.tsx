@@ -45,7 +45,7 @@ export default function SpotifyBottomPlayer() {
           frameBorder="0"
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
           loading="lazy"
-          title="Smooth Jazz Radio"
+          title="House Music Radio"
         />
       </div>
     </div>
