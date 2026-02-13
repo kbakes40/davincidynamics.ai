@@ -7,6 +7,8 @@ interface SpotifyPlayer {
   disconnect: () => void;
   togglePlay: () => Promise<void>;
   nextTrack: () => Promise<void>;
+  setVolume: (volume: number) => Promise<void>;
+  getVolume: () => Promise<number>;
   addListener: (event: string, callback: (data: any) => void) => boolean;
   removeListener: (event: string, callback?: (data: any) => void) => boolean;
 }
@@ -42,6 +44,7 @@ export default function SpotifyBottomPlayer() {
   const [trackName, setTrackName] = useState('Boss Hookah Radio');
   const [artistName, setArtistName] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [volume, setVolume] = useState(80); // 80% default
   const playerRef = useRef<SpotifyPlayer | null>(null);
 
   // Load Spotify SDK
@@ -216,6 +219,20 @@ export default function SpotifyBottomPlayer() {
     }
   };
 
+  const handleVolumeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseInt(e.target.value);
+    setVolume(newVolume);
+    
+    if (player) {
+      try {
+        // Spotify volume is 0-1, so divide by 100
+        await player.setVolume(newVolume / 100);
+      } catch (err) {
+        console.error('Volume change error:', err);
+      }
+    }
+  };
+
   return (
     <div
       className="fixed bottom-0 left-0 right-0 z-[9999] flex items-center gap-4 px-4 py-3 border-t"
@@ -241,6 +258,29 @@ export default function SpotifyBottomPlayer() {
           </div>
         )}
       </div>
+
+      {/* Center: Volume Slider (only when connected) */}
+      {accessToken && (
+        <div className="flex items-center gap-3 px-4">
+          <svg className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.6)' }} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={volume}
+            onChange={handleVolumeChange}
+            className="w-24 h-1 rounded-full appearance-none cursor-pointer"
+            style={{
+              background: `linear-gradient(to right, #1DB954 0%, #1DB954 ${volume}%, rgba(255,255,255,0.2) ${volume}%, rgba(255,255,255,0.2) 100%)`
+            }}
+          />
+          <span className="text-xs font-medium w-8 text-right" style={{ color: 'rgba(255,255,255,0.6)' }}>
+            {volume}%
+          </span>
+        </div>
+      )}
 
       {/* Right: Controls */}
       <div className="flex items-center gap-2">
