@@ -115,3 +115,4 @@
 - [x] Add event tracking for button clicks (Book Demo, Hire via Fiverr, Start Chat)
 - [x] Add event tracking for video interactions
 - [x] Add event tracking for Sophia chat opens/closes
+- [x] Update GA4 Measurement ID to G-X1X67V64XP
