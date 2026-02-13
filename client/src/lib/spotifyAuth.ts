@@ -1,6 +1,7 @@
 /**
  * Spotify OAuth PKCE Flow Utilities
  * Implements Authorization Code with PKCE for secure client-side authentication
+ * Uses popup window approach to avoid browser security restrictions
  */
 
 // Generate a random code verifier for PKCE
@@ -40,7 +41,7 @@ export interface SpotifyAuthParams {
   scopes: string[];
 }
 
-export async function redirectToSpotifyAuth(params: SpotifyAuthParams): Promise<void> {
+export async function openSpotifyAuthPopup(params: SpotifyAuthParams): Promise<string> {
   const codeVerifier = generateRandomString(64);
   const codeChallenge = await generateCodeChallenge(codeVerifier);
 
@@ -55,7 +56,64 @@ export async function redirectToSpotifyAuth(params: SpotifyAuthParams): Promise<
   authUrl.searchParams.append('code_challenge', codeChallenge);
   authUrl.searchParams.append('scope', params.scopes.join(' '));
 
-  window.location.href = authUrl.toString();
+  // Open popup window
+  const width = 500;
+  const height = 700;
+  const left = window.screenX + (window.outerWidth - width) / 2;
+  const top = window.screenY + (window.outerHeight - height) / 2;
+  
+  const popup = window.open(
+    authUrl.toString(),
+    'Spotify Login',
+    `width=${width},height=${height},left=${left},top=${top},popup=yes`
+  );
+
+  if (!popup) {
+    throw new Error('Failed to open popup. Please allow popups for this site.');
+  }
+
+  // Wait for the callback to complete
+  return new Promise((resolve, reject) => {
+    const checkInterval = setInterval(() => {
+      try {
+        if (popup.closed) {
+          clearInterval(checkInterval);
+          reject(new Error('Authentication cancelled'));
+          return;
+        }
+
+        // Check if popup has navigated to our callback URL
+        if (popup.location.href.includes(params.redirectUri)) {
+          const url = new URL(popup.location.href);
+          const code = url.searchParams.get('code');
+          const error = url.searchParams.get('error');
+
+          clearInterval(checkInterval);
+          popup.close();
+
+          if (error) {
+            reject(new Error(`Spotify authorization failed: ${error}`));
+          } else if (code) {
+            resolve(code);
+          } else {
+            reject(new Error('No authorization code received'));
+          }
+        }
+      } catch (e) {
+        // Cross-origin error - popup hasn't navigated to callback yet
+        // This is expected, just keep checking
+      }
+    }, 500);
+
+    // Timeout after 5 minutes
+    setTimeout(() => {
+      clearInterval(checkInterval);
+      if (!popup.closed) {
+        popup.close();
+      }
+      reject(new Error('Authentication timeout'));
+    }, 5 * 60 * 1000);
+  });
 }
 
 export interface TokenResponse {
