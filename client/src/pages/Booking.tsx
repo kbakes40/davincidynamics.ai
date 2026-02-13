@@ -327,8 +327,50 @@ export default function Booking() {
               {selectedTier ? `Selected Package: ${getTierName(selectedTier)}` : "Schedule Your Demo"}
             </h2>
             <p className="text-muted-foreground text-center mb-6 font-heading">
-              Fill out the form below and we'll contact you within 24 hours
+              Choose how you'd like to connect with us
             </p>
+
+            {/* Bot Chat Option */}
+            <div className="mb-8 p-6 bg-accent/10 border border-accent/30 rounded-lg">
+              <h3 className="font-heading font-bold text-lg text-accent mb-3 text-center">
+                💬 Prefer to Chat? Talk to Our AI Assistant
+              </h3>
+              <p className="text-muted-foreground text-sm text-center mb-4 font-heading">
+                Get instant answers about pricing, demos, and scaling options
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <Button
+                  variant="default"
+                  className="bg-accent text-background hover:bg-accent/90 font-heading font-bold"
+                  onClick={() => window.open('https://t.me/DaVinciAssistBot?start=site_chat', '_blank')}
+                >
+                  Start Chat Now
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold"
+                  onClick={() => window.open('https://t.me/DaVinciAssistBot?start=pricing', '_blank')}
+                >
+                  View Pricing
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold"
+                  onClick={() => window.open('https://t.me/DaVinciAssistBot?start=watch_demo', '_blank')}
+                >
+                  Watch Demo
+                </Button>
+              </div>
+            </div>
+
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-accent/30"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-card text-muted-foreground font-heading">Or fill out the form below</span>
+              </div>
+            </div>
 
             {bookingUrl ? (
               <div className="w-full h-[600px] rounded-lg overflow-hidden">

@@ -18,3 +18,4 @@
 - [x] Reorganize booking page: show pricing packages as hero section, form below
 - [x] Replace mobile video placeholder with Google Drive video and enable autoplay
 - [x] Download and integrate desktop demo video with autoplay
+- [x] Add DaVinci Assist Bot chat option alongside booking form
