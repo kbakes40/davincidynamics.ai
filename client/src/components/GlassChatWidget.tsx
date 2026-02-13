@@ -18,8 +18,8 @@ export default function GlassChatWidget() {
   const [isTyping, setIsTyping] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState("");
   const [position, setPosition] = useState({ 
-    x: (window.innerWidth - 400) / 2, 
-    y: (window.innerHeight - 600) / 2 
+    x: (window.innerWidth - 380) / 2, 
+    y: (window.innerHeight - 500) / 2 
   });
   const [isAnimating, setIsAnimating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -171,8 +171,8 @@ export default function GlassChatWidget() {
         style={{
           left: `${position.x}px`,
           top: `${position.y}px`,
-          width: '400px',
-          height: isMinimized ? 'auto' : '600px',
+          width: '380px',
+          height: isMinimized ? 'auto' : '500px',
         }}
         onMouseDown={handleMouseDown}
       >
