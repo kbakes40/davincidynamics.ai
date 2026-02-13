@@ -1,20 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
-import { trpc } from '@/lib/trpc';
+import { exchangeCodeForToken } from '@/lib/spotifyAuth';
 
 export default function SpotifyCallback() {
   const [, setLocation] = useLocation();
   const [error, setError] = useState<string | null>(null);
-  const exchangeTokenMutation = trpc.spotify.exchangeToken.useMutation();
 
   useEffect(() => {
     const handleCallback = async () => {
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
-      const state = params.get('state');
       const errorParam = params.get('error');
 
-      console.log('[Spotify Callback] Code:', code, 'State:', state, 'Error:', errorParam);
+      console.log('[Spotify Callback] Code:', code, 'Error:', errorParam);
 
       if (errorParam) {
         setError(`Spotify authentication error: ${errorParam}`);
@@ -32,45 +30,25 @@ export default function SpotifyCallback() {
         return;
       }
 
-      if (!state) {
-        setError('No state parameter received');
-        setTimeout(() => {
-          setLocation('/');
-        }, 3000);
-        return;
-      }
-
-      // Verify state matches what we stored
-      const storedState = sessionStorage.getItem('spotify_oauth_state');
-      if (state !== storedState) {
-        setError('State mismatch - possible security issue');
-        sessionStorage.removeItem('spotify_oauth_state');
-        setTimeout(() => {
-          setLocation('/');
-        }, 3000);
-        return;
-      }
-
-      // Clean up stored state
-      sessionStorage.removeItem('spotify_oauth_state');
-
       try {
-        // Exchange code for token via backend
+        // Exchange code for token
         const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
         const redirectUri = `${window.location.origin}/spotify-callback`;
         
-        console.log('[Spotify Callback] Exchanging code via backend...');
-        const tokenData = await exchangeTokenMutation.mutateAsync({
-          code,
-          state,
-          clientId,
-          redirectUri,
-        });
+        console.log('[Spotify Callback] Exchanging code for token...');
+        const token = await exchangeCodeForToken(code, clientId, redirectUri);
         
-        console.log('[Spotify Callback] Token received, redirecting to home with token in hash');
+        console.log('[Spotify Callback] Token received, passing to home page');
         
-        // Pass token via URL hash (will be picked up by SpotifyBottomPlayer)
-        setLocation(`/#access_token=${tokenData.access_token}`);
+        // Pass token via URL hash (temporary, cleared on page load)
+        const returnPath = sessionStorage.getItem('spotify_return_path') || '/';
+        sessionStorage.removeItem('spotify_return_path');
+        
+        // Store token temporarily in sessionStorage just for the redirect
+        sessionStorage.setItem('spotify_temp_token', token.access_token);
+        
+        console.log('[Spotify Callback] Redirecting to:', returnPath);
+        setLocation(returnPath);
       } catch (err) {
         console.error('[Spotify Callback] Error:', err);
         setError(err instanceof Error ? err.message : 'Failed to complete authentication');
@@ -81,7 +59,7 @@ export default function SpotifyCallback() {
     };
 
     handleCallback();
-  }, [setLocation, exchangeTokenMutation]);
+  }, [setLocation]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">

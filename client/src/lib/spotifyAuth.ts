@@ -1,12 +1,65 @@
 /**
- * Spotify OAuth Client - Uses Backend Proxy
- * All OAuth logic is handled server-side to avoid browser security restrictions
+ * Spotify OAuth PKCE Flow Utilities
+ * Implements Authorization Code with PKCE for secure client-side authentication
+ * Uses full-page redirect for better compatibility and reliability
+ * NO PERSISTENCE - tokens are session-only and cleared on page refresh
  */
+
+// Generate a random code verifier for PKCE
+function generateRandomString(length: number): string {
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const values = crypto.getRandomValues(new Uint8Array(length));
+  return values.reduce((acc, x) => acc + possible[x % possible.length], '');
+}
+
+// Generate code challenge from verifier
+async function sha256(plain: string): Promise<ArrayBuffer> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(plain);
+  return await crypto.subtle.digest('SHA-256', data);
+}
+
+function base64encode(input: ArrayBuffer): string {
+  const bytes = new Uint8Array(input);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary)
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+
+export async function generateCodeChallenge(codeVerifier: string): Promise<string> {
+  const hashed = await sha256(codeVerifier);
+  return base64encode(hashed);
+}
 
 export interface SpotifyAuthParams {
   clientId: string;
   redirectUri: string;
   scopes: string[];
+}
+
+export async function redirectToSpotifyAuth(params: SpotifyAuthParams): Promise<void> {
+  const codeVerifier = generateRandomString(64);
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+  // Store code verifier ONLY for the OAuth flow (temporary)
+  sessionStorage.setItem('spotify_code_verifier', codeVerifier);
+  sessionStorage.setItem('spotify_return_path', window.location.pathname);
+
+  const authUrl = new URL('https://accounts.spotify.com/authorize');
+  authUrl.searchParams.append('client_id', params.clientId);
+  authUrl.searchParams.append('response_type', 'code');
+  authUrl.searchParams.append('redirect_uri', params.redirectUri);
+  authUrl.searchParams.append('code_challenge_method', 'S256');
+  authUrl.searchParams.append('code_challenge', codeChallenge);
+  authUrl.searchParams.append('scope', params.scopes.join(' '));
+
+  // Redirect to Spotify authorization page
+  window.location.href = authUrl.toString();
 }
 
 export interface TokenResponse {
@@ -17,18 +70,42 @@ export interface TokenResponse {
   scope: string;
 }
 
-// These functions are no longer used - kept for compatibility
-// The backend proxy handles all OAuth logic now
-export async function redirectToSpotifyAuth(params: SpotifyAuthParams): Promise<void> {
-  console.log('[spotifyAuth] This function is deprecated - use backend proxy instead');
-  throw new Error('Use backend proxy for authentication');
-}
-
 export async function exchangeCodeForToken(
   code: string,
   clientId: string,
   redirectUri: string
 ): Promise<TokenResponse> {
-  console.log('[spotifyAuth] This function is deprecated - use backend proxy instead');
-  throw new Error('Use backend proxy for token exchange');
+  const codeVerifier = sessionStorage.getItem('spotify_code_verifier');
+  if (!codeVerifier) {
+    throw new Error('Code verifier not found');
+  }
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    grant_type: 'authorization_code',
+    code,
+    redirect_uri: redirectUri,
+    code_verifier: codeVerifier,
+  });
+
+  const response = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: params.toString(),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Token exchange failed: ${error.error_description || error.error}`);
+  }
+
+  const data: TokenResponse = await response.json();
+  
+  // Clean up code verifier immediately after use
+  sessionStorage.removeItem('spotify_code_verifier');
+  sessionStorage.removeItem('spotify_return_path');
+  
+  return data;
 }
