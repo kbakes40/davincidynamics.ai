@@ -46,13 +46,22 @@ export default function SpotifyBottomPlayer() {
 
   // Load Spotify SDK
   useEffect(() => {
+    // Define the callback BEFORE loading the script
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      // This will be called when SDK is ready
+      // Actual initialization happens in the next useEffect
+    };
+
     const script = document.createElement('script');
     script.src = 'https://sdk.scdn.co/spotify-player.js';
     script.async = true;
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+      delete window.onSpotifyWebPlaybackSDKReady;
     };
   }, []);
 
@@ -66,9 +75,9 @@ export default function SpotifyBottomPlayer() {
 
   // Initialize player when SDK is ready and we have a token
   useEffect(() => {
-    if (!accessToken) return;
+    if (!accessToken || !window.Spotify) return;
 
-    window.onSpotifyWebPlaybackSDKReady = () => {
+    const initializePlayer = () => {
       if (!window.Spotify) return;
 
       const spotifyPlayer = new window.Spotify.Player({
@@ -106,6 +115,18 @@ export default function SpotifyBottomPlayer() {
       setPlayer(spotifyPlayer);
       playerRef.current = spotifyPlayer;
     };
+
+    // If SDK is already loaded, initialize immediately
+    if (window.Spotify) {
+      initializePlayer();
+    } else {
+      // Otherwise wait for SDK ready callback
+      const originalCallback = window.onSpotifyWebPlaybackSDKReady;
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        if (originalCallback) originalCallback();
+        initializePlayer();
+      };
+    }
 
     return () => {
       if (playerRef.current) {
