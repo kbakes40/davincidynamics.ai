@@ -14,6 +14,8 @@ export default function GlassChatWidget() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [streamingMessage, setStreamingMessage] = useState("");
   const [position, setPosition] = useState({ x: window.innerWidth - 420, y: window.innerHeight - 620 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -51,6 +53,7 @@ export default function GlassChatWidget() {
 
     setMessages(prev => [...prev, userMessage]);
     setInputValue("");
+    setIsTyping(true);
 
     try {
       const response = await chatMutation.mutateAsync({ 
@@ -61,15 +64,36 @@ export default function GlassChatWidget() {
         message: inputValue 
       });
       
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
+      setIsTyping(false);
+      const fullResponse = typeof response === 'string' ? response : String(response);
+      
+      // Stream the response character by character
+      const messageId = (Date.now() + 1).toString();
+      setStreamingMessage("");
+      
+      // Add empty message placeholder
+      const placeholderMessage: Message = {
+        id: messageId,
         role: "assistant",
-        content: typeof response === 'string' ? response : String(response),
+        content: "",
         timestamp: new Date()
       };
-
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages(prev => [...prev, placeholderMessage]);
+      
+      // Stream characters
+      for (let i = 0; i <= fullResponse.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 20)); // 20ms per character
+        const currentText = fullResponse.slice(0, i);
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === messageId 
+              ? { ...msg, content: currentText }
+              : msg
+          )
+        );
+      }
     } catch (error) {
+      setIsTyping(false);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -231,6 +255,27 @@ export default function GlassChatWidget() {
                   </div>
                 </div>
               ))}
+              
+              {/* Typing indicator */}
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div
+                    className="max-w-[80%] rounded-2xl rounded-bl-sm px-4 py-3"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                    }}
+                  >
+                    <div className="flex gap-1 items-center">
+                      <div className="w-2 h-2 rounded-full bg-[#00D9FF] animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 rounded-full bg-[#00D9FF] animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-2 h-2 rounded-full bg-[#00D9FF] animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div ref={messagesEndRef} />
             </div>
 

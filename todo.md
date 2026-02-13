@@ -63,3 +63,6 @@
 - [x] Create Apple-style glassmorphic chat widget with dark tinted glass
 - [x] Make chat widget draggable around the screen
 - [x] Integrate chat widget with AI backend
+- [x] Update bot AI to provide full conversational responses (no Telegram redirect)
+- [x] Add typing indicator to chat widget
+- [x] Implement character-by-character streaming for AI responses
