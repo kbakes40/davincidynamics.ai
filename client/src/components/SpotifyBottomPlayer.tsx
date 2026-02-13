@@ -19,6 +19,9 @@ interface PlayerState {
     current_track: {
       name: string;
       artists: Array<{ name: string }>;
+      album: {
+        images: Array<{ url: string; height: number; width: number }>;
+      };
     };
   };
 }
@@ -43,6 +46,7 @@ export default function SpotifyBottomPlayer() {
   const [isPaused, setIsPaused] = useState(true);
   const [trackName, setTrackName] = useState('Boss Hookah Radio');
   const [artistName, setArtistName] = useState('');
+  const [albumArtUrl, setAlbumArtUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [volume, setVolume] = useState(80); // 80% default
   const playerRef = useRef<SpotifyPlayer | null>(null);
@@ -108,6 +112,13 @@ export default function SpotifyBottomPlayer() {
         setIsPaused(state.paused);
         setTrackName(state.track_window.current_track.name);
         setArtistName(state.track_window.current_track.artists.map(a => a.name).join(', '));
+        
+        // Get smallest album art (64x64 typically)
+        const albumImages = state.track_window.current_track.album.images;
+        if (albumImages && albumImages.length > 0) {
+          // Use the smallest image (last in array)
+          setAlbumArtUrl(albumImages[albumImages.length - 1].url);
+        }
       });
 
       spotifyPlayer.connect().catch((err) => {
@@ -242,21 +253,31 @@ export default function SpotifyBottomPlayer() {
         borderTopColor: 'rgba(255,255,255,0.08)',
       }}
     >
-      {/* Left: Track Info */}
-      <div className="flex-1 min-w-0">
-        <div className="font-semibold text-sm truncate" style={{ color: 'rgba(255,255,255,0.92)' }}>
-          {trackName}
+      {/* Left: Album Art + Track Info */}
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        {albumArtUrl && (
+          <img 
+            src={albumArtUrl} 
+            alt="Album artwork"
+            className="w-12 h-12 rounded-md shadow-lg"
+            style={{ objectFit: 'cover' }}
+          />
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-sm truncate" style={{ color: 'rgba(255,255,255,0.92)' }}>
+            {trackName}
+          </div>
+          {artistName && (
+            <div className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              {artistName}
+            </div>
+          )}
+          {errorMessage && (
+            <div className="text-xs mt-1" style={{ color: 'rgba(255,80,80,0.92)' }}>
+              {errorMessage}
+            </div>
+          )}
         </div>
-        {artistName && (
-          <div className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.6)' }}>
-            {artistName}
-          </div>
-        )}
-        {errorMessage && (
-          <div className="text-xs mt-1" style={{ color: 'rgba(255,80,80,0.92)' }}>
-            {errorMessage}
-          </div>
-        )}
       </div>
 
       {/* Center: Volume Slider (only when connected) */}
