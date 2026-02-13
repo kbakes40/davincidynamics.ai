@@ -107,3 +107,6 @@
 - [x] Connect "Start Chat Now" button on Platform Demo to open Sophia chat widget
 - [x] Reduce keywords from 11 to 3-8 focused terms
 - [x] Optimize title to 30-60 characters
+- [x] Create social preview image for Open Graph
+- [x] Add Open Graph meta tags to home page
+- [x] Add Open Graph meta tags to Platform Demo page

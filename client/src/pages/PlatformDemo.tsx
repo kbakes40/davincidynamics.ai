@@ -14,6 +14,7 @@ import { useLocation } from "wouter";
 import Navigation from "@/components/Navigation";
 import { useScrollFade } from "@/hooks/useScrollFade";
 import { useChat } from "@/contexts/ChatContext";
+import { Helmet } from "react-helmet-async";
 
 export default function PlatformDemo() {
   // The userAuth hooks provides authentication state
@@ -106,6 +107,24 @@ export default function PlatformDemo() {
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+      <Helmet>
+        <title>Platform Demo - DaVinci Dynamics</title>
+        <meta name="description" content="See how DaVinci Dynamics turns Facebook & TikTok sales into a real business. Watch live demos of our revenue-optimized ecommerce platform." />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.davincidynamics.ai/platform-demo" />
+        <meta property="og:title" content="Platform Demo - DaVinci Dynamics" />
+        <meta property="og:description" content="See how DaVinci Dynamics turns Facebook & TikTok sales into a real business. Watch live demos of our revenue-optimized ecommerce platform." />
+        <meta property="og:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/PXfURBFNVBolMqns.png" />
+        
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://www.davincidynamics.ai/platform-demo" />
+        <meta property="twitter:title" content="Platform Demo - DaVinci Dynamics" />
+        <meta property="twitter:description" content="See how DaVinci Dynamics turns Facebook & TikTok sales into a real business. Watch live demos of our revenue-optimized ecommerce platform." />
+        <meta property="twitter:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/PXfURBFNVBolMqns.png" />
+      </Helmet>
       <Navigation />
       {/* Background glow effects */}
       <div 
