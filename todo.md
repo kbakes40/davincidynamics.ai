@@ -25,3 +25,4 @@
 - [x] Build Solutions, About, and Contact pages
 - [x] Replace existing Home page with new DaVinci home
 - [x] Update App.tsx routing
+- [x] Fix nested anchor tag error in Navigation component

@@ -26,25 +26,23 @@ export default function Navigation() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/">
-            <a className="font-display font-black text-xl lg:text-2xl text-neon hover:text-accent transition-colors cursor-pointer">
-              DaVinci Dynamics
-            </a>
+          <Link href="/" className="font-display font-black text-xl lg:text-2xl text-neon hover:text-accent transition-colors cursor-pointer">
+            DaVinci Dynamics
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             {navItems.map((item) => (
-              <Link key={item.path} href={item.path}>
-                <a
-                  className={`font-heading font-semibold transition-colors cursor-pointer ${
-                    isActive(item.path)
-                      ? "text-accent"
-                      : "text-foreground hover:text-accent"
-                  }`}
-                >
-                  {item.name}
-                </a>
+              <Link 
+                key={item.path} 
+                href={item.path}
+                className={`font-heading font-semibold transition-colors cursor-pointer ${
+                  isActive(item.path)
+                    ? "text-accent"
+                    : "text-foreground hover:text-accent"
+                }`}
+              >
+                {item.name}
               </Link>
             ))}
             <Link href="/booking">
@@ -71,17 +69,17 @@ export default function Navigation() {
           <div className="md:hidden py-4 border-t border-accent/20">
             <div className="flex flex-col gap-4">
               {navItems.map((item) => (
-                <Link key={item.path} href={item.path}>
-                  <a
-                    className={`font-heading font-semibold block py-2 transition-colors cursor-pointer ${
-                      isActive(item.path)
-                        ? "text-accent"
-                        : "text-foreground hover:text-accent"
-                    }`}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.name}
-                  </a>
+                <Link 
+                  key={item.path} 
+                  href={item.path}
+                  className={`font-heading font-semibold block py-2 transition-colors cursor-pointer ${
+                    isActive(item.path)
+                      ? "text-accent"
+                      : "text-foreground hover:text-accent"
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.name}
                 </Link>
               ))}
               <Link href="/booking">
