@@ -32,3 +32,5 @@
 - [x] Update home page to highlight bot automation capabilities
 - [x] Create interactive cost savings calculator component
 - [x] Integrate calculator into home page with 12/24-month projections
+- [x] Create Telegram bot handler script with start command responses
+- [x] Add deployment instructions for bot handler

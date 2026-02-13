@@ -1,0 +1,22 @@
+{
+  "name": "davinci-dynamics-telegram-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot for DaVinci Dynamics e-commerce platform",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "nodemon bot.js"
+  },
+  "keywords": ["telegram", "bot", "ecommerce", "davinci"],
+  "author": "DaVinci Dynamics",
+  "license": "MIT",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
