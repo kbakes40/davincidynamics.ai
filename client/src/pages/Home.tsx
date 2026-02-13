@@ -18,7 +18,7 @@ export default function Home() {
   let { user, loading, error, isAuthenticated, logout } = useAuth();
   const [, setLocation] = useLocation();
 
-  const [mobileVideoUrl, setMobileVideoUrl] = useState("");
+  const [mobileVideoUrl, setMobileVideoUrl] = useState("https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/gZoWFxkzgJhTRkmy.mp4");
   const [desktopVideoUrl, setDesktopVideoUrl] = useState("");
   const [mobileVideoFile, setMobileVideoFile] = useState<File | null>(null);
   const [desktopVideoFile, setDesktopVideoFile] = useState<File | null>(null);
