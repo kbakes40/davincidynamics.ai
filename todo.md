@@ -88,3 +88,6 @@
 - [x] Make welcome message type out character-by-character as widget appears (ChatGPT-style)
 - [x] Update Sophia's personality to be funny and sarcastic
 - [x] Fix booking flow - immediately provide booking link when user says yes to availability
+- [x] Update Sophia to extract and remember key customer facts (spending, business type, pain points)
+- [x] Add defensive sarcastic responses when customers get mean - use their own information against them
+- [x] Ensure Sophia never asks the same question twice by checking conversation history
