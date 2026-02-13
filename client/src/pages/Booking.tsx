@@ -109,7 +109,7 @@ export default function Booking() {
         {/* Hero Section */}
         <header className="text-center mb-12 lg:mb-16 animate-fade-in-up">
           <h1 className="font-display font-black text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 leading-tight tracking-tight text-foreground">
-            Book Your <span className="text-neon">Ecommerce Platform Demo</span>
+            Book Your <span className="text-neon">E-commerce Platform Demo</span>
           </h1>
           <p className="font-heading text-sm md:text-base lg:text-lg text-muted-foreground mb-8 font-medium max-w-3xl mx-auto">
             See the complete ordering flow, in-store pickup, shipping, payment processing, and inventory management—then get a custom build plan in one call.
@@ -176,7 +176,7 @@ export default function Booking() {
 
               <ul className="space-y-2 mb-6">
                 {[
-                  "Full ecommerce site",
+                  "Full e-commerce site",
                   "In store pickup and shipping setup",
                   "Zelle integration",
                   "Dashboard access",
