@@ -17,3 +17,4 @@
 - [x] Integrate Telegram bot to receive booking form submissions
 - [x] Reorganize booking page: show pricing packages as hero section, form below
 - [x] Replace mobile video placeholder with Google Drive video and enable autoplay
+- [x] Download and integrate desktop demo video with autoplay
