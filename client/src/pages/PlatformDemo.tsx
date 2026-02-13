@@ -13,12 +13,14 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import Navigation from "@/components/Navigation";
 import { useScrollFade } from "@/hooks/useScrollFade";
+import { useChat } from "@/contexts/ChatContext";
 
 export default function PlatformDemo() {
   // The userAuth hooks provides authentication state
   // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
   let { user, loading, error, isAuthenticated, logout } = useAuth();
   const [, setLocation] = useLocation();
+  const { openChat } = useChat();
   
   // Scroll fade for pricing section
   const pricingSection = useScrollFade();
@@ -418,7 +420,7 @@ export default function PlatformDemo() {
             <Button 
               size="lg"
               className="w-full sm:w-auto lg:px-16 bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base lg:text-lg py-6 transition-all duration-300 neon-glow-intense"
-              onClick={() => window.open('https://www.davincidynamics.ai', '_blank')}
+              onClick={openChat}
             >
               Start Chat Now
             </Button>
