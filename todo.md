@@ -145,3 +145,6 @@
 
 ## Grammar Improvements
 - [x] Remove all em dashes (—) and replace with proper grammar/punctuation across all pages
+
+## Revert Changes
+- [x] Revert Home page wording back to original version (before all-in-one service changes)
