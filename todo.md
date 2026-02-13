@@ -84,3 +84,5 @@
 - [x] Fix Sophia positioning - center it perfectly on screen
 - [x] Fix Sophia entrance animation - remove fade-out/fade-in loop
 - [x] Add smooth slide-out transition when closing Sophia
+- [x] Add smooth scale-up entrance animation for Sophia (reverse of close animation)
+- [x] Make welcome message type out character-by-character as widget appears (ChatGPT-style)

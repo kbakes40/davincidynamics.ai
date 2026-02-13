@@ -22,6 +22,8 @@ export default function GlassChatWidget() {
     y: (window.innerHeight - 500) / 2 
   });
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isEntering, setIsEntering] = useState(true);
+  const [hasTypedWelcome, setHasTypedWelcome] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   
@@ -34,17 +36,43 @@ export default function GlassChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Welcome message and entrance animation
+  // Welcome message with typing animation
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      setMessages([{
-        id: "welcome",
-        role: "assistant",
-        content: "Hi! I'm Sophia, your DaVinci Dynamics business consultant. I help entrepreneurs like you stop throwing money away on platform fees. What are you currently paying monthly for your e-commerce platform?",
-        timestamp: new Date()
-      }]);
+    if (isOpen && messages.length === 0 && !hasTypedWelcome) {
+      // Start entrance animation
+      setIsEntering(true);
+      
+      // Wait for entrance animation to complete, then start typing
+      setTimeout(async () => {
+        setIsEntering(false);
+        setHasTypedWelcome(true);
+        
+        const welcomeText = "Hi! I'm Sophia, your DaVinci Dynamics business consultant. I help entrepreneurs like you stop throwing money away on platform fees. What are you currently paying monthly for your e-commerce platform?";
+        const messageId = "welcome";
+        
+        // Add empty message placeholder
+        const placeholderMessage: Message = {
+          id: messageId,
+          role: "assistant",
+          content: "",
+          timestamp: new Date()
+        };
+        setMessages([placeholderMessage]);
+        
+        // Stream characters
+        for (let i = 0; i <= welcomeText.length; i++) {
+          await new Promise(resolve => setTimeout(resolve, 20)); // 20ms per character
+          const currentText = welcomeText.slice(0, i);
+          setMessages([{
+            id: messageId,
+            role: "assistant",
+            content: currentText,
+            timestamp: new Date()
+          }]);
+        }
+      }, 400); // Match entrance animation duration
     }
-  }, [isOpen]);
+  }, [isOpen, hasTypedWelcome]);
 
   // Exit animation
   const handleClose = () => {
@@ -52,6 +80,9 @@ export default function GlassChatWidget() {
     setTimeout(() => {
       closeChat();
       setIsAnimating(false);
+      setIsEntering(true);
+      setHasTypedWelcome(false);
+      setMessages([]);
     }, 400);
   };
 
@@ -192,8 +223,8 @@ export default function GlassChatWidget() {
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
           border: '1px solid rgba(0, 217, 255, 0.15)',
           boxShadow: '0 8px 32px rgba(0, 217, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-          transform: isAnimating ? 'scale(0.9) translateY(20px)' : 'scale(1) translateY(0)',
-          opacity: isAnimating ? 0 : 1,
+          transform: isAnimating ? 'scale(0.9) translateY(20px)' : isEntering ? 'scale(0.9) translateY(-20px)' : 'scale(1) translateY(0)',
+          opacity: isAnimating ? 0 : isEntering ? 0 : 1,
           transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
