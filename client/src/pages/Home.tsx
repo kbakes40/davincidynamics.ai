@@ -8,6 +8,7 @@ import { Check, ArrowRight, Zap, Shield, TrendingUp, Bot } from "lucide-react";
 import { useLocation } from "wouter";
 import Navigation from "@/components/Navigation";
 import CostSavingsCalculator from "@/components/CostSavingsCalculator";
+import { useEffect } from "react";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -241,9 +242,12 @@ export default function Home() {
                   size="lg"
                   variant="outline"
                   className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold text-lg px-8 py-6"
-                  onClick={() => window.open('https://t.me/DaVinciAssistBot?start=site_chat', '_blank')}
+                  onClick={() => {
+                    const chatButton = document.querySelector('[aria-label="Open chat"]') as HTMLButtonElement;
+                    if (chatButton) chatButton.click();
+                  }}
                 >
-                  Chat with Our Bot
+                  Chat with Sophia
                 </Button>
               </div>
             </div>

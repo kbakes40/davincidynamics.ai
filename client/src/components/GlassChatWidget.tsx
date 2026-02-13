@@ -35,7 +35,7 @@ export default function GlassChatWidget() {
       setMessages([{
         id: "welcome",
         role: "assistant",
-        content: "👋 Welcome to DaVinci Dynamics! I'm here to help you transform your business. Ask me anything about our platform, pricing, or book a demo!",
+        content: "Hi! I'm Sophia, your DaVinci Dynamics business consultant. I help entrepreneurs like you stop throwing money away on platform fees. What are you currently paying monthly for your e-commerce platform?",
         timestamp: new Date()
       }]);
     }
@@ -195,12 +195,14 @@ export default function GlassChatWidget() {
           }}
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#0099CC] flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 text-white" />
-            </div>
+            <img 
+              src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/pYerRDAgxrVEcVZH.png" 
+              alt="Sophia" 
+              className="w-10 h-10 rounded-full object-cover border-2 border-[#00D9FF]/30"
+            />
             <div>
-              <h3 className="text-white font-semibold text-sm">DaVinci AI</h3>
-              <p className="text-[#00D9FF] text-xs">Online</p>
+              <h3 className="text-white font-semibold text-sm">Sophia</h3>
+              <p className="text-[#00D9FF] text-xs">Business Consultant • Online</p>
             </div>
           </div>
           

@@ -354,21 +354,24 @@ export default function Booking() {
                 <Button
                   variant="default"
                   className="bg-accent text-background hover:bg-accent/90 font-heading font-bold"
-                  onClick={() => window.open('https://t.me/DaVinciAssistBot?start=site_chat', '_blank')}
+                  onClick={() => {
+                    const chatButton = document.querySelector('[aria-label="Open chat"]') as HTMLButtonElement;
+                    if (chatButton) chatButton.click();
+                  }}
                 >
-                  Start Chat Now
+                  Chat with Sophia
                 </Button>
                 <Button
                   variant="outline"
                   className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold"
-                  onClick={() => window.open('https://t.me/DaVinciAssistBot?start=pricing', '_blank')}
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 >
                   View Pricing
                 </Button>
                 <Button
                   variant="outline"
                   className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold"
-                  onClick={() => window.open('https://t.me/DaVinciAssistBot?start=watch_demo', '_blank')}
+                  onClick={() => window.location.href = '/platform-demo'}
                 >
                   Watch Demo
                 </Button>

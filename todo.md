@@ -66,3 +66,8 @@
 - [x] Update bot AI to provide full conversational responses (no Telegram redirect)
 - [x] Add typing indicator to chat widget
 - [x] Implement character-by-character streaming for AI responses
+- [x] Generate professional woman's face icon for chatbot
+- [x] Give chatbot a professional name
+- [x] Replace all Telegram bot links with chat widget
+- [x] Update AI to be more sales-pushy
+- [x] Add dynamic pricing shock responses
