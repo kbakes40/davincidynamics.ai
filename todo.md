@@ -157,3 +157,4 @@
 ## Spotify Player Updates
 - [x] Hide Spotify player by default
 - [x] Add triple-tap screen detection to show Spotify player
+- [x] Fix "View Live Demo" buttons - mobile to davincidynamics.site, desktop to bosshookah.site

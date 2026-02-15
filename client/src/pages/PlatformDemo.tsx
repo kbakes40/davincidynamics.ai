@@ -235,7 +235,7 @@ export default function PlatformDemo() {
               <Button 
                 variant="outline" 
                 className="mt-6 border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
-                onClick={() => window.open('https://www.davincidynamics.ai/', '_blank')}
+                onClick={() => window.open('https://davincidynamics.site', '_blank')}
               >
                 View Live Mobile Demo →
               </Button>
@@ -315,7 +315,7 @@ export default function PlatformDemo() {
               <Button 
                 variant="outline" 
                 className="mt-6 border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
-                onClick={() => window.open('https://www.davincidynamics.ai/', '_blank')}
+                onClick={() => window.open('https://bosshookah.site', '_blank')}
               >
                 View Live Desktop Demo →
               </Button>
