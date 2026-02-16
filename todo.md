@@ -427,3 +427,13 @@
 - [x] Remove webhook configuration code from two-bot-handoff.ts
 - [x] Remove webhook setup call from server index
 - [x] Document that OpenClaw controls DavinciBot responses
+
+## Update Chatbot Logic with DaVinci Dynamics Assistant Prompt
+- [x] Replace bot-ai-handler system prompt with new DaVinci Dynamics prompt
+- [x] Add button-based response logic (Get My Savings Plan, Book Demo, See Pricing, etc.)
+- [x] Implement lead capture flow (platform, spend, pain point, contact info)
+- [x] Add objection handling responses
+- [x] Update handleMessage to accept context parameters
+- [x] Update frontend to pass button_clicked, button_label, page_url context
+- [x] Update bot router to accept context in chat mutation
+- [ ] Test chatbot with different button contexts

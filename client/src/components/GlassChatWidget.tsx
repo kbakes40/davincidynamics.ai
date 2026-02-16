@@ -139,12 +139,20 @@ export default function GlassChatWidget() {
     setIsTyping(true);
 
     try {
+      // Get page context from URL and any button that was clicked
+      const pageUrl = window.location.href;
+      const pageName = document.title;
+      
       const response = await chatMutation.mutateAsync({ 
         telegramUser: {
           id: Date.now(), // Anonymous web user
           first_name: "Web User"
         },
-        message: inputValue 
+        message: inputValue,
+        context: {
+          page_url: pageUrl,
+          page_name: pageName,
+        }
       });
       
       setIsTyping(false);

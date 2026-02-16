@@ -27,6 +27,13 @@ export const botRouter = router({
         last_name: z.string().optional(),
       }),
       message: z.string(),
+      context: z.object({
+        page_name: z.string().optional(),
+        button_clicked: z.string().optional(),
+        button_label: z.string().optional(),
+        page_url: z.string().optional(),
+        customer_name: z.string().optional(),
+      }).optional(),
     }))
     .mutation(async ({ input }) => {
       // Get or create user and conversation
