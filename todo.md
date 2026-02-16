@@ -275,3 +275,11 @@
 - [x] Reconfigure webhook with new token
 - [x] Restart server with new token
 - [x] Test handoff notification functionality
+
+## Website-Telegram Bridge (User Never Leaves Site)
+- [x] Send handoff notification to @DavinciDynamics_Chatbot with conversation context
+- [x] Also send notification to @Leo_Handoff_bot for tracking
+- [x] Route DaVinci bot messages back to website chat database
+- [x] Website polling picks up DaVinci bot messages and displays them (already implemented)
+- [ ] Test complete flow: Website → DaVinci Bot → Website
+- [x] User never knows about Telegram - stays on website entire time

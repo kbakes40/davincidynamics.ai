@@ -31,6 +31,9 @@ interface TelegramUpdate {
       length: number;
       url?: string;
     }>;
+    reply_to_message?: {
+      text?: string;
+    };
   };
   callback_query?: {
     id: string;
@@ -174,8 +177,52 @@ async function processUpdate(update: TelegramUpdate): Promise<void> {
       return;
     }
 
+    // Check if this is a reply to a handoff notification (contains Conversation ID)
+    const conversationIdMatch = text.match(/Conversation ID: (\d+)/);
+    const replyToMessage = message.reply_to_message?.text;
+    const replyConversationIdMatch = replyToMessage?.match(/Conversation ID: (\d+)/);
+    
+    const conversationId = conversationIdMatch?.[1] || replyConversationIdMatch?.[1];
+    
+    if (conversationId) {
+      console.log('[DaVinci Bot] 🎯 Agent message for conversation:', conversationId);
+      console.log('[DaVinci Bot] Agent message:', text);
+      
+      // Store agent message in website chat database
+      const { getDb } = await import('./db');
+      const { messages: messagesTable } = await import('../drizzle/schema');
+      const db = await getDb();
+      
+      if (db) {
+        try {
+          await db.insert(messagesTable).values({
+            conversationId: parseInt(conversationId),
+            role: 'assistant',
+            content: text,
+            timestamp: new Date(),
+            intent: 'agent_message'
+          });
+          
+          console.log('[DaVinci Bot] ✅ Agent message stored in website chat database');
+          
+          // Confirm to agent
+          await sendTelegramMessage(
+            chatId,
+            `✅ Message delivered to customer on website!\n\n"${text}"`
+          );
+        } catch (error) {
+          console.error('[DaVinci Bot] Error storing agent message:', error);
+          await sendTelegramMessage(
+            chatId,
+            `❌ Error: Could not deliver message to website chat`
+          );
+        }
+      }
+      return;
+    }
+    
     // For any other message, treat as generic inquiry
-    console.log('[DaVinci Bot] 💬 Regular message:', text);
+    console.log('[DaVinci Bot] 💬 Regular message (no conversation ID):', text);
     
     const context = {
       user_name: message.from.first_name,

@@ -296,7 +296,7 @@ export class BotAIHandler {
   }
 
   /**
-   * Send handoff notification to Telegram bot
+   * Send handoff notification to both Telegram bots
    */
   private async sendHandoffNotification(leadData: {
     name?: string;
@@ -308,18 +308,15 @@ export class BotAIHandler {
   }) {
     console.log('[Handoff] Attempting to send notification for conversation:', leadData.conversationId);
     
-    const token = process.env.TELEGRAM_HANDOFF_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID;
+    const handoffToken = process.env.TELEGRAM_HANDOFF_BOT_TOKEN;
+    const handoffChatId = process.env.TELEGRAM_CHAT_ID;
+    const davinciToken = process.env.DAVINCI_CHATBOT_TOKEN;
     
-    console.log('[Handoff] Token present:', !!token, 'Chat ID present:', !!chatId);
+    console.log('[Handoff] Handoff bot token:', !!handoffToken, 'Chat ID:', !!handoffChatId);
+    console.log('[Handoff] DaVinci bot token:', !!davinciToken);
     
-    if (!token || !chatId) {
-      console.error('[Handoff] ERROR: Telegram handoff bot credentials not configured');
-      console.error('[Handoff] Token:', token ? 'SET' : 'MISSING', 'Chat ID:', chatId ? 'SET' : 'MISSING');
-      return;
-    }
-
-    const message = `🔔 New Lead Handoff
+    // Message for tracking bot (@Leo_Handoff_bot)
+    const trackingMessage = `🔔 New Lead Handoff
 
 👤 Name: ${leadData.name || 'Not provided'}
 📧 Email: ${leadData.email || 'Not provided'}
@@ -330,28 +327,67 @@ Conversation ID: ${leadData.conversationId}
 User ID: ${leadData.userId}
 
 Leo has captured their information and handed off the conversation. Please follow up!`;
-
-    console.log('[Handoff] Sending notification to chat ID:', chatId);
     
-    try {
-      const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: message,
-          parse_mode: 'HTML'
-        })
-      });
+    // Message for DaVinci bot (will respond back to website)
+    const davinciMessage = `🎯 New Lead - Take Over Conversation
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[Handoff] ERROR: Failed to send notification:', errorText);
-      } else {
-        console.log('[Handoff] ✅ Notification sent successfully!');
+👤 ${leadData.name || 'Customer'}
+📧 ${leadData.email || 'No email'}
+📱 ${leadData.phone || 'No phone'}
+💰 Monthly Spend: ${leadData.monthlySpend || 'Not provided'}
+
+Conversation ID: ${leadData.conversationId}
+
+This customer is waiting on the website. Reply here and your message will appear in their chat window!`;
+
+    // Send to @Leo_Handoff_bot for tracking
+    if (handoffToken && handoffChatId) {
+      console.log('[Handoff] Sending tracking notification to @Leo_Handoff_bot');
+      try {
+        const response = await fetch(`https://api.telegram.org/bot${handoffToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: handoffChatId,
+            text: trackingMessage,
+            parse_mode: 'HTML'
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('[Handoff] ERROR: Failed to send tracking notification:', errorText);
+        } else {
+          console.log('[Handoff] ✅ Tracking notification sent to @Leo_Handoff_bot!');
+        }
+      } catch (error) {
+        console.error('[Handoff] ERROR: Exception sending tracking notification:', error);
       }
-    } catch (error) {
-      console.error('[Handoff] ERROR: Exception sending notification:', error);
+    }
+    
+    // Send to @DavinciDynamics_Chatbot for agent takeover
+    if (davinciToken && handoffChatId) {
+      console.log('[Handoff] Sending takeover notification to @DavinciDynamics_Chatbot');
+      try {
+        const response = await fetch(`https://api.telegram.org/bot${davinciToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: handoffChatId,
+            text: davinciMessage,
+            parse_mode: 'HTML'
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('[Handoff] ERROR: Failed to send DaVinci notification:', errorText);
+        } else {
+          console.log('[Handoff] ✅ Takeover notification sent to @DavinciDynamics_Chatbot!');
+        }
+      } catch (error) {
+        console.error('[Handoff] ERROR: Exception sending DaVinci notification:', error);
+      }
     }
   }
 
