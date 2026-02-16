@@ -43,6 +43,13 @@
       "when": 1771229245959,
       "tag": "0005_sudden_masque",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1771229854262,
+      "tag": "0006_tired_ozymandias",
+      "breakpoints": true
     }
   ]
 }

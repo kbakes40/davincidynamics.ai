@@ -7,9 +7,9 @@ import { getDb } from './db';
 import { conversations, botUsers } from '../drizzle/schema';
 import { eq } from 'drizzle-orm';
 
-/**
+  /**
  * Forward customer message to @DavinciDynamics_Chatbot
- * Includes 60-second timeout fallback
+ * Includes 20-second timeout fallback
  */
 export async function forwardToTelegram(payload: {
   conversationId: number;
@@ -63,10 +63,10 @@ This customer is waiting on the website. Reply here and your message will appear
 
     console.log('[Bridge] ✅ Message forwarded to Telegram successfully');
     
-    // Set 60-second timeout for fallback message
+    // Set 20-second timeout for fallback message
     setTimeout(async () => {
       await sendTimeoutFallback(payload.conversationId);
-    }, 60000);
+    }, 20000);
     
     return true;
   } catch (error) {
@@ -76,7 +76,7 @@ This customer is waiting on the website. Reply here and your message will appear
 }
 
 /**
- * Send timeout fallback message if no Leo reply within 60 seconds
+ * Send timeout fallback message if no Leo reply within 20 seconds
  */
 async function sendTimeoutFallback(conversationId: number): Promise<void> {
   console.log('[Bridge] Checking if timeout fallback needed for conversation:', conversationId);
@@ -84,7 +84,7 @@ async function sendTimeoutFallback(conversationId: number): Promise<void> {
   const db = await getDb();
   if (!db) return;
   
-  // Check if Leo has replied in the last 60 seconds
+  // Check if Leo has replied in the last 20 seconds
   const { messages: messagesTable } = await import('../drizzle/schema');
   const { desc } = await import('drizzle-orm');
   
@@ -99,14 +99,14 @@ async function sendTimeoutFallback(conversationId: number): Promise<void> {
   const lastMessage = recentMessages[0];
   if (lastMessage && lastMessage.role === 'assistant') {
     const messageAge = Date.now() - new Date(lastMessage.timestamp).getTime();
-    if (messageAge < 60000) {
-      console.log('[Bridge] Leo replied within 60s - no fallback needed');
+    if (messageAge < 20000) {
+      console.log('[Bridge] Leo replied within 20s - no fallback needed');
       return;
     }
   }
   
   // Send fallback message
-  console.log('[Bridge] ⏰ Sending 60s timeout fallback message');
+  console.log('[Bridge] ⏰ Sending 20s timeout fallback message');
   
   try {
     await db.insert(messagesTable).values({

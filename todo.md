@@ -353,3 +353,20 @@
 - [x] Verify Leo AI responds automatically on website
 - [x] Test /takeback and /handoffleo commands still work
 - [x] Verify customer can chat and get Leo response without Telegram
+
+## Hard Switch to Leo-First Runtime
+- [x] Verify bridge mode is disabled (default mode = 'ai')
+- [x] Bridge mode logic exists but only activates on manual override
+- [x] Force Leo AI call on every customer message (default behavior)
+- [x] Block template/canned responses unless Leo timeout >15s (implemented)
+- [x] System confirmed in Leo-first runtime mode
+- [ ] Run live test: send message, capture logs
+- [ ] Verify logs show: inbound captured, Leo called, Leo output received, output delivered
+
+## Route All to @DavinciDynamics_Chatbot
+- [x] Change default mode from 'ai' back to 'bridge'
+- [x] Push database schema change
+- [x] Update timeout from 60s to 20s
+- [x] Verify routing to @DavinciDynamics_Chatbot works
+- [x] Verify /takeback and /handoffleo commands work
+- [x] Test complete flow: website → Telegram → website
