@@ -237,14 +237,20 @@ export default function GlassChatWidget() {
           }}
         >
           <div className="flex items-center gap-3">
-            <img 
-              src="https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/qd8LmcSmALyfOlQZm0sQuu-img-1_1770971337000_na1fn_c29waGlhLWF2YXRhci1nbGFzc2Vz.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L3FkOExtY1NtQUx5Zk9sUVptMHNRdXUtaW1nLTFfMTc3MDk3MTMzNzAwMF9uYTFmbl9jMjl3YUdsaExXRjJZWFJoY2kxbmJHRnpjMlZ6LnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=KnEXHWwTrp2ILeNbR3Cz5jVUzjvsaRZfzw5Ic5oyuZNvz50yTO0oS1NOG6YtJV-WXorOC~dqA2oBqWDzGLq1Oq7ivLf-TuzfkYKgCQg-FM-3NdIeRD3Hjq0C6x0sC3~IvHrTpg5MA4M5ibyg85aENXEAZiXF0h8vuO-Stn-NPmHdKU2YH0OIOt4OvrSniceRhwbvsJxikEyyO9MLJKUA1xJ4O2mEgObGWtYWjPtFUAyzxtXn1sq~d84VbPSYLHoU84ncLQqGF1WXCu9MLENEESghpgWYM6qav2rZcHsJg1bwQBBTqrMg4uC-lxiLq9KfEZ4kwV0hVu1n1xsQiFUXqw__" 
-              alt="Sophia" 
-              className="w-10 h-10 rounded-full object-cover border-2 border-[#00D9FF]/30"
-            />
+            <div className="relative">
+              <img 
+                src="/chatbot-icon.png" 
+                alt="Sophia AI" 
+                className="w-12 h-12 object-contain"
+                style={{
+                  filter: 'drop-shadow(0 0 8px rgba(0, 217, 255, 0.6))'
+                }}
+              />
+            </div>
             <div>
               <h3 className="text-white font-semibold text-sm">Sophia</h3>
               <p className="text-[#00D9FF] text-xs">Business Consultant • Online</p>
+              <p className="text-gray-400 text-[10px] mt-0.5">Powered by Davinci Dynamics</p>
             </div>
           </div>
           
