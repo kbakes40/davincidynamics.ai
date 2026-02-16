@@ -158,3 +158,4 @@
 - [x] Hide Spotify player by default
 - [x] Add triple-tap screen detection to show Spotify player
 - [x] Fix "View Live Demo" buttons - mobile to davincidynamics.site, desktop to bosshookah.site
+- [x] Fix link loop issue - links redirecting to home instead of external sites (davincidynamics.site, bosshookah.site)

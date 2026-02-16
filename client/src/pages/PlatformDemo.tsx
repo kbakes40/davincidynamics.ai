@@ -168,12 +168,12 @@ export default function PlatformDemo() {
               </h2>
               {mobileVideoUrl ? (
                 <a 
-                  href="https://davincidynamics.site" 
+                  href="https://www.davincidynamics.site" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-full max-w-sm relative group block cursor-pointer"
                   onClick={(e) => {
-                    trackButtonClick('Mobile Demo Video', { location: 'platform_demo', destination: 'davincidynamics.site' });
+                    trackButtonClick('Mobile Demo Video', { location: 'platform_demo', destination: 'www.davincidynamics.site' });
                   }}
                 >
                   <video
@@ -235,7 +235,7 @@ export default function PlatformDemo() {
               <Button 
                 variant="outline" 
                 className="mt-6 border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
-                onClick={() => window.open('https://davincidynamics.site', '_blank')}
+                onClick={() => window.open('https://www.davincidynamics.site', '_blank')}
               >
                 View Live Mobile Demo →
               </Button>
@@ -248,12 +248,12 @@ export default function PlatformDemo() {
               </h2>
               {desktopVideoUrl ? (
                 <a 
-                  href="https://bosshookah.site" 
+                  href="https://www.bosshookah.site" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-full relative group block cursor-pointer"
                   onClick={(e) => {
-                    trackButtonClick('Desktop Demo Video', { location: 'platform_demo', destination: 'bosshookah.site' });
+                    trackButtonClick('Desktop Demo Video', { location: 'platform_demo', destination: 'www.bosshookah.site' });
                   }}
                 >
                   <video
@@ -315,7 +315,7 @@ export default function PlatformDemo() {
               <Button 
                 variant="outline" 
                 className="mt-6 border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
-                onClick={() => window.open('https://bosshookah.site', '_blank')}
+                onClick={() => window.open('https://www.bosshookah.site', '_blank')}
               >
                 View Live Desktop Demo →
               </Button>
