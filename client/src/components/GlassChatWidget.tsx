@@ -29,6 +29,8 @@ export default function GlassChatWidget() {
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [isHandedOff, setIsHandedOff] = useState(false);
   const [lastMessageId, setLastMessageId] = useState<number>(0);
+  const [customerName, setCustomerName] = useState<string>("");
+  const [isAskingForName, setIsAskingForName] = useState(false);
   
   const chatMutation = trpc.bot.chat.useMutation();
   const trpcUtils = trpc.useUtils();
@@ -51,7 +53,8 @@ export default function GlassChatWidget() {
         setIsEntering(false);
         setHasTypedWelcome(true);
         
-        const welcomeText = "Hi! I'm Leo, your DaVinci Dynamics business consultant. I help entrepreneurs like you stop throwing money away on platform fees. What are you currently paying monthly for your e-commerce platform?";
+        const welcomeText = "Hi! I'm Leo with DaVinci Dynamics. Before we dive in — what's your first name?";
+        setIsAskingForName(true);
         const messageId = "welcome";
         
         // Add empty message placeholder
@@ -135,7 +138,46 @@ export default function GlassChatWidget() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputValue;
     setInputValue("");
+    
+    // If asking for name, capture it
+    if (isAskingForName && !customerName) {
+      setCustomerName(currentInput);
+      setIsAskingForName(false);
+      
+      // Show personalized follow-up
+      setIsTyping(true);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setIsTyping(false);
+      
+      const followUpText = `Great to meet you, ${currentInput}! What are you currently paying monthly for your e-commerce platform?`;
+      const messageId = (Date.now() + 1).toString();
+      
+      // Add empty message placeholder
+      const placeholderMessage: Message = {
+        id: messageId,
+        role: "assistant",
+        content: "",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, placeholderMessage]);
+      
+      // Stream characters
+      for (let i = 0; i <= followUpText.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 20));
+        const currentText = followUpText.slice(0, i);
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === messageId 
+              ? { ...msg, content: currentText }
+              : msg
+          )
+        );
+      }
+      return;
+    }
+    
     setIsTyping(true);
 
     try {
@@ -146,12 +188,13 @@ export default function GlassChatWidget() {
       const response = await chatMutation.mutateAsync({ 
         telegramUser: {
           id: Date.now(), // Anonymous web user
-          first_name: "Web User"
+          first_name: customerName || "Web User"
         },
-        message: inputValue,
+        message: currentInput,
         context: {
           page_url: pageUrl,
           page_name: pageName,
+          customer_name: customerName || undefined,
         }
       });
       

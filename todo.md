@@ -436,4 +436,11 @@
 - [x] Update handleMessage to accept context parameters
 - [x] Update frontend to pass button_clicked, button_label, page_url context
 - [x] Update bot router to accept context in chat mutation
-- [ ] Test chatbot with different button contexts
+- [x] Test chatbot with different button contexts
+
+## Add Customer Name Capture to Chat Widget
+- [x] Update GlassChatWidget to show name prompt before first message
+- [x] Store customer name in state
+- [x] Pass customer_name in context to all subsequent messages
+- [x] Update welcome message to ask for name
+- [x] Test name capture and personalization flow
