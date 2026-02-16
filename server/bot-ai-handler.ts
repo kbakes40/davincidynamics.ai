@@ -7,7 +7,7 @@ import { invokeLLM } from './_core/llm';
 import { getDb } from './db';
 import { botUsers, conversations, messages, leadEvents } from '../drizzle/schema';
 import type { NewBotUser, NewConversation, NewMessage, NewLeadEvent } from '../drizzle/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 
 const SYSTEM_PROMPT = `You are Leo, a professional business consultant for DaVinci Dynamics who helps e-commerce entrepreneurs optimize their platform costs and maximize profits.
 
@@ -580,6 +580,148 @@ Leo has captured their information and handed off the conversation. Please follo
         })
         .where(eq(conversations.id, active[0].id));
     }
+  }
+
+  /**
+   * Get full conversation with all messages and metadata
+   */
+  async getFullConversation(conversationId: number) {
+    const db = await getDb();
+    if (!db) return null;
+
+    // Get conversation details
+    const conv = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.id, conversationId))
+      .limit(1);
+
+    if (conv.length === 0) return null;
+
+    // Get user details
+    const user = await db
+      .select()
+      .from(botUsers)
+      .where(eq(botUsers.id, conv[0].userId))
+      .limit(1);
+
+    // Get all messages
+    const msgs = await db
+      .select()
+      .from(messages)
+      .where(eq(messages.conversationId, conversationId))
+      .orderBy(messages.timestamp);
+
+    // Get lead events
+    const events = await db
+      .select()
+      .from(leadEvents)
+      .where(eq(leadEvents.userId, conv[0].userId))
+      .orderBy(leadEvents.timestamp);
+
+    // Parse metadata
+    const metadata = conv[0].metadata ? JSON.parse(conv[0].metadata as string) : {};
+
+    return {
+      conversation: conv[0],
+      user: user[0] || null,
+      messages: msgs,
+      events: events,
+      metadata,
+      duration: conv[0].endedAt 
+        ? Math.floor((conv[0].endedAt.getTime() - conv[0].startedAt.getTime()) / 1000)
+        : null,
+    };
+  }
+
+  /**
+   * List conversations with filters
+   */
+  async listConversations(filters: {
+    status?: 'all' | 'active' | 'handed_off' | 'ended';
+    startDate?: string;
+    endDate?: string;
+    searchQuery?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    const db = await getDb();
+    if (!db) return { conversations: [], total: 0 };
+
+    const limit = filters.limit || 50;
+    const offset = filters.offset || 0;
+
+    // Build query
+    let query = db
+      .select({
+        conversation: conversations,
+        user: botUsers,
+      })
+      .from(conversations)
+      .leftJoin(botUsers, eq(conversations.userId, botUsers.id));
+
+    // Apply filters
+    const conditions = [];
+
+    if (filters.status === 'active') {
+      conditions.push(sql`${conversations.endedAt} IS NULL`);
+    } else if (filters.status === 'handed_off') {
+      conditions.push(sql`${conversations.metadata} LIKE '%"handedOff":true%'`);
+    } else if (filters.status === 'ended') {
+      conditions.push(sql`${conversations.endedAt} IS NOT NULL`);
+    }
+
+    if (filters.startDate) {
+      conditions.push(sql`${conversations.startedAt} >= ${filters.startDate}`);
+    }
+
+    if (filters.endDate) {
+      conditions.push(sql`${conversations.startedAt} <= ${filters.endDate}`);
+    }
+
+    if (filters.searchQuery) {
+      conditions.push(
+        sql`(
+          ${botUsers.firstName} LIKE ${'%' + filters.searchQuery + '%'} OR
+          ${botUsers.lastName} LIKE ${'%' + filters.searchQuery + '%'} OR
+          ${botUsers.username} LIKE ${'%' + filters.searchQuery + '%'}
+        )`
+      );
+    }
+
+    // Execute query
+    const results = await query
+      .where(conditions.length > 0 ? sql`${sql.join(conditions, sql` AND `)}` : undefined)
+      .orderBy(desc(conversations.startedAt))
+      .limit(limit)
+      .offset(offset);
+
+    // Get total count
+    const countQuery = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(conversations)
+      .leftJoin(botUsers, eq(conversations.userId, botUsers.id))
+      .where(conditions.length > 0 ? sql`${sql.join(conditions, sql` AND `)}` : undefined);
+
+    return {
+      conversations: results,
+      total: countQuery[0]?.count || 0,
+      limit,
+      offset,
+    };
+  }
+
+  /**
+   * Export conversation to JSON
+   */
+  async exportConversation(conversationId: number) {
+    const fullConv = await this.getFullConversation(conversationId);
+    if (!fullConv) return null;
+
+    return {
+      exportedAt: new Date().toISOString(),
+      conversation: fullConv,
+    };
   }
 }
 

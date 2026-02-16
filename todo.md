@@ -192,3 +192,15 @@
 - [x] Store handoff bot token securely
 - [x] Add metadata field to conversations table for handoff tracking
 - [x] Push database schema changes
+
+## Conversation History Tracking
+- [x] Create API endpoint to fetch full conversation history for a user
+- [x] Create API endpoint to list all conversations with filters (date, status, handoff)
+- [x] Add conversation export to JSON endpoint
+- [x] Build conversation history dashboard page
+- [x] Add conversation timeline view showing all messages chronologically
+- [x] Add conversation metadata display (start time, duration, message count, handoff status)
+- [x] Implement conversation search by user name, email, or message content
+- [x] Add conversation export to JSON
+- [x] Add route for conversation history page
+- [ ] Add conversation tags and notes for internal tracking

@@ -13,6 +13,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import PlatformDemo from "./pages/PlatformDemo";
 import BotAnalytics from "./pages/BotAnalytics";
+import ConversationHistory from "./pages/ConversationHistory";
 import { BookingProvider } from "./contexts/BookingContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import GlassChatWidget from "./components/GlassChatWidget";
@@ -29,6 +30,7 @@ function Router() {
         <Route path={"/platform-demo"} component={PlatformDemo} />
         <Route path={"/booking"} component={Booking} />
         <Route path={"/bot-analytics"} component={BotAnalytics} />
+        <Route path={"/conversations"} component={ConversationHistory} />
         <Route path={"/spotify-callback"} component={SpotifyCallback} />
         <Route path={"/404"} component={NotFound} />
         <Route component={NotFound} />

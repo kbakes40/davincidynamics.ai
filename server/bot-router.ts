@@ -79,4 +79,42 @@ export const botRouter = router({
       await botAI.logLeadEvent(user.id, input.eventType, input.eventData);
       return { success: true };
     }),
+
+  /**
+   * Get full conversation history for a specific conversation
+   */
+  getConversation: publicProcedure
+    .input(z.object({
+      conversationId: z.number(),
+    }))
+    .query(async ({ input }) => {
+      return await botAI.getFullConversation(input.conversationId);
+    }),
+
+  /**
+   * List all conversations with filters
+   */
+  listConversations: publicProcedure
+    .input(z.object({
+      status: z.enum(['all', 'active', 'handed_off', 'ended']).optional(),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+      searchQuery: z.string().optional(),
+      limit: z.number().optional(),
+      offset: z.number().optional(),
+    }))
+    .query(async ({ input }) => {
+      return await botAI.listConversations(input);
+    }),
+
+  /**
+   * Export conversation to JSON
+   */
+  exportConversation: publicProcedure
+    .input(z.object({
+      conversationId: z.number(),
+    }))
+    .query(async ({ input }) => {
+      return await botAI.exportConversation(input.conversationId);
+    }),
 });
