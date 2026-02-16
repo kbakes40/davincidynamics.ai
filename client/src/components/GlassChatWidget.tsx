@@ -31,6 +31,7 @@ export default function GlassChatWidget() {
   const [lastMessageId, setLastMessageId] = useState<number>(0);
   
   const chatMutation = trpc.bot.chat.useMutation();
+  const trpcUtils = trpc.useUtils();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const widgetRef = useRef<HTMLDivElement>(null);
 
@@ -83,7 +84,7 @@ export default function GlassChatWidget() {
 
     const pollInterval = setInterval(async () => {
       try {
-        const result = await trpc.bot.pollMessages.query({
+        const result = await trpcUtils.bot.pollMessages.fetch({
           conversationId,
           lastMessageId: lastMessageId > 0 ? lastMessageId : undefined,
         });

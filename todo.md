@@ -213,3 +213,6 @@
 - [x] Add visual indicator when human agent takes over
 - [ ] Set up Telegram webhook URL with @Leo_Handoff_bot
 - [ ] Test message flow: Telegram → Database → Website Chat
+
+## Bug Fixes
+- [x] Fix polling error: "hooks[lastArg] is not a function" - use trpc.useUtils() instead of direct query call
