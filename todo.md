@@ -415,3 +415,15 @@
 - [x] Delete leo-telegram-bot.ts file
 - [x] Revert bot-router to simple AI mode (no bridge mode)
 - [x] Clean up unused code
+
+## Two-Bot Handoff Flow Implementation
+- [x] Configure @Leo_Handoff_bot to forward all messages to @DavinciDynamics_Chatbot
+- [x] Set up @DavinciDynamics_Chatbot webhook to receive forwarded messages
+- [x] Implement response flow: DavinciBot → website chat
+- [ ] Test complete flow: website → Leo_Handoff → DavinciBot → website
+
+## Remove DavinciBot Webhook (Controlled by OpenClaw)
+- [x] Delete webhook from @DavinciDynamics_Chatbot
+- [x] Remove webhook configuration code from two-bot-handoff.ts
+- [x] Remove webhook setup call from server index
+- [x] Document that OpenClaw controls DavinciBot responses

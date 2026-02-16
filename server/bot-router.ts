@@ -8,6 +8,7 @@ import { publicProcedure, router } from './_core/trpc';
 import { botAI } from './bot-ai-handler';
 import { processTelegramWebhook } from './telegram-webhook';
 import { pollMessages } from './poll-messages';
+import { forwardToHandoffBot } from './two-bot-handoff';
 
 import { getDb } from './db';
 import { conversations, messages as messagesTable } from '../drizzle/schema';
@@ -28,9 +29,34 @@ export const botRouter = router({
       message: z.string(),
     }))
     .mutation(async ({ input }) => {
-      // Call Leo AI handler
-      const response = await botAI.handleMessage(input.telegramUser, input.message);
-      return response;
+      // Get or create user and conversation
+      const user = await botAI.getOrCreateUser(input.telegramUser);
+      const conversation = await botAI.getOrCreateConversation(user.id);
+      const conversationId = conversation.id;
+      
+      // Save user message
+      const db = await getDb();
+      if (db) {
+        await db.insert(messagesTable).values({
+          conversationId,
+          role: 'user',
+          content: input.message,
+          timestamp: new Date()
+        });
+      }
+      
+      // Forward to two-bot handoff system
+      await forwardToHandoffBot({
+        conversationId,
+        customerMessage: input.message,
+      });
+      
+      // Return empty response - agent will respond via Telegram
+      return {
+        message: "",
+        conversationId,
+        isHandedOff: true  // Enable frontend polling
+      };
     }),
 
   /**

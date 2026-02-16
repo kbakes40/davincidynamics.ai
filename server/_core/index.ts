@@ -52,6 +52,8 @@ async function startServer() {
     }
   });
   
+  // Note: DavinciBot responses handled by OpenClaw (external system)
+  
 
   
   
@@ -82,6 +84,8 @@ async function startServer() {
     
     // Start Telegram bots
     startTelegramBot(app);
+    
+    // Note: DavinciBot webhook controlled by OpenClaw
     
 
     
