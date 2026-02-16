@@ -364,7 +364,7 @@ export default function PlatformDemo() {
               className="w-full border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
               onClick={() => window.open('https://www.davincidynamics.ai', '_blank')}
             >
-              Chat to Get Started
+              Get My Starter Platform
             </Button>
           </div>
 
@@ -410,7 +410,7 @@ export default function PlatformDemo() {
               className="w-full bg-accent text-background hover:bg-accent/90 font-heading font-bold transition-all duration-300 neon-glow-intense"
               onClick={() => window.open('https://www.davincidynamics.ai', '_blank')}
             >
-              Chat With Us Now
+              Configure My Growth System
             </Button>
           </div>
 
@@ -450,7 +450,7 @@ export default function PlatformDemo() {
               className="w-full border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
               onClick={() => window.open('https://www.davincidynamics.ai', '_blank')}
             >
-              Chat About Scaling
+              Request Scaling Audit
             </Button>
           </div>
         </div>
@@ -461,7 +461,7 @@ export default function PlatformDemo() {
             Own your customer data. Automate fulfillment. Scale smarter.
           </p>
           <p className="text-xs text-accent/80 font-heading mb-4">
-            💬 Click below to chat instantly with our team
+            💬 Get your custom platform recommendation instantly
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -469,11 +469,11 @@ export default function PlatformDemo() {
               size="lg"
               className="w-full sm:w-auto lg:px-16 bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base lg:text-lg py-6 transition-all duration-300 neon-glow-intense"
               onClick={() => {
-                trackButtonClick('Start Chat Now', { location: 'platform_demo' });
+                trackButtonClick('Get My Custom Platform', { location: 'platform_demo' });
                 openChat();
               }}
             >
-              Start Chat Now
+              Get My Custom Platform
             </Button>
             <Button 
               size="lg"

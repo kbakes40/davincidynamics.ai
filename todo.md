@@ -164,3 +164,9 @@
 - [x] Update chatbot icon to AI head design with neon glow (transparent background)
 - [x] Add "Powered by Davinci Dynamics" text to chatbot icon
 - [x] Update Sophia's message avatars to use AI head icon
+
+## CTA Optimization
+- [x] Replace generic "Chat" CTAs with outcome-focused alternatives across all pages
+- [x] Update Home page CTAs to emphasize value delivery
+- [x] Update Platform Demo page CTAs to focus on specific outcomes
+- [x] Update Booking page CTAs to reduce sales friction

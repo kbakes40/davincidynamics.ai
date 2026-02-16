@@ -350,7 +350,7 @@ export default function Booking() {
             {/* Bot Chat Option */}
             <div className="mb-8 p-6 bg-accent/10 border border-accent/30 rounded-lg">
               <h3 className="font-heading font-bold text-lg text-accent mb-3 text-center">
-                💬 Prefer to Chat? Talk to Our AI Assistant
+                💬 Need Help Choosing? Get Your Custom Recommendation
               </h3>
               <p className="text-muted-foreground text-sm text-center mb-4 font-heading">
                 Get instant answers about pricing, demos, and scaling options
@@ -361,7 +361,7 @@ export default function Booking() {
                   className="bg-accent text-background hover:bg-accent/90 font-heading font-bold"
                   onClick={openChat}
                 >
-                  Chat with Sophia
+                  Get My Custom Plan
                 </Button>
                 <Button
                   variant="outline"

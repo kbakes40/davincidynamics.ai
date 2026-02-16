@@ -270,7 +270,7 @@ export default function Home() {
                   className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold text-lg px-8 py-6"
                   onClick={openChat}
                 >
-                  Chat with Sophia
+                  Calculate My Savings
                 </Button>
               </div>
             </div>
