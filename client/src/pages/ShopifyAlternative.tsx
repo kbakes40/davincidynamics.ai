@@ -361,83 +361,107 @@ export default function ShopifyAlternative() {
                   audience: 'women',
                   name: 'Beauty & Skincare',
                   desc: 'Hero product focus, ingredient storytelling, before/after galleries, quiz-based product finder',
-                  features: ['Product quiz', 'Ingredient glossary', 'Routine builder', 'Subscription upsells']
+                  features: ['Product quiz', 'Ingredient glossary', 'Routine builder', 'Subscription upsells'],
+                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/jfOVVKlIdaUaRJkU.png'
                 },
                 {
                   audience: 'women',
                   name: "Women's Fashion",
                   desc: 'Lookbook-style layout, outfit bundling, size guide integration, style quiz, wishlist',
-                  features: ['Lookbook grid', 'Outfit bundles', 'Virtual stylist', 'Size recommendations']
+                  features: ['Lookbook grid', 'Outfit bundles', 'Virtual stylist', 'Size recommendations'],
+                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/scXgWShWRxduEmdi.png'
                 },
                 {
                   audience: 'women',
                   name: 'Jewelry & Accessories',
                   desc: 'High-res zoom, customization options, gift messaging, occasion-based filtering',
-                  features: ['360° product view', 'Engraving options', 'Gift packaging', 'Occasion filters']
+                  features: ['360° product view', 'Engraving options', 'Gift packaging', 'Occasion filters'],
+                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/qHFwUwzyGuChZEqi.png'
                 },
                 {
                   audience: 'women',
                   name: 'Wellness/Self-Care',
                   desc: 'Editorial content, wellness quiz, subscription boxes, community features, education hub',
-                  features: ['Wellness quiz', 'Subscription boxes', 'Content library', 'Community forum']
+                  features: ['Wellness quiz', 'Subscription boxes', 'Content library', 'Community forum'],
+                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/dNixKOxvDADpEHKi.png'
                 },
                 // Men-focused templates
                 {
                   audience: 'men',
                   name: "Men's Grooming",
                   desc: 'Problem-solution layout, routine builder, subscription model, educational content',
-                  features: ['Routine builder', 'Auto-replenish', 'Grooming guides', 'Product comparisons']
+                  features: ['Routine builder', 'Auto-replenish', 'Grooming guides', 'Product comparisons'],
+                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/waIgqYCszsKAKqho.png'
                 },
                 {
                   audience: 'men',
                   name: "Men's Streetwear",
                   desc: 'Drop-style releases, countdown timers, limited edition badges, hype-driven copy',
-                  features: ['Drop calendar', 'Countdown timers', 'Limited badges', 'Waitlist signup']
+                  features: ['Drop calendar', 'Countdown timers', 'Limited badges', 'Waitlist signup'],
+                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/IgmbyaNhxyfKsmfw.png'
                 },
                 {
                   audience: 'men',
                   name: 'Fitness/Supplements',
                   desc: 'Goal-based product finder, stack builder, progress tracking, educational content',
-                  features: ['Goal selector', 'Stack builder', 'Progress tracker', 'Nutrition guides']
+                  features: ['Goal selector', 'Stack builder', 'Progress tracker', 'Nutrition guides'],
+                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/isJeIbKzVdqHcBkQ.png'
                 },
                 {
                   audience: 'men',
                   name: 'Watches/Accessories',
                   desc: 'Luxury presentation, detailed specs, comparison tool, authentication guarantee',
-                  features: ['Spec sheets', 'Side-by-side compare', 'Authentication', 'Warranty info']
+                  features: ['Spec sheets', 'Side-by-side compare', 'Authentication', 'Warranty info'],
+                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/dNNBebWyucaNbVzt.png'
                 },
                 // Unisex templates
                 {
                   audience: 'unisex',
                   name: 'Minimal DTC',
                   desc: 'Clean single-product focus, benefits-driven copy, social proof, simple checkout',
-                  features: ['Single product', 'Benefits focus', 'Social proof', 'One-click checkout']
+                  features: ['Single product', 'Benefits focus', 'Social proof', 'One-click checkout'],
+                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/CASVovFoLTwzhcWQ.png'
                 },
                 {
                   audience: 'unisex',
                   name: 'Bundle/Upsell',
                   desc: 'Bundle builder, volume discounts, "Complete the set" prompts, cart upsells',
-                  features: ['Bundle builder', 'Volume pricing', 'Cart upsells', 'Gift sets']
+                  features: ['Bundle builder', 'Volume pricing', 'Cart upsells', 'Gift sets'],
+                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/fieGEuaZBoXVLpWX.png'
                 },
                 {
                   audience: 'unisex',
                   name: 'Social-Proof UGC',
                   desc: 'Customer photo gallery, video reviews, Instagram feed, community highlights',
-                  features: ['UGC gallery', 'Video reviews', 'Instagram feed', 'Community stories']
+                  features: ['UGC gallery', 'Video reviews', 'Instagram feed', 'Community stories'],
+                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/unNwnuYiDnnfoQRv.png'
                 },
                 {
                   audience: 'unisex',
                   name: 'One-Product Funnel',
                   desc: 'Long-form sales page, video hero, testimonials, urgency elements, guarantee',
-                  features: ['Video sales letter', 'Testimonial wall', 'Urgency timer', 'Money-back guarantee']
+                  features: ['Video sales letter', 'Testimonial wall', 'Urgency timer', 'Money-back guarantee'],
+                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/iRxNelwIbhmJcsxW.png'
                 }
               ]
                 .filter(template => selectedAudience === 'all' || template.audience === selectedAudience)
                 .map((template, idx) => (
                   <div
                     key={idx}
-                    className="bg-card border border-border rounded-xl p-6 hover:border-accent/50 transition-all group"
+                    className="bg-card border border-border rounded-xl overflow-hidden hover:border-accent/50 transition-all group"
                   >
+                    {/* Template Preview Image */}
+                    {template.image && (
+                      <div className="relative w-full h-48 bg-muted overflow-hidden">
+                        <img
+                          src={template.image}
+                          alt={`${template.name} template preview`}
+                          className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="p-6">
                     <div className="mb-4">
                       <span className={`inline-block px-3 py-1 rounded-full text-xs font-heading font-semibold mb-3 ${
                         template.audience === 'women' ? 'bg-pink-500/20 text-pink-400' :
@@ -468,6 +492,7 @@ export default function ShopifyAlternative() {
                     >
                       Get This Template
                     </Button>
+                    </div>
                   </div>
                 ))}
             </div>

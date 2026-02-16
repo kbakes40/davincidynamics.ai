@@ -485,3 +485,10 @@
 - [x] Implement filter functionality to show/hide templates by audience
 - [x] Ensure each template has distinct layout, visual hierarchy, CTA placement, and merchandising strategy
 - [x] Test filtering and save checkpoint
+
+## Generate Template Preview Images
+- [ ] Generate mockup images for 4 women-focused templates
+- [ ] Generate mockup images for 4 men-focused templates
+- [ ] Generate mockup images for 4 unisex templates
+- [ ] Integrate preview images into template cards
+- [ ] Test image loading and save checkpoint
