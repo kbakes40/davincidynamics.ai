@@ -239,7 +239,7 @@ export default function GlassChatWidget() {
           <div className="flex items-center gap-3">
             <div className="relative">
               <img 
-                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/xaGhjEYpeTpbGiyr.png" 
+                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/iAccQzIdIuuxhoEn.png" 
                 alt="Leo AI" 
                 className="w-12 h-12 object-cover rounded-full"
                 style={{
@@ -286,7 +286,7 @@ export default function GlassChatWidget() {
                 >
                   {msg.role === 'assistant' && (
                     <img 
-                      src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/xaGhjEYpeTpbGiyr.png" 
+                      src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/iAccQzIdIuuxhoEn.png" 
                       alt="Leo AI" 
                       className="w-8 h-8 object-cover rounded-full flex-shrink-0"
                       style={{
@@ -320,7 +320,7 @@ export default function GlassChatWidget() {
               {isTyping && (
                 <div className="flex justify-start gap-2 items-end">
                   <img 
-                    src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/xaGhjEYpeTpbGiyr.png" 
+                    src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/iAccQzIdIuuxhoEn.png" 
                     alt="Leo AI" 
                     className="w-8 h-8 object-cover rounded-full flex-shrink-0"
                     style={{
