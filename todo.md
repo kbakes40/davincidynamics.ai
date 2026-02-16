@@ -475,4 +475,13 @@
 - [x] Add custom chat context for Shopify-specific first message
 - [x] Wire into App.tsx routing
 - [x] Add SEO metadata (title, description, FAQ schema)
-- [ ] Test complete flow and save checkpoint
+- [x] Test complete flow and save checkpoint
+
+## Add Template Showcase to Shopify Alternative Page
+- [x] Create template showcase section with audience filters (All, Women, Men, Unisex)
+- [x] Design 4 women-focused templates (Beauty & Skincare, Women's Fashion, Jewelry & Accessories, Wellness/Self-Care)
+- [x] Design 4 men-focused templates (Men's Grooming, Men's Streetwear, Fitness/Supplements, Watches/Accessories)
+- [x] Design 4 unisex templates (Minimal DTC, Bundle/Upsell, Social-Proof UGC, One-Product Funnel)
+- [x] Implement filter functionality to show/hide templates by audience
+- [x] Ensure each template has distinct layout, visual hierarchy, CTA placement, and merchandising strategy
+- [x] Test filtering and save checkpoint

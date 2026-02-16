@@ -58,6 +58,10 @@ export default function ShopifyAlternative() {
   // Sticky CTA state
   const [showStickyCta, setShowStickyCta] = useState(false);
   
+  // Template showcase state
+  const [selectedAudience, setSelectedAudience] = useState<'all' | 'women' | 'men' | 'unisex'>('all');
+  const templateSection = useScrollFade();
+  
   const leadCaptureMutation = trpc.leads.capture.useMutation();
   
   // Calculate savings
@@ -317,9 +321,175 @@ export default function ShopifyAlternative() {
           </div>
         </section>
 
-        {/* Savings Calculator */}
-        <section ref={calculatorSection.ref} className={`container mx-auto px-4 py-16 ${getFadeClass(calculatorSection.isVisible)}`}>
-          <div className="max-w-3xl mx-auto">
+        {/* Template Showcase Section */}
+        <section ref={templateSection.ref} className={`container mx-auto px-4 py-16 ${getFadeClass(templateSection.isVisible)}`}>
+          <div className="max-w-7xl mx-auto">
+            <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-5xl text-center mb-4">
+              Built for <span className="text-neon">Your Audience</span>
+            </h2>
+            <p className="text-center text-muted-foreground font-heading text-lg mb-8">
+              Choose from audience-optimized templates designed to convert
+            </p>
+            
+            {/* Audience Filters */}
+            <div className="flex flex-wrap justify-center gap-3 mb-12">
+              {[
+                { value: 'all' as const, label: 'All Templates' },
+                { value: 'women' as const, label: 'Women' },
+                { value: 'men' as const, label: 'Men' },
+                { value: 'unisex' as const, label: 'Unisex' }
+              ].map((filter) => (
+                <button
+                  key={filter.value}
+                  onClick={() => setSelectedAudience(filter.value)}
+                  className={`px-6 py-3 rounded-lg font-heading font-semibold transition-all ${
+                    selectedAudience === filter.value
+                      ? 'bg-accent text-background neon-glow'
+                      : 'bg-card border border-border hover:border-accent/50 text-foreground'
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+            
+            {/* Template Grid */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                // Women-focused templates
+                {
+                  audience: 'women',
+                  name: 'Beauty & Skincare',
+                  desc: 'Hero product focus, ingredient storytelling, before/after galleries, quiz-based product finder',
+                  features: ['Product quiz', 'Ingredient glossary', 'Routine builder', 'Subscription upsells']
+                },
+                {
+                  audience: 'women',
+                  name: "Women's Fashion",
+                  desc: 'Lookbook-style layout, outfit bundling, size guide integration, style quiz, wishlist',
+                  features: ['Lookbook grid', 'Outfit bundles', 'Virtual stylist', 'Size recommendations']
+                },
+                {
+                  audience: 'women',
+                  name: 'Jewelry & Accessories',
+                  desc: 'High-res zoom, customization options, gift messaging, occasion-based filtering',
+                  features: ['360° product view', 'Engraving options', 'Gift packaging', 'Occasion filters']
+                },
+                {
+                  audience: 'women',
+                  name: 'Wellness/Self-Care',
+                  desc: 'Editorial content, wellness quiz, subscription boxes, community features, education hub',
+                  features: ['Wellness quiz', 'Subscription boxes', 'Content library', 'Community forum']
+                },
+                // Men-focused templates
+                {
+                  audience: 'men',
+                  name: "Men's Grooming",
+                  desc: 'Problem-solution layout, routine builder, subscription model, educational content',
+                  features: ['Routine builder', 'Auto-replenish', 'Grooming guides', 'Product comparisons']
+                },
+                {
+                  audience: 'men',
+                  name: "Men's Streetwear",
+                  desc: 'Drop-style releases, countdown timers, limited edition badges, hype-driven copy',
+                  features: ['Drop calendar', 'Countdown timers', 'Limited badges', 'Waitlist signup']
+                },
+                {
+                  audience: 'men',
+                  name: 'Fitness/Supplements',
+                  desc: 'Goal-based product finder, stack builder, progress tracking, educational content',
+                  features: ['Goal selector', 'Stack builder', 'Progress tracker', 'Nutrition guides']
+                },
+                {
+                  audience: 'men',
+                  name: 'Watches/Accessories',
+                  desc: 'Luxury presentation, detailed specs, comparison tool, authentication guarantee',
+                  features: ['Spec sheets', 'Side-by-side compare', 'Authentication', 'Warranty info']
+                },
+                // Unisex templates
+                {
+                  audience: 'unisex',
+                  name: 'Minimal DTC',
+                  desc: 'Clean single-product focus, benefits-driven copy, social proof, simple checkout',
+                  features: ['Single product', 'Benefits focus', 'Social proof', 'One-click checkout']
+                },
+                {
+                  audience: 'unisex',
+                  name: 'Bundle/Upsell',
+                  desc: 'Bundle builder, volume discounts, "Complete the set" prompts, cart upsells',
+                  features: ['Bundle builder', 'Volume pricing', 'Cart upsells', 'Gift sets']
+                },
+                {
+                  audience: 'unisex',
+                  name: 'Social-Proof UGC',
+                  desc: 'Customer photo gallery, video reviews, Instagram feed, community highlights',
+                  features: ['UGC gallery', 'Video reviews', 'Instagram feed', 'Community stories']
+                },
+                {
+                  audience: 'unisex',
+                  name: 'One-Product Funnel',
+                  desc: 'Long-form sales page, video hero, testimonials, urgency elements, guarantee',
+                  features: ['Video sales letter', 'Testimonial wall', 'Urgency timer', 'Money-back guarantee']
+                }
+              ]
+                .filter(template => selectedAudience === 'all' || template.audience === selectedAudience)
+                .map((template, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-card border border-border rounded-xl p-6 hover:border-accent/50 transition-all group"
+                  >
+                    <div className="mb-4">
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-heading font-semibold mb-3 ${
+                        template.audience === 'women' ? 'bg-pink-500/20 text-pink-400' :
+                        template.audience === 'men' ? 'bg-blue-500/20 text-blue-400' :
+                        'bg-purple-500/20 text-purple-400'
+                      }`}>
+                        {template.audience === 'women' ? 'Women' : template.audience === 'men' ? 'Men' : 'Unisex'}
+                      </span>
+                      <h3 className="font-heading font-bold text-xl mb-2 group-hover:text-accent transition-colors">
+                        {template.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-4">{template.desc}</p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {template.features.map((feature, fIdx) => (
+                        <div key={fIdx} className="flex items-start gap-2">
+                          <Check className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                          <span className="text-sm font-heading">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      className="w-full mt-6 border-accent/30 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold"
+                      onClick={() => setShowLeadForm(true)}
+                    >
+                      Get This Template
+                    </Button>
+                  </div>
+                ))}
+            </div>
+            
+            <div className="mt-12 text-center">
+              <p className="text-muted-foreground font-heading mb-6">
+                All templates include full migration support, custom branding, and built-in automation
+              </p>
+              <Button
+                size="lg"
+                className="bg-accent text-background hover:bg-accent/90 font-heading font-bold text-lg px-8 py-6 neon-glow"
+                onClick={() => setLocation('/booking')}
+              >
+                Book Strategy Call
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Savings Calculator Section */}
+        <section ref={calculatorSection.ref} className={`container mx-auto px-4 py-16 ${getFadeClass(calculatorSection.isVisible)}`}>         <div className="max-w-3xl mx-auto">
             <div className="bg-card border border-accent/30 rounded-2xl p-8 md:p-12 neon-glow">
               <h2 className="font-display font-bold text-3xl md:text-4xl text-center mb-4">
                 Calculate Your <span className="text-neon">Savings</span>
