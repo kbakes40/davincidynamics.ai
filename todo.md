@@ -170,3 +170,5 @@
 - [x] Update Home page CTAs to emphasize value delivery
 - [x] Update Platform Demo page CTAs to focus on specific outcomes
 - [x] Update Booking page CTAs to reduce sales friction
+- [x] Generate simplified chatbot icon (geometric head only, no lightning, no text, transparent background)
+- [x] Update chatbot icon file in project (replaced with simplified version)

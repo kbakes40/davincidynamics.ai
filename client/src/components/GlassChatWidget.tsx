@@ -239,7 +239,7 @@ export default function GlassChatWidget() {
           <div className="flex items-center gap-3">
             <div className="relative">
               <img 
-                src="/chatbot-icon.png" 
+                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/FefxtEAbdFeGtAFo.png" 
                 alt="Sophia AI" 
                 className="w-12 h-12 object-contain"
                 style={{
@@ -286,7 +286,7 @@ export default function GlassChatWidget() {
                 >
                   {msg.role === 'assistant' && (
                     <img 
-                      src="/chatbot-icon.png" 
+                      src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/FefxtEAbdFeGtAFo.png" 
                       alt="Sophia AI" 
                       className="w-8 h-8 object-contain flex-shrink-0"
                       style={{
@@ -320,7 +320,7 @@ export default function GlassChatWidget() {
               {isTyping && (
                 <div className="flex justify-start gap-2 items-end">
                   <img 
-                    src="/chatbot-icon.png" 
+                    src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/FefxtEAbdFeGtAFo.png" 
                     alt="Sophia AI" 
                     className="w-8 h-8 object-contain flex-shrink-0"
                     style={{
