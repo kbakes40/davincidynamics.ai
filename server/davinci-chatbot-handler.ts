@@ -177,6 +177,14 @@ async function processUpdate(update: TelegramUpdate): Promise<void> {
       return;
     }
 
+    // Handle conversation commands (/takeback, /handoffleo)
+    const { parseConversationCommand } = await import('./conversation-commands');
+    const commandResponse = await parseConversationCommand(text);
+    if (commandResponse) {
+      await sendTelegramMessage(chatId, commandResponse);
+      return;
+    }
+
     // Check if this is a reply to a handoff notification (contains Conversation ID)
     const conversationIdMatch = text.match(/Conversation ID: (\d+)/);
     const replyToMessage = message.reply_to_message?.text;

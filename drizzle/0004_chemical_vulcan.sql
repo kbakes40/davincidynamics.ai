@@ -1,0 +1,1 @@
+ALTER TABLE `conversations` MODIFY COLUMN `mode` enum('ai','bridge') NOT NULL DEFAULT 'bridge';

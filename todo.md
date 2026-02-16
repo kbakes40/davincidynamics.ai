@@ -302,3 +302,23 @@
 - [x] Check conversation mode BEFORE calling Leo AI handler
 - [x] Only call AI handler if mode is 'ai'
 - [x] Test bridge mode forwards to Telegram without AI processing
+
+## Set Bridge Mode as Default
+- [x] Change schema default from 'ai' to 'bridge'
+- [x] Push database migration
+- [ ] Test new conversations default to bridge mode
+
+## Manual Override Commands
+- [x] Implement /takeback command (set mode to 'ai')
+- [x] Implement /handoffleo command (set mode to 'bridge')
+- [x] Add command parsing to DaVinci bot handler
+- [ ] Test commands work correctly
+
+## End-to-End Test
+- [x] Create new conversation on website
+- [x] Verify conversation defaults to bridge mode
+- [x] Verify message forwards to Telegram
+- [x] Reply in Telegram and verify appears on website
+- [x] Test /takeback command
+- [x] Test /handoffleo command
+- [x] Capture logs and transcript
