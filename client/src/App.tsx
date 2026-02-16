@@ -14,6 +14,7 @@ import Contact from "./pages/Contact";
 import PlatformDemo from "./pages/PlatformDemo";
 import BotAnalytics from "./pages/BotAnalytics";
 import ConversationHistory from "./pages/ConversationHistory";
+import ShopifyAlternative from "./pages/ShopifyAlternative";
 import { BookingProvider } from "./contexts/BookingContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import GlassChatWidget from "./components/GlassChatWidget";
@@ -29,6 +30,7 @@ function Router() {
         <Route path={"/contact"} component={Contact} />
         <Route path={"/platform-demo"} component={PlatformDemo} />
         <Route path={"/booking"} component={Booking} />
+        <Route path={"/shopify-alternative"} component={ShopifyAlternative} />
         <Route path={"/bot-analytics"} component={BotAnalytics} />
         <Route path={"/conversations"} component={ConversationHistory} />
         <Route path={"/spotify-callback"} component={SpotifyCallback} />

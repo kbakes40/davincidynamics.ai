@@ -444,3 +444,35 @@
 - [x] Pass customer_name in context to all subsequent messages
 - [x] Update welcome message to ask for name
 - [x] Test name capture and personalization flow
+
+## Add /shopify-alternative Landing Page
+- [ ] Create ShopifyAlternative.tsx page component
+- [ ] Implement Hero section with headline and dual CTAs
+- [ ] Add Cost Breakdown section
+- [ ] Add Value Proposition section
+- [ ] Implement Savings Calculator with inputs/outputs
+- [ ] Add Migration Reassurance block
+- [ ] Add FAQ section with schema markup
+- [ ] Add Final CTA section
+- [ ] Create 2-step lead capture form component
+- [ ] Add leads table to database schema
+- [ ] Create lead capture tRPC mutation
+- [ ] Add sticky CTA on scroll
+- [ ] Customize chat widget first message for Shopify page
+- [ ] Add route to App.tsx
+- [ ] Add to navigation menu
+- [ ] Add SEO metadata (title, description, FAQ schema)
+- [ ] Add internal links to /pricing, /platform-demo, /contact
+- [ ] Test responsive behavior
+- [ ] Run build and verify no regressions
+
+## Add /shopify-alternative Landing Page
+- [x] Create ShopifyAlternative.tsx page component with all sections
+- [x] Add leads table to database schema
+- [x] Create leads router for tRPC
+- [x] Add 2-step lead capture form with database integration
+- [x] Implement savings calculator with real-time calculations
+- [x] Add custom chat context for Shopify-specific first message
+- [x] Wire into App.tsx routing
+- [x] Add SEO metadata (title, description, FAQ schema)
+- [ ] Test complete flow and save checkpoint

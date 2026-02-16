@@ -53,8 +53,12 @@ export default function GlassChatWidget() {
         setIsEntering(false);
         setHasTypedWelcome(true);
         
-        const welcomeText = "Hi! I'm Leo with DaVinci Dynamics. Before we dive in — what's your first name?";
-        setIsAskingForName(true);
+        // Check if we're on the Shopify Alternative page
+        const isShopifyPage = window.location.pathname === '/shopify-alternative';
+        const welcomeText = isShopifyPage
+          ? "Hey — if you're on Shopify, I can quickly map where your costs are leaking. What are you spending monthly on Shopify + apps right now?"
+          : "Hi! I'm Leo with DaVinci Dynamics. Before we dive in — what's your first name?";
+        setIsAskingForName(!isShopifyPage); // Only ask for name if not on Shopify page
         const messageId = "welcome";
         
         // Add empty message placeholder

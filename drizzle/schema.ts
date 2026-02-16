@@ -49,6 +49,20 @@ export const botUsers = mysqlTable("bot_users", {
   optedOut: int("opted_out").default(0), // 0=false, 1=true
 });
 
+export const leads = mysqlTable("leads", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  phone: varchar("phone", { length: 50 }).notNull(),
+  storeUrl: varchar("store_url", { length: 500 }),
+  monthlySpend: varchar("monthly_spend", { length: 50 }),
+  sourcePage: varchar("source_page", { length: 255 }).notNull(),
+  utmSource: varchar("utm_source", { length: 255 }),
+  utmMedium: varchar("utm_medium", { length: 255 }),
+  utmCampaign: varchar("utm_campaign", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const conversations = mysqlTable("conversations", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("user_id").notNull(),
@@ -92,3 +106,5 @@ export type Message = typeof messages.$inferSelect;
 export type NewMessage = typeof messages.$inferInsert;
 export type LeadEvent = typeof leadEvents.$inferSelect;
 export type NewLeadEvent = typeof leadEvents.$inferInsert;
+export type Lead = typeof leads.$inferSelect;
+export type NewLead = typeof leads.$inferInsert;
