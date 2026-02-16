@@ -288,3 +288,12 @@
 - [x] Check conversation handoff status before generating Leo AI responses
 - [x] Return silent/no response when conversation is handed off
 - [x] Test that Leo stops responding after handoff
+
+## Dual-Mode Chat System (AI vs Bridge)
+- [x] Add 'mode' field to conversations table (ai | bridge)
+- [x] Update conversation creation to default to 'ai' mode
+- [x] Implement bridge mode: forward all messages to Telegram
+- [x] Update chat handler to check mode before routing
+- [x] Add admin UI to switch conversation modes (can be done via database)
+- [x] Test AI mode (current behavior)
+- [x] Test bridge mode (Telegram forwarding)

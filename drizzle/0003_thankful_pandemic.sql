@@ -1,0 +1,1 @@
+ALTER TABLE `conversations` ADD `mode` enum('ai','bridge') DEFAULT 'ai' NOT NULL;

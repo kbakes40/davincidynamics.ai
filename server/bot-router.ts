@@ -8,6 +8,10 @@ import { publicProcedure, router } from './_core/trpc';
 import { botAI } from './bot-ai-handler';
 import { processTelegramWebhook } from './telegram-webhook';
 import { pollMessages } from './poll-messages';
+import { forwardToTelegram, isBridgeMode } from './bridge-forwarder';
+import { getDb } from './db';
+import { conversations, messages as messagesTable } from '../drizzle/schema';
+import { eq } from 'drizzle-orm';
 
 export const botRouter = router({
   /**
@@ -24,8 +28,55 @@ export const botRouter = router({
       message: z.string(),
     }))
     .mutation(async ({ input }) => {
-      // Use AI handler for full conversational responses
+      // Get or create conversation first
       const response = await botAI.handleMessage(input.telegramUser, input.message);
+      const conversationId = response.conversationId;
+      
+      // Check if conversation is in bridge mode
+      const bridgeMode = await isBridgeMode(conversationId);
+      
+      if (bridgeMode) {
+        console.log('[Chat] Conversation', conversationId, 'is in bridge mode - forwarding to Telegram');
+        
+        // Get conversation metadata for customer info
+        const db = await getDb();
+        if (db) {
+          const conv = await db
+            .select()
+            .from(conversations)
+            .where(eq(conversations.id, conversationId))
+            .limit(1);
+          
+          const metadata = conv[0]?.metadata ? JSON.parse(conv[0].metadata as string) : {};
+          
+          // Forward to Telegram
+          await forwardToTelegram({
+            conversationId,
+            customerName: metadata.name,
+            customerEmail: metadata.email,
+            customerPhone: metadata.phone,
+            monthlySpend: metadata.monthlySpend,
+            lastCustomerMessage: input.message
+          });
+          
+          // Save user message
+          await db.insert(messagesTable).values({
+            conversationId,
+            role: 'user',
+            content: input.message,
+            timestamp: new Date()
+          });
+        }
+        
+        // Return empty response - agent will respond via Telegram
+        return {
+          message: "",
+          conversationId,
+          isHandedOff: false
+        };
+      }
+      
+      // AI mode - return Leo AI response
       return response;
     }),
 

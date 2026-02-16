@@ -58,6 +58,7 @@ export const conversations = mysqlTable("conversations", {
   leadScoreChange: int("lead_score_change").default(0),
   outcome: varchar("outcome", { length: 50 }),
   metadata: text("metadata"), // JSON for additional data like handoff status
+  mode: mysqlEnum("mode", ["ai", "bridge"]).default("ai").notNull(), // ai = Leo AI responds, bridge = forward to Telegram
 });
 
 export const messages = mysqlTable("messages", {
