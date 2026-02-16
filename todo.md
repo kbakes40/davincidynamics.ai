@@ -297,3 +297,8 @@
 - [x] Add admin UI to switch conversation modes (can be done via database)
 - [x] Test AI mode (current behavior)
 - [x] Test bridge mode (Telegram forwarding)
+
+## Fix Bridge Mode Logic
+- [x] Check conversation mode BEFORE calling Leo AI handler
+- [x] Only call AI handler if mode is 'ai'
+- [x] Test bridge mode forwards to Telegram without AI processing

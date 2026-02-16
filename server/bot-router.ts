@@ -28,11 +28,12 @@ export const botRouter = router({
       message: z.string(),
     }))
     .mutation(async ({ input }) => {
-      // Get or create conversation first
-      const response = await botAI.handleMessage(input.telegramUser, input.message);
-      const conversationId = response.conversationId;
+      // First, get or create user and conversation to get conversation ID
+      const user = await botAI.getOrCreateUser(input.telegramUser);
+      const conversation = await botAI.getOrCreateConversation(user.id);
+      const conversationId = conversation.id;
       
-      // Check if conversation is in bridge mode
+      // Check if conversation is in bridge mode BEFORE calling AI
       const bridgeMode = await isBridgeMode(conversationId);
       
       if (bridgeMode) {
@@ -76,7 +77,8 @@ export const botRouter = router({
         };
       }
       
-      // AI mode - return Leo AI response
+      // AI mode - call Leo AI handler
+      const response = await botAI.handleMessage(input.telegramUser, input.message);
       return response;
     }),
 
