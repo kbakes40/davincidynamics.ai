@@ -229,3 +229,16 @@
 - [x] Remove requirement to reply to handoff notification
 - [ ] Store chat_id to conversation_id mapping in database (optional enhancement)
 - [x] Add fallback logic when no active conversation exists
+
+## Debug Message Sync Issue
+- [ ] Verify Telegram webhook is configured with correct URL
+- [ ] Test webhook endpoint manually with curl
+- [ ] Check server logs for webhook requests
+- [ ] Verify messages are being stored in database
+- [ ] Check frontend polling is working
+- [ ] Verify conversation is marked as handed off
+
+## Webhook Setup Script
+- [x] Create script to automatically configure Telegram webhook
+- [x] Add webhook status check endpoint
+- [ ] Test webhook is receiving messages
