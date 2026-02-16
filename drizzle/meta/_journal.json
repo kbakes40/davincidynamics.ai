@@ -64,6 +64,13 @@
       "when": 1771241904277,
       "tag": "0008_groovy_quicksilver",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1771242937945,
+      "tag": "0009_certain_champions",
+      "breakpoints": true
     }
   ]
 }

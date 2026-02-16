@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { decimal, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -96,6 +96,23 @@ export const leadEvents = mysqlTable("lead_events", {
   eventType: varchar("event_type", { length: 50 }).notNull(),
   eventData: text("event_data"), // JSON
   timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
+export const profitTracking = mysqlTable("profit_tracking", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  month: varchar("month", { length: 7 }).notNull(), // Format: YYYY-MM
+  industry: varchar("industry", { length: 50 }).notNull(), // e-commerce, saas, service
+  revenue: decimal("revenue", { precision: 12, scale: 2 }).notNull(),
+  cogs: decimal("cogs", { precision: 12, scale: 2 }).notNull(),
+  platformCost: decimal("platform_cost", { precision: 12, scale: 2 }).notNull(),
+  adSpend: decimal("ad_spend", { precision: 12, scale: 2 }).notNull(),
+  fulfillmentCost: decimal("fulfillment_cost", { precision: 12, scale: 2 }).notNull(),
+  otherCosts: decimal("other_costs", { precision: 12, scale: 2 }).default("0").notNull(),
+  netProfit: decimal("net_profit", { precision: 12, scale: 2 }).notNull(),
+  profitMargin: decimal("profit_margin", { precision: 5, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
 
 // Export types

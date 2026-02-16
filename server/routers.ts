@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { botRouter } from "./bot-router";
 import { leadsRouter } from "./leads-router";
+import { profitTrackingRouter } from "./profit-tracking-router";
 import { z } from "zod";
 
 export const appRouter = router({
@@ -11,6 +12,7 @@ export const appRouter = router({
   system: systemRouter,
   bot: botRouter,
   leads: leadsRouter,
+  profitTracking: profitTrackingRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

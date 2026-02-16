@@ -507,5 +507,18 @@
 - [x] Add custom chat context for profit-specific first message
 - [x] Wire into App.tsx routing
 - [x] Add SEO metadata (title, description, FAQ schema, Service schema)
-- [ ] Add navigation/footer links
-- [ ] Test complete flow and save checkpoint
+- [x] Add navigation/footer links
+- [x] Test complete flow and save checkpoint
+
+## Profit Tracking Dashboard & Industry Calculators
+- [x] Create profit_tracking table in database schema (user_id, month, revenue, cogs, platform_cost, ad_spend, fulfillment_cost, net_profit, margin, industry, created_at)
+- [x] Push database schema changes
+- [x] Create profit tracking router with tRPC procedures (saveMonthlyData, getTrackingHistory, getProgressStats)
+- [x] Build ProfitDashboard page component with authentication check
+- [x] Add monthly data entry form
+- [x] Implement progress chart showing month-over-month improvements
+- [x] Add industry-specific calculator variants (e-commerce, SaaS, service)
+- [x] Update ProfitCrmDemo calculator with industry selection dropdown
+- [x] Add industry-specific cost categories and benchmarks
+- [x] Wire ProfitDashboard into App.tsx routing
+- [x] Test complete flow and save checkpoint

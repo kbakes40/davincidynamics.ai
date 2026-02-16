@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   DollarSign, 
   TrendingUp, 
@@ -33,6 +34,7 @@ export default function ProfitCrmDemo() {
   const finalCtaSection = useScrollFade();
 
   // Calculator state
+  const [industry, setIndustry] = useState<'e-commerce' | 'saas' | 'service'>('e-commerce');
   const [revenue, setRevenue] = useState('10000');
   const [cogs, setCogs] = useState('30');
   const [platformCost, setPlatformCost] = useState('500');
@@ -275,6 +277,19 @@ export default function ProfitCrmDemo() {
               <h3 className="font-heading font-bold text-xl mb-6">Your Current Numbers</h3>
               <div className="space-y-4">
                 <div>
+                  <label className="block text-sm font-heading text-muted-foreground mb-2">Industry Type</label>
+                  <Select value={industry} onValueChange={(value: 'e-commerce' | 'saas' | 'service') => setIndustry(value)}>
+                    <SelectTrigger className="bg-background border-border">
+                      <SelectValue placeholder="Select industry" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="e-commerce">E-Commerce</SelectItem>
+                      <SelectItem value="saas">SaaS</SelectItem>
+                      <SelectItem value="service">Service Business</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
                   <label className="block text-sm font-heading text-muted-foreground mb-2">Monthly Revenue ($)</label>
                   <Input
                     type="number"
@@ -284,7 +299,9 @@ export default function ProfitCrmDemo() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-heading text-muted-foreground mb-2">COGS (%)</label>
+                  <label className="block text-sm font-heading text-muted-foreground mb-2">
+                    {industry === 'e-commerce' ? 'COGS (%)' : industry === 'saas' ? 'Server/Infrastructure Costs (%)' : 'Service Delivery Costs (%)'}
+                  </label>
                   <Input
                     type="number"
                     value={cogs}
@@ -293,7 +310,9 @@ export default function ProfitCrmDemo() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-heading text-muted-foreground mb-2">Platform/App Cost ($)</label>
+                  <label className="block text-sm font-heading text-muted-foreground mb-2">
+                    {industry === 'e-commerce' ? 'Platform/App Cost ($)' : industry === 'saas' ? 'Software/Tool Stack ($)' : 'Business Software ($)'}
+                  </label>
                   <Input
                     type="number"
                     value={platformCost}
@@ -302,7 +321,9 @@ export default function ProfitCrmDemo() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-heading text-muted-foreground mb-2">Ad Spend ($)</label>
+                  <label className="block text-sm font-heading text-muted-foreground mb-2">
+                    {industry === 'e-commerce' ? 'Ad Spend ($)' : industry === 'saas' ? 'Marketing/CAC ($)' : 'Marketing/Outreach ($)'}
+                  </label>
                   <Input
                     type="number"
                     value={adSpend}
@@ -311,7 +332,9 @@ export default function ProfitCrmDemo() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-heading text-muted-foreground mb-2">Fulfillment/Ops Cost ($)</label>
+                  <label className="block text-sm font-heading text-muted-foreground mb-2">
+                    {industry === 'e-commerce' ? 'Fulfillment/Ops Cost ($)' : industry === 'saas' ? 'Support/Ops Cost ($)' : 'Labor/Ops Cost ($)'}
+                  </label>
                   <Input
                     type="number"
                     value={fulfillmentCost}
