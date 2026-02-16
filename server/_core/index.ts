@@ -8,7 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startTelegramBot } from "../telegram-bot-handler";
-import { setupLeoWebhook } from "../leo-telegram-bot";
+
 
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -52,6 +52,8 @@ async function startServer() {
     }
   });
   
+
+  
   
   // tRPC API
   app.use(
@@ -75,14 +77,13 @@ async function startServer() {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
 
-  server.listen(port, () => {
+  server.listen(port, async () => {
     console.log(`Server running on http://localhost:${port}/`);
     
     // Start Telegram bots
     startTelegramBot(app);
     
-    // Setup Leo Telegram Bot (FULL AUTO MODE - webhook)
-    setupLeoWebhook(app, port);
+
     
 
   });

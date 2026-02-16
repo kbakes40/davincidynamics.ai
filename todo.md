@@ -402,3 +402,16 @@
 - [x] Auto-configure webhook URL on server start
 - [ ] Test webhook receives messages from Telegram
 - [ ] Verify complete round trip works
+
+## Remove Leo_Handoff_bot to Eliminate Conflicts
+- [ ] Disable Leo_Handoff_bot polling in telegram-bot-handler.ts
+- [ ] Remove bridge-forwarder.ts (no longer needed)
+- [ ] Clean up unused imports
+- [ ] Verify no getUpdates conflicts
+
+## Remove @DavinciDynamics_Chatbot Integration
+- [x] Remove Leo webhook endpoint and handler
+- [x] Remove Leo bot imports from server index
+- [x] Delete leo-telegram-bot.ts file
+- [x] Revert bot-router to simple AI mode (no bridge mode)
+- [x] Clean up unused code

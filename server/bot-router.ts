@@ -8,8 +8,7 @@ import { publicProcedure, router } from './_core/trpc';
 import { botAI } from './bot-ai-handler';
 import { processTelegramWebhook } from './telegram-webhook';
 import { pollMessages } from './poll-messages';
-import { isBridgeMode } from './bridge-forwarder';
-import { forwardToLeo } from './leo-telegram-bot';
+
 import { getDb } from './db';
 import { conversations, messages as messagesTable } from '../drizzle/schema';
 import { eq } from 'drizzle-orm';
@@ -29,56 +28,7 @@ export const botRouter = router({
       message: z.string(),
     }))
     .mutation(async ({ input }) => {
-      // First, get or create user and conversation to get conversation ID
-      const user = await botAI.getOrCreateUser(input.telegramUser);
-      const conversation = await botAI.getOrCreateConversation(user.id);
-      const conversationId = conversation.id;
-      
-      // Check if conversation is in bridge mode BEFORE calling AI
-      const bridgeMode = await isBridgeMode(conversationId);
-      
-      if (bridgeMode) {
-        console.log('[Chat] Conversation', conversationId, 'is in bridge mode - forwarding to Telegram');
-        
-        // Get conversation metadata for customer info
-        const db = await getDb();
-        if (db) {
-          const conv = await db
-            .select()
-            .from(conversations)
-            .where(eq(conversations.id, conversationId))
-            .limit(1);
-          
-          const metadata = conv[0]?.metadata ? JSON.parse(conv[0].metadata as string) : {};
-          
-          // Forward to Leo Telegram Bot
-          await forwardToLeo({
-            conversationId,
-            customerName: metadata.name,
-            customerEmail: metadata.email,
-            customerPhone: metadata.phone,
-            pageUrl: metadata.pageUrl,
-            lastCustomerMessage: input.message
-          });
-          
-          // Save user message
-          await db.insert(messagesTable).values({
-            conversationId,
-            role: 'user',
-            content: input.message,
-            timestamp: new Date()
-          });
-        }
-        
-        // Return empty response - agent will respond via Telegram
-        return {
-          message: "",
-          conversationId,
-          isHandedOff: false
-        };
-      }
-      
-      // AI mode - call Leo AI handler
+      // Call Leo AI handler
       const response = await botAI.handleMessage(input.telegramUser, input.message);
       return response;
     }),
