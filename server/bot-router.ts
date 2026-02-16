@@ -8,7 +8,8 @@ import { publicProcedure, router } from './_core/trpc';
 import { botAI } from './bot-ai-handler';
 import { processTelegramWebhook } from './telegram-webhook';
 import { pollMessages } from './poll-messages';
-import { forwardToTelegram, isBridgeMode } from './bridge-forwarder';
+import { isBridgeMode } from './bridge-forwarder';
+import { forwardToLeo } from './leo-telegram-bot';
 import { getDb } from './db';
 import { conversations, messages as messagesTable } from '../drizzle/schema';
 import { eq } from 'drizzle-orm';
@@ -50,13 +51,13 @@ export const botRouter = router({
           
           const metadata = conv[0]?.metadata ? JSON.parse(conv[0].metadata as string) : {};
           
-          // Forward to Telegram
-          await forwardToTelegram({
+          // Forward to Leo Telegram Bot
+          await forwardToLeo({
             conversationId,
             customerName: metadata.name,
             customerEmail: metadata.email,
             customerPhone: metadata.phone,
-            monthlySpend: metadata.monthlySpend,
+            pageUrl: metadata.pageUrl,
             lastCustomerMessage: input.message
           });
           

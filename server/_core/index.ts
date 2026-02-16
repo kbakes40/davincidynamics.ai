@@ -8,6 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startTelegramBot } from "../telegram-bot-handler";
+import { setupLeoWebhook } from "../leo-telegram-bot";
 
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -79,6 +80,9 @@ async function startServer() {
     
     // Start Telegram bots
     startTelegramBot(app);
+    
+    // Setup Leo Telegram Bot (FULL AUTO MODE - webhook)
+    setupLeoWebhook(app, port);
     
 
   });

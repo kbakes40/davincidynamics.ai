@@ -383,3 +383,22 @@
 - [x] Remove DaVinci bot imports and setup calls
 - [x] Delete webhook URL from Telegram
 - [x] Keep only @Leo_Handoff_bot for agent responses
+
+## FULL AUTO LEO MODE Implementation
+- [x] Create Leo Telegram Bot handler with Telegraf (polling mode to avoid webhook conflicts)
+- [x] Set all new conversations to owner=leo, mode=bridge
+- [x] Forward every customer message to @DavinciDynamics_Chatbot
+- [x] Capture Leo replies and post to website chat automatically
+- [x] Add message deduplication (conversation_id + message_hash + direction)
+- [x] Add retry logic (3 attempts, exponential backoff)
+- [x] Add comprehensive logging (inbound_received, forwarded_to_telegram, leo_reply_received, delivered_to_website, delivery_failed)
+- [x] Implement 20-second timeout fallback
+- [x] Keep manual override commands (/takeback, /handoffleo)
+- [ ] Test complete round trip with proof logs
+
+## Convert Leo Bot to Webhook Mode
+- [x] Replace Telegraf polling with webhook handler
+- [x] Register webhook endpoint in Express
+- [x] Auto-configure webhook URL on server start
+- [ ] Test webhook receives messages from Telegram
+- [ ] Verify complete round trip works
