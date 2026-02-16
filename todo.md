@@ -268,3 +268,10 @@
 - [x] Run setup-davinci-webhook.js after deployment
 - [x] Validate bot token with vitest
 - [x] Document trigger, routing, and response steps
+
+## Update @Leo_Handoff_bot Token
+- [x] Request new TELEGRAM_HANDOFF_BOT_TOKEN from user
+- [x] Validate new token with Telegram API
+- [x] Reconfigure webhook with new token
+- [x] Restart server with new token
+- [x] Test handoff notification functionality
