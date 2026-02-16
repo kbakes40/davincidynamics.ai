@@ -185,24 +185,60 @@ async function processUpdate(update: TelegramUpdate): Promise<void> {
       return;
     }
 
-    // Check if this is a reply to a handoff notification (contains Conversation ID)
-    const conversationIdMatch = text.match(/Conversation ID: (\d+)/);
+    // Check if this is a reply to a handoff notification (relaxed CID parsing)
+    // Accepts: "Conversation ID: 123", "[CID: 123]", "CID 123", "#123"
+    const conversationIdMatch = text.match(/(?:Conversation ID:|\[?CID:?\]?|#)\s*(\d+)/);
     const replyToMessage = message.reply_to_message?.text;
-    const replyConversationIdMatch = replyToMessage?.match(/Conversation ID: (\d+)/);
+    const replyConversationIdMatch = replyToMessage?.match(/(?:Conversation ID:|\[?CID:?\]?|#)\s*(\d+)/);
     
     const conversationId = conversationIdMatch?.[1] || replyConversationIdMatch?.[1];
+    
+    console.log('[DaVinci Bot] 🔍 CID parsing - text:', text);
+    console.log('[DaVinci Bot] 🔍 CID parsing - reply:', replyToMessage);
+    console.log('[DaVinci Bot] 🔍 Extracted CID:', conversationId);
     
     if (conversationId) {
       console.log('[DaVinci Bot] 🎯 Agent message for conversation:', conversationId);
       console.log('[DaVinci Bot] Agent message:', text);
       
-      // Store agent message in website chat database
+      // Check if conversation is in bridge mode (owner=leo)
       const { getDb } = await import('./db');
-      const { messages: messagesTable } = await import('../drizzle/schema');
+      const { conversations, messages: messagesTable } = await import('../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
       const db = await getDb();
       
-      if (db) {
-        try {
+      if (!db) {
+        console.error('[DaVinci Bot] Database connection failed');
+        await sendTelegramMessage(chatId, '❌ Error: Database unavailable');
+        return;
+      }
+      
+      // Verify conversation exists and is in bridge mode
+      const conv = await db
+        .select()
+        .from(conversations)
+        .where(eq(conversations.id, parseInt(conversationId)))
+        .limit(1);
+      
+      if (conv.length === 0) {
+        console.error('[DaVinci Bot] Conversation not found:', conversationId);
+        await sendTelegramMessage(chatId, `❌ Conversation ${conversationId} not found`);
+        return;
+      }
+      
+      if (conv[0].mode !== 'bridge') {
+        console.log('[DaVinci Bot] ⚠️ Conversation not in bridge mode (owner != leo):', conversationId);
+        await sendTelegramMessage(
+          chatId,
+          `⚠️ Conversation ${conversationId} is in AI mode. Use /handoffleo ${conversationId} to take control.`
+        );
+        return;
+      }
+      
+      console.log('[DaVinci Bot] ✅ Conversation verified - mode=bridge (owner=leo)');
+      
+      // Store agent message in website chat database
+      try {
           await db.insert(messagesTable).values({
             conversationId: parseInt(conversationId),
             role: 'assistant',
@@ -225,7 +261,6 @@ async function processUpdate(update: TelegramUpdate): Promise<void> {
             `❌ Error: Could not deliver message to website chat`
           );
         }
-      }
       return;
     }
     

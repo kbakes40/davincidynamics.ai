@@ -328,3 +328,11 @@
 - [x] Send fallback message after 60s if no Leo reply
 - [x] Continue waiting for Leo reply after fallback
 - [x] Test timeout triggers correctly
+
+## Debug Auto-Response Failure
+- [x] Relax CID parsing to accept "Conversation ID:", "[CID]", "#123", etc.
+- [x] Enforce owner=leo (mode=bridge) check before routing
+- [x] Add comprehensive logging for debugging
+- [ ] Verify webhook delivery to Telegram
+- [ ] Run live test: website → Telegram → website
+- [ ] Capture and analyze complete log trail
