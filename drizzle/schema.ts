@@ -57,6 +57,7 @@ export const conversations = mysqlTable("conversations", {
   messageCount: int("message_count").default(0),
   leadScoreChange: int("lead_score_change").default(0),
   outcome: varchar("outcome", { length: 50 }),
+  metadata: text("metadata"), // JSON for additional data like handoff status
 });
 
 export const messages = mysqlTable("messages", {

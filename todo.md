@@ -178,3 +178,17 @@
 - [x] Update system prompt in bot-ai-handler.ts to change Sophia to Leo
 - [x] Generate chatbot icon with black background inside circle (keep circular shape)
 - [x] Add pulse animation to Leo's header icon
+
+## Leo Lead Booking Updates
+- [x] Update Leo's system prompt to prioritize booking demo calls
+- [x] Add contact information capture (name, email, phone) to conversation flow
+- [x] Update conversation flow to push toward booking link
+
+## Leo Professional Tone & Handoff
+- [x] Update Leo's system prompt to professional business consultant tone (remove sarcasm)
+- [x] Implement Telegram bot handoff after contact info capture
+- [x] Add handoff notification to @Leo_Handoff_bot
+- [x] Pause Leo's AI responses after handoff
+- [x] Store handoff bot token securely
+- [x] Add metadata field to conversations table for handoff tracking
+- [x] Push database schema changes

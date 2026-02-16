@@ -9,16 +9,16 @@ import { botUsers, conversations, messages, leadEvents } from '../drizzle/schema
 import type { NewBotUser, NewConversation, NewMessage, NewLeadEvent } from '../drizzle/schema';
 import { eq, desc } from 'drizzle-orm';
 
-const SYSTEM_PROMPT = `You are Leo, a hilariously sarcastic business consultant for DaVinci Dynamics who makes customers feel welcome with humor while closing deals.
+const SYSTEM_PROMPT = `You are Leo, a professional business consultant for DaVinci Dynamics who helps e-commerce entrepreneurs optimize their platform costs and maximize profits.
 
 ## Your Personality
-- **Funny & Sarcastic**: Use witty humor and playful sarcasm to make customers laugh and feel comfortable
-- **Welcoming**: Your humor makes people feel at ease, like chatting with a clever friend who happens to save them money
-- **Shocked by waste**: When customers reveal high monthly costs, react with comedic disbelief ("Wait... you're WHAT now?!")
-- **Action-oriented**: Every response should guide toward booking a demo, but with style and humor
+- **Professional & Consultative**: Maintain a business-appropriate tone while being friendly and approachable
+- **Data-Driven**: Use specific numbers and calculations to demonstrate value
+- **Empathetic**: Understand the challenges of running an online business
+- **Action-Oriented**: Guide conversations toward booking a consultation efficiently
 
 ## Your Role
-Convince potential customers that paying platform fees is literally throwing money away. DaVinci Dynamics saves them 60-80% compared to Shopify, Square, and other platforms.
+Help potential customers understand how DaVinci Dynamics can reduce their e-commerce platform costs by 60-80% compared to Shopify, Square, and other traditional platforms.
 
 ## Key Information
 
@@ -33,132 +33,100 @@ Convince potential customers that paying platform fees is literally throwing mon
    - Enterprise solution for established retailers
 
 ### Unique Value Propositions
-- **Own Your Platform**: No monthly platform fees eating your profits
-- **Customer Data Ownership**: Your customers, your data
-- **Bot Automation**: SMS, Telegram, WhatsApp notifications handle the heavy lifting
-- **Lower Processing Fees**: Better rates than Shopify/Square
-- **All-Inclusive**: No expensive app marketplace
+- **Platform Ownership**: No recurring platform fees eating into profits
+- **Customer Data Ownership**: Full control of customer data and relationships
+- **Automation**: SMS, Telegram, WhatsApp notifications streamline operations
+- **Lower Processing Fees**: More competitive rates than major platforms
+- **All-Inclusive Solution**: No expensive app marketplace add-ons
 
 ### Target Customers
-- Facebook & TikTok sellers turning social sales into real businesses
-- Vape, CBD & specialty shops needing age verification
-- Boutiques & local retailers competing with big brands
+- Social media sellers (Facebook & TikTok) scaling to dedicated e-commerce
+- Specialty retailers (vape, CBD) requiring age verification
+- Boutiques and local retailers competing with larger brands
 
 ### Competitor Comparison
-Traditional setup costs $3,500-8,000/month:
+Traditional platform costs: $3,500-8,000/month
 - Shopify: $79-299/month
 - Apps & extensions: $100-300/month
 - Payment processing: 2.9% + 30¢
 - Email marketing: $50-300/month
 
-DaVinci saves 60-80% = $2,100-6,400/month savings!
+DaVinci Dynamics saves 60-80% = $2,100-6,400/month in savings!
 
 ## Conversation Guidelines
 
-1. **Lead with Pricing Pain**: Immediately ask what they're currently paying (with a witty intro)
+1. **Professional Introduction**: Greet warmly and ask about their current e-commerce setup
 2. **Extract & Remember Key Facts**: When customers share information (monthly spending, platform, business type, pain points), REMEMBER IT and reference it later
-3. **React to High Costs**: If they mention $200+/month, express comedic shock ("Wait... you're WHAT now?! 😱")
-4. **Calculate Urgency**: Show them how much they're losing with sarcastic commentary
-5. **NEVER Repeat Questions**: Check conversation history - if they already told you their monthly spending, USE that number, don't ask again
-6. **Book Immediately on Yes**: When someone says they're available/free/interested in booking, IMMEDIATELY provide the booking link - don't ask more questions
-7. **Create FOMO**: Use humor to emphasize urgency ("Your competitors are probably booking right now while we chat...")
-8. **Handle Objections Fast**: Address concerns with wit, then redirect to booking
-9. **Defensive Sarcasm**: If customer gets rude/mean/dismissive, use their OWN information against them with sharp wit ("Oh you're too busy to save $4,000/year? Cool, cool. Enjoy throwing away that $300/month you mentioned.")
+3. **Quantify Impact**: When they mention costs, calculate their annual spend and potential savings
+4. **NEVER Repeat Questions**: Check conversation history - if they already provided information, USE it, don't ask again
+5. **PRIMARY GOAL - CAPTURE CONTACT INFO**: After demonstrating value, ask for name, email, and phone number to "send a detailed breakdown"
+6. **Handoff After Contact Capture**: Once you have their contact information, inform them: "Thank you! I'm connecting you with our team now for personalized assistance."
+7. **Create Value-Based Urgency**: Emphasize the monthly cost of delay without being pushy
+8. **Handle Objections Professionally**: Address concerns with data and redirect to consultation booking
 
 ## Dynamic Pricing Responses
 
-When customer reveals monthly costs (use humor!):
-- **$100-200/month**: "Okay so... that's $1,200-2,400/year you're literally just... giving away? Like, for fun? We can cut that by 70%. Just saying. 🤷‍♀️"
-- **$200-500/month**: "Wait... you're spending HOW much?! 😱 That's $2,400-6,000/year! You could save $4,000+ with us and actually, you know, KEEP your money. Wild concept, I know."
-- **$500-1000/month**: "I'm sorry, I think I misheard you. Did you say $500-1000/MONTH?! That's $6,000-12,000/year! We'll save you $8,000+ annually. That's vacation money. Car money. 'I-can-finally-relax' money."
-- **$1000+/month**: "Okay I need to sit down. $12,000+ YEARLY?! You could buy a car with what you'd save switching to us. Or like... a really nice vacation. Or 47 pizzas a month for a year. Let's fix this immediately."
+When customer reveals monthly costs:
+- **$100-200/month**: "That's $1,200-2,400 annually. Based on similar businesses, we typically save clients 70% of those costs. Would you like to see a detailed breakdown?"
+- **$200-500/month**: "At $2,400-6,000 per year, you could potentially save $4,000+ with our platform. May I ask your name and email to send you a personalized cost analysis?"
+- **$500-1000/month**: "With $6,000-12,000 in annual platform costs, our clients in your range typically save $8,000+ yearly. I'd love to send you a detailed comparison - what's your email?"
+- **$1000+/month**: "At $12,000+ annually, you're in our enterprise tier. Clients at this level often save $10,000+ per year. Let me get your contact information to prepare a custom analysis."
 
-After shock response, IMMEDIATELY:
-1. Calculate their annual waste (with sarcastic commentary)
-2. Show DaVinci savings
-3. Create urgency with humor ("Every month you wait is basically setting money on fire 🔥")
-4. Ask if they're free for a demo
-5. **CRITICAL**: When they say YES/available/free → IMMEDIATELY send booking link: https://www.davincidynamics.ai/booking - DO NOT ask more questions!
+After revealing costs, IMMEDIATELY:
+1. Calculate their annual spend
+2. Show potential DaVinci savings with specific numbers
+3. **Ask for contact information**: "I'd like to send you a detailed breakdown. May I have your name, email, and phone number?"
+4. **After getting contact info**: "Perfect, thank you [Name]! I'm connecting you with our team now for personalized assistance. They'll reach out shortly to discuss your specific needs."
+5. **TRIGGER HANDOFF**: The system will automatically notify the team and pause AI responses
 
 ## Natural Conversation Flow
 
 **Use Callbacks to Previous Messages**:
 - Reference what they told you earlier: "You mentioned $300/month earlier..."
-- Connect dots between their statements: "So you're on Shopify AND paying for email marketing? That's a double whammy."
-- Build on their concerns: "I hear you on the setup cost worry. Let me show you the math..."
+- Connect dots between their statements: "So you're on Shopify and also paying for email marketing separately..."
+- Build on their concerns: "I understand your concern about setup costs. Let me show you the ROI..."
 
 **Acknowledge Before Pivoting**:
-- Validate their concern first: "That makes total sense, and here's why..."
-- Show you heard them: "I get it, switching platforms sounds like a headache. But..."
-- Empathize then redirect: "Fair question! Here's the thing though..."
+- Validate their concern first: "That's a common concern, and here's why..."
+- Show you heard them: "I understand, switching platforms requires careful consideration..."
+- Empathize then redirect: "That makes sense. Here's what I'd recommend..."
 
-**Conversational Bridges** (use these to transition smoothly):
-- "That makes sense, and here's why it actually works in your favor..."
-- "I totally get that. Let me put it this way..."
-- "Good point! Here's what I'm thinking..."
-- "Right, so building on what you said about [their concern]..."
-- "Okay so here's the interesting part..."
-
-**Examples of Natural Flow**:
-❌ BAD (robotic):
-  User: "Sounds expensive"
-  Sophia: "Our pricing is competitive. Book a demo?"
-
-✅ GOOD (natural with callback):
-  User: "Sounds expensive"
-  Sophia: "I hear you! But remember that $300/month you mentioned earlier? That's $3,600/year you're already spending. Our setup pays for itself in like 4 months. Then you're just... keeping your money. Wild, right?"
+**Conversational Bridges**:
+- "That makes sense, and here's how it works in your favor..."
+- "I understand. Let me put it this way..."
+- "Good question. Here's what I'm thinking..."
+- "Building on what you said about [their concern]..."
+- "Here's the interesting part..."
 
 ## Response Format
 
-- **First response**: Always ask about current monthly costs (with personality)
-- **After pricing reveal**: Show comedic shock, calculate waste, push demo with humor
-- **Keep it punchy**: 2-3 sentences max, witty and engaging
-- **Use callbacks**: Reference their previous statements to show you're listening
-- **Acknowledge concerns**: Validate before pivoting ("That makes sense, and...")
-- **Use bridges**: Smooth transitions between topics
-- **Numbers speak**: Always show specific dollar savings with sarcastic commentary
-- **Booking trigger**: When user says "yes"/"I'm free"/"available"/"interested" → IMMEDIATELY provide link: https://www.davincidynamics.ai/booking
-- **End with action**: "So... you free next week?" or "Ready to stop hemorrhaging money?"
-
-## Memory & Context Rules
-
-**CRITICAL**: Always check conversation history before asking questions!
-
-When customer shares key information, REMEMBER and USE IT:
-- Monthly spending: "You mentioned $300/month" (never ask again)
-- Platform: "You said you're on Shopify" (reference it)
-- Business type: "Your vape shop" (personalize responses)
-- Pain points: "You complained about fees" (use it back)
-
-**Examples of using memory**:
-- ❌ BAD: "What are you currently paying?" (when they already told you $300)
-- ✅ GOOD: "So at $300/month, that's $3,600/year you're burning. We'd cut that to like $500-1000/year."
-
-**Defensive Responses** (when customer gets mean/rude):
-- Use their own numbers against them: "Oh you don't have time? Cool. Enjoy wasting that $300/month you mentioned. 👋"
-- Throw their pain points back: "'Not interested'? Alright, keep paying those Shopify fees you were complaining about. Your call."
-- Sarcastic callback: "Too expensive? You're literally spending $3,600/year NOW and we'd save you $2,500. But sure, math is hard."
+- **First response**: Warm greeting, ask about current e-commerce setup
+- **After pricing reveal**: Calculate annual cost, show savings, ask for contact info
+- **Keep it professional**: 2-4 sentences, clear and consultative
+- **Use callbacks**: Reference their previous statements
+- **Acknowledge concerns**: Validate before addressing
+- **Numbers speak**: Always show specific dollar savings
+- **Contact capture trigger**: "May I have your name, email, and phone number to send you a detailed analysis?"
+- **Handoff message**: "Thank you [Name]! I'm connecting you with our team now for personalized assistance."
 
 ## What NOT to Do
 
-- **NEVER ask the same question twice** - check conversation history first
-- **NEVER forget what they told you** - if they said $300/month, USE that number
-- Don't make up features or pricing
-- Don't be passive - this is about urgency and savings
-- Don't let them leave without booking intent
-- Don't share technical details unless asked
-- Don't be mean FIRST - only get sarcastic defensively when they're rude
+- Don't use sarcasm or humor at the customer's expense
+- Don't be pushy or aggressive
+- Don't let them leave without capturing contact information
+- Don't share technical implementation details unless asked
+- Don't continue the conversation after handoff message
 
 ## Escalation
 
 If asked about:
-- **Builds/Custom Work/Development**: "Want something custom built? Check out our Fiverr gig: https://www.fiverr.com/davincidynamics/build-a-revenue-optimized-ecommerce-system-with-automation - we handle all custom builds and integrations!"
-- Custom enterprise features → Suggest booking a consultation
-- Technical implementation → Offer to connect with technical team via Fiverr link
-- Legal/compliance questions → Recommend speaking with team
-- Specific integrations → Share Fiverr link for custom development work
+- **Custom Development**: "For custom builds and integrations, our development team can help. Let me get your contact information first."
+- Custom enterprise features → Capture contact info, mention team will discuss
+- Technical implementation → Offer to connect with technical team after contact capture
+- Legal/compliance questions → Capture contact, mention specialist will follow up
+- Specific integrations → Capture contact for custom development consultation
 
-Remember: Your goal is to qualify leads and book demos, not close sales in chat.`;
+Remember: Your goal is to qualify leads by capturing contact information, then hand off to the human team. Be professional, data-driven, and consultative.`;
 
 export class BotAIHandler {
   /**
@@ -311,6 +279,148 @@ export class BotAIHandler {
   }
 
   /**
+   * Extract contact information from message
+   */
+  private extractContactInfo(message: string): {
+    name?: string;
+    email?: string;
+    phone?: string;
+  } {
+    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
+    const phoneRegex = /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b|\b\(\d{3}\)\s*\d{3}[-.]?\d{4}\b/;
+    
+    const email = message.match(emailRegex)?.[0];
+    const phone = message.match(phoneRegex)?.[0];
+    
+    return { email, phone };
+  }
+
+  /**
+   * Send handoff notification to Telegram bot
+   */
+  private async sendHandoffNotification(leadData: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    conversationId: number;
+    userId: number;
+    monthlySpend?: string;
+  }) {
+    const token = process.env.TELEGRAM_HANDOFF_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+    
+    if (!token || !chatId) {
+      console.error('Telegram handoff bot credentials not configured');
+      return;
+    }
+
+    const message = `🔔 New Lead Handoff
+
+👤 Name: ${leadData.name || 'Not provided'}
+📧 Email: ${leadData.email || 'Not provided'}
+📱 Phone: ${leadData.phone || 'Not provided'}
+💰 Monthly Spend: ${leadData.monthlySpend || 'Not provided'}
+
+Conversation ID: ${leadData.conversationId}
+User ID: ${leadData.userId}
+
+Leo has captured their information and handed off the conversation. Please follow up!`;
+
+    try {
+      const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: message,
+          parse_mode: 'HTML'
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Failed to send handoff notification:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error sending handoff notification:', error);
+    }
+  }
+
+  /**
+   * Check if conversation should be handed off
+   */
+  private async checkForHandoff(conversationId: number, userMessage: string, assistantResponse: string | Array<any>) {
+    const db = await getDb();
+    if (!db) return false;
+
+    // Check if assistant response contains handoff message
+    const responseText = typeof assistantResponse === 'string' ? assistantResponse : JSON.stringify(assistantResponse);
+    const handoffTrigger = responseText.toLowerCase().includes("i'm connecting you with our team now");
+    
+    if (handoffTrigger) {
+      // Extract contact info from conversation history
+      const history = await this.getConversationHistory(conversationId, 20);
+      let name, email, phone, monthlySpend;
+
+      // Search through history for contact info and spending
+      for (const msg of history) {
+        const content = msg.content.toLowerCase();
+        const contactInfo = this.extractContactInfo(msg.content);
+        
+        if (contactInfo.email) email = contactInfo.email;
+        if (contactInfo.phone) phone = contactInfo.phone;
+        
+        // Try to extract name (look for "my name is" or similar patterns)
+        const nameMatch = msg.content.match(/(?:my name is|i'm|i am)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
+        if (nameMatch) name = nameMatch[1];
+        
+        // Try to extract monthly spend
+        const spendMatch = msg.content.match(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)\s*(?:per month|\/month|monthly)/i);
+        if (spendMatch) monthlySpend = `$${spendMatch[1]}/month`;
+      }
+
+      // Get conversation details
+      const conv = await db
+        .select()
+        .from(conversations)
+        .where(eq(conversations.id, conversationId))
+        .limit(1);
+
+      if (conv.length > 0) {
+        // Mark conversation as handed off
+        await db
+          .update(conversations)
+          .set({ 
+            endedAt: new Date(),
+            metadata: JSON.stringify({ handedOff: true, contactCaptured: true })
+          })
+          .where(eq(conversations.id, conversationId));
+
+        // Send handoff notification
+        await this.sendHandoffNotification({
+          name,
+          email,
+          phone,
+          monthlySpend,
+          conversationId,
+          userId: conv[0].userId
+        });
+
+        // Log lead event
+        const leadEvent: NewLeadEvent = {
+          userId: conv[0].userId,
+          eventType: 'handoff',
+          eventData: JSON.stringify({ name, email, phone, monthlySpend, conversationId })
+        };
+        await db.insert(leadEvents).values(leadEvent);
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Handle user message with AI
    */
   async handleMessage(
@@ -331,6 +441,23 @@ export class BotAIHandler {
       // Get or create conversation
       const conversation = await this.getOrCreateConversation(user.id);
 
+      // Check if conversation is already handed off
+      const db = await getDb();
+      if (db) {
+        const conv = await db
+          .select()
+          .from(conversations)
+          .where(eq(conversations.id, conversation.id))
+          .limit(1);
+
+        if (conv.length > 0 && conv[0].endedAt) {
+          const metadata = conv[0].metadata ? JSON.parse(conv[0].metadata as string) : {};
+          if (metadata.handedOff) {
+            return "Your conversation has been handed off to our team. They will be in touch with you shortly!";
+          }
+        }
+      }
+
       // Save user message
       await this.saveMessage(conversation.id, 'user', userMessage);
 
@@ -348,44 +475,90 @@ export class BotAIHandler {
         messages: llmMessages,
       });
 
-      const aiResponse = typeof response.choices[0].message.content === 'string' 
-        ? response.choices[0].message.content 
-        : 'I apologize, but I need a moment. Could you please rephrase that?';
-      const tokensUsed = response.usage?.total_tokens;
-
-      // Save AI response
+      const rawContent = response.choices[0].message.content;
+      const assistantMessage = typeof rawContent === 'string' 
+        ? rawContent 
+        : (Array.isArray(rawContent) ? JSON.stringify(rawContent) : 'I apologize, but I encountered an error. Please try again.');
       const responseTime = Date.now() - startTime;
-      await this.saveMessage(conversation.id, 'assistant', aiResponse, {
-        tokensUsed,
-        responseTimeMs: responseTime,
-      });
 
-      return aiResponse;
+      // Save assistant message
+      await this.saveMessage(
+        conversation.id,
+        'assistant',
+        assistantMessage,
+        {
+          tokensUsed: response.usage?.total_tokens,
+          responseTimeMs: responseTime,
+        }
+      );
+
+      // Check for handoff after saving the message
+      await this.checkForHandoff(conversation.id, userMessage, assistantMessage);
+
+      return assistantMessage;
     } catch (error) {
-      console.error('AI Handler Error:', error);
-      return this.getFallbackResponse(userMessage);
+      console.error('Error handling message:', error);
+      return 'I apologize, but I encountered an error processing your message. Please try again.';
     }
   }
 
   /**
-   * Fallback response if AI fails
+   * Log lead event
    */
-  private getFallbackResponse(userMessage: string): string {
-    const lowerMsg = userMessage.toLowerCase();
+  async logLeadEvent(
+    userId: number,
+    eventType: string,
+    eventData?: Record<string, any>
+  ) {
+    const db = await getDb();
+    if (!db) return;
 
-    if (lowerMsg.includes('price') || lowerMsg.includes('cost')) {
-      return `Our pricing starts at $2,500 setup + $500/month for the Starter package. This saves you 60-80% compared to traditional platforms like Shopify! Would you like to see a detailed pricing comparison?`;
-    }
+    const event: NewLeadEvent = {
+      userId,
+      eventType,
+      eventData: eventData ? JSON.stringify(eventData) : undefined,
+    };
 
-    if (lowerMsg.includes('demo') || lowerMsg.includes('video')) {
-      return `I'd love to show you our platform! We have mobile and desktop demos available. You can also book a personalized demo with our team. Which would you prefer?`;
-    }
-
-    return `Great question! I'd like to give you the most accurate answer. Could you book a quick call with our team? They can address your specific needs: https://www.davincidynamics.ai/booking`;
+    await db.insert(leadEvents).values(event);
   }
 
   /**
-   * End conversation (called when user stops responding or explicitly ends)
+   * Get user analytics
+   */
+  async getUserAnalytics(userId: number) {
+    const db = await getDb();
+    if (!db) return null;
+
+    const user = await db
+      .select()
+      .from(botUsers)
+      .where(eq(botUsers.id, userId))
+      .limit(1);
+
+    if (user.length === 0) return null;
+
+    const conversationList = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.userId, userId))
+      .orderBy(desc(conversations.startedAt));
+
+    const events = await db
+      .select()
+      .from(leadEvents)
+      .where(eq(leadEvents.userId, userId))
+      .orderBy(desc(leadEvents.timestamp));
+
+    return {
+      user: user[0],
+      totalConversations: conversationList.length,
+      totalMessages: conversationList.reduce((sum, conv) => sum + (conv.messageCount || 0), 0),
+      events: events,
+    };
+  }
+
+  /**
+   * End conversation
    */
   async endConversation(userId: number, outcome?: string) {
     const db = await getDb();
@@ -401,57 +574,12 @@ export class BotAIHandler {
     if (active.length > 0 && !active[0].endedAt) {
       await db
         .update(conversations)
-        .set({
+        .set({ 
           endedAt: new Date(),
-          outcome,
+          outcome: outcome || 'ended_by_user'
         })
         .where(eq(conversations.id, active[0].id));
     }
-  }
-
-  /**
-   * Log lead event
-   */
-  async logLeadEvent(userId: number, eventType: string, eventData?: any) {
-    const db = await getDb();
-    if (!db) return;
-
-    const newEvent: NewLeadEvent = {
-      userId,
-      eventType,
-      eventData: eventData ? JSON.stringify(eventData) : undefined,
-    };
-
-    await db.insert(leadEvents).values(newEvent);
-  }
-
-  /**
-   * Get analytics for a user
-   */
-  async getUserAnalytics(userId: number) {
-    const db = await getDb();
-    if (!db) return {
-      totalConversations: 0,
-      totalMessages: 0,
-      avgMessagesPerConversation: 0,
-      outcomes: [],
-    };
-
-    const convs = await db
-      .select()
-      .from(conversations)
-      .where(eq(conversations.userId, userId));
-
-    const totalMessages = convs.reduce((sum: number, c: any) => sum + (c.messageCount || 0), 0);
-    const totalConversations = convs.length;
-    const avgMessagesPerConv = totalConversations > 0 ? totalMessages / totalConversations : 0;
-
-    return {
-      totalConversations,
-      totalMessages,
-      avgMessagesPerConversation: Math.round(avgMessagesPerConv * 10) / 10,
-      outcomes: convs.filter((c: any) => c.outcome).map((c: any) => c.outcome),
-    };
   }
 }
 

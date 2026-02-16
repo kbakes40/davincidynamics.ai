@@ -15,6 +15,13 @@
       "when": 1770965531716,
       "tag": "0001_redundant_miss_america",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1771209776631,
+      "tag": "0002_fast_skullbuster",
+      "breakpoints": true
     }
   ]
 }
