@@ -283,3 +283,8 @@
 - [x] Website polling picks up DaVinci bot messages and displays them (already implemented)
 - [ ] Test complete flow: Website → DaVinci Bot → Website
 - [x] User never knows about Telegram - stays on website entire time
+
+## Stop Leo AI After Handoff
+- [x] Check conversation handoff status before generating Leo AI responses
+- [x] Return silent/no response when conversation is handed off
+- [x] Test that Leo stops responding after handoff

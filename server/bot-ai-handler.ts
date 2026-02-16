@@ -496,11 +496,13 @@ This customer is waiting on the website. Reply here and your message will appear
           .where(eq(conversations.id, conversation.id))
           .limit(1);
 
-        if (conv.length > 0 && conv[0].endedAt) {
+        if (conv.length > 0) {
           const metadata = conv[0].metadata ? JSON.parse(conv[0].metadata as string) : {};
           if (metadata.handedOff) {
+            console.log('[Leo AI] Conversation', conversation.id, 'is handed off - not responding');
+            // Return empty message - agent will respond via Telegram
             return {
-              message: "Your conversation has been handed off to our team. They will be in touch with you shortly!",
+              message: "",
               conversationId: conversation.id,
               isHandedOff: true
             };
