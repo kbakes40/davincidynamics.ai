@@ -8,7 +8,7 @@ import { conversations, botUsers } from '../drizzle/schema';
 import { eq } from 'drizzle-orm';
 
   /**
- * Forward customer message to @DavinciDynamics_Chatbot
+ * Forward customer message to @Leo_Handoff_bot
  * Includes 20-second timeout fallback
  */
 export async function forwardToTelegram(payload: {
@@ -22,7 +22,7 @@ export async function forwardToTelegram(payload: {
 }): Promise<boolean> {
   console.log('[Bridge] Forwarding message to Telegram for conversation:', payload.conversationId);
   
-  const token = process.env.DAVINCI_CHATBOT_TOKEN;
+  const token = process.env.TELEGRAM_HANDOFF_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
   
   if (!token || !chatId) {

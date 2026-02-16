@@ -8,7 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startTelegramBot } from "../telegram-bot-handler";
-import { startDaVinciChatbot, deleteDaVinciWebhook } from "../davinci-chatbot-handler";
+
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -51,6 +51,7 @@ async function startServer() {
     }
   });
   
+  
   // tRPC API
   app.use(
     "/api/trpc",
@@ -79,9 +80,7 @@ async function startServer() {
     // Start Telegram bots
     startTelegramBot(app);
     
-    // Start DaVinci Dynamics Chatbot (Leo)
-    deleteDaVinciWebhook(); // Clear webhook in development
-    startDaVinciChatbot(app);
+
   });
 }
 

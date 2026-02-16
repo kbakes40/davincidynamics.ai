@@ -370,3 +370,16 @@
 - [x] Verify routing to @DavinciDynamics_Chatbot works
 - [x] Verify /takeback and /handoffleo commands work
 - [x] Test complete flow: website → Telegram → website
+
+## Fix Telegram Webhook Message Handling
+- [x] Treat EVERY Telegram message as agent output (no pattern matching)
+- [x] Map to newest unanswered conversation with owner=leo
+- [x] Add comprehensive logging: telegram_update_received, cid_resolved, website_send_attempted, website_send_status
+- [ ] Test with exact format: "Conversation ID: 360009 Hey — Leo here. What platform are you currently using to sell?"
+- [ ] Capture and analyze 5 log lines from webhook flow
+
+## Remove @DavinciDynamics_Chatbot Integration
+- [x] Remove DaVinci webhook endpoint from server
+- [x] Remove DaVinci bot imports and setup calls
+- [x] Delete webhook URL from Telegram
+- [x] Keep only @Leo_Handoff_bot for agent responses

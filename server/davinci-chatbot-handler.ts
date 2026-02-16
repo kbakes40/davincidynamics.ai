@@ -1,6 +1,6 @@
 /**
  * @DavinciDynamics_Chatbot - Telegram Bot Handler
- * Leo AI sales assistant that triggers on link clicks
+ * Treats ALL incoming messages as agent output for active conversations
  */
 
 import type { Express } from 'express';
@@ -87,10 +87,60 @@ async function sendTelegramMessage(chatId: number, text: string): Promise<boolea
 }
 
 /**
+ * Find newest unanswered conversation with owner=leo
+ */
+async function findActiveConversation(): Promise<number | null> {
+  const { getDb } = await import('./db');
+  const { conversations, messages: messagesTable } = await import('../drizzle/schema');
+  const { desc, eq } = await import('drizzle-orm');
+  
+  const db = await getDb();
+  if (!db) return null;
+
+  // Get all conversations in bridge mode (owner=leo), ordered by most recent
+  const activeConvs = await db
+    .select()
+    .from(conversations)
+    .where(eq(conversations.mode, 'bridge'))
+    .orderBy(desc(conversations.startedAt))
+    .limit(20);
+
+  console.log('[DaVinci Bot] 🔍 Found', activeConvs.length, 'bridge mode conversations');
+
+  // Find first conversation where last message is from user (not assistant)
+  for (const conv of activeConvs) {
+    const lastMessage = await db
+      .select()
+      .from(messagesTable)
+      .where(eq(messagesTable.conversationId, conv.id))
+      .orderBy(desc(messagesTable.timestamp))
+      .limit(1);
+
+    if (lastMessage.length > 0 && lastMessage[0].role === 'user') {
+      console.log('[DaVinci Bot] ✅ Found unanswered conversation:', conv.id);
+      return conv.id;
+    }
+  }
+
+  // If no unanswered, return most recent bridge mode conversation
+  if (activeConvs.length > 0) {
+    console.log('[DaVinci Bot] ⚠️ No unanswered conversations, using most recent:', activeConvs[0].id);
+    return activeConvs[0].id;
+  }
+
+  return null;
+}
+
+/**
  * Process incoming webhook update
  */
-async function processUpdate(update: TelegramUpdate): Promise<void> {
-  console.log('[DaVinci Bot] 📨 Received update:', JSON.stringify(update, null, 2));
+export async function processDaVinciUpdate(update: TelegramUpdate): Promise<void> {
+  console.log('[DaVinci Bot] 📨 telegram_update_received:', JSON.stringify({
+    update_id: update.update_id,
+    message_id: update.message?.message_id,
+    from: update.message?.from.username,
+    text: update.message?.text?.substring(0, 100)
+  }));
 
   // Handle callback query (button click)
   if (update.callback_query) {
@@ -133,40 +183,12 @@ async function processUpdate(update: TelegramUpdate): Promise<void> {
     return;
   }
 
-  // Handle regular message with URL entities (link click)
+  // Handle regular message
   if (update.message) {
     const message = update.message;
     const userId = message.from.id;
     const chatId = message.chat.id;
     const text = message.text || '';
-
-    // Check if message contains URL entities
-    const urlEntities = message.entities?.filter(e => e.type === 'url' || e.type === 'text_link');
-    
-    if (urlEntities && urlEntities.length > 0) {
-      console.log('[DaVinci Bot] 🔗 Link detected in message');
-
-      const url = urlEntities[0].url || text.substring(
-        urlEntities[0].offset,
-        urlEntities[0].offset + urlEntities[0].length
-      );
-
-      const context = {
-        user_name: message.from.first_name,
-        user_id: userId.toString(),
-        chat_id: chatId.toString(),
-        link_url: url,
-        last_user_message: text,
-        timestamp: new Date(message.date * 1000).toISOString()
-      };
-
-      // Get Leo's response
-      const { response } = await handleLinkClick(userId, context);
-
-      // Send response
-      await sendTelegramMessage(chatId, response);
-      return;
-    }
 
     // Handle /start command
     if (text === '/start') {
@@ -185,98 +207,92 @@ async function processUpdate(update: TelegramUpdate): Promise<void> {
       return;
     }
 
-    // Check if this is a reply to a handoff notification (relaxed CID parsing)
-    // Accepts: "Conversation ID: 123", "[CID: 123]", "CID 123", "#123"
+    // STEP 1: Try to extract explicit conversation ID from message
     const conversationIdMatch = text.match(/(?:Conversation ID:|\[?CID:?\]?|#)\s*(\d+)/);
     const replyToMessage = message.reply_to_message?.text;
     const replyConversationIdMatch = replyToMessage?.match(/(?:Conversation ID:|\[?CID:?\]?|#)\s*(\d+)/);
     
-    const conversationId = conversationIdMatch?.[1] || replyConversationIdMatch?.[1];
+    let conversationId = conversationIdMatch?.[1] || replyConversationIdMatch?.[1];
     
-    console.log('[DaVinci Bot] 🔍 CID parsing - text:', text);
-    console.log('[DaVinci Bot] 🔍 CID parsing - reply:', replyToMessage);
-    console.log('[DaVinci Bot] 🔍 Extracted CID:', conversationId);
-    
-    if (conversationId) {
-      console.log('[DaVinci Bot] 🔥 HOTFIX MODE - Direct delivery without blocking');
-      console.log('[DaVinci Bot] 🎯 Parsed CID:', conversationId);
-      console.log('[DaVinci Bot] 💬 Agent message:', text);
-      
-      const { getDb } = await import('./db');
-      const { messages: messagesTable } = await import('../drizzle/schema');
-      const db = await getDb();
-      
-      let sendAttempted = false;
-      let sendStatus = 'not_attempted';
-      let errorDetails = null;
-      
-      if (!db) {
-        console.error('[DaVinci Bot] ❌ Database connection failed');
-        sendStatus = 'db_unavailable';
-        await sendTelegramMessage(chatId, '❌ Error: Database unavailable');
+    console.log('[DaVinci Bot] 🔍 cid_resolved (explicit):', conversationId || 'none');
+
+    // STEP 2: If no explicit CID, find newest unanswered conversation with owner=leo
+    if (!conversationId) {
+      const autoConvId = await findActiveConversation();
+      if (autoConvId) {
+        conversationId = autoConvId.toString();
+        console.log('[DaVinci Bot] 🔍 cid_resolved (auto-mapped):', conversationId);
+      } else {
+        console.log('[DaVinci Bot] ❌ No active owner=leo conversations found');
+        await sendTelegramMessage(
+          chatId,
+          '❌ No active conversations found. Please include "Conversation ID: XXX" in your message.'
+        );
         return;
       }
-      
-      console.log('[DaVinci Bot] 📦 Attempting direct message delivery...');
-      sendAttempted = true;
-      
-      // HOTFIX: Direct delivery without owner/mode checks
-      try {
-          await db.insert(messagesTable).values({
-            conversationId: parseInt(conversationId),
-            role: 'assistant',
-            content: text,
-            timestamp: new Date(),
-            intent: 'agent_message'
-          });
-          
-          sendStatus = 'success';
-          console.log('[DaVinci Bot] ✅ Message stored successfully');
-          console.log('[DaVinci Bot] 📦 DELIVERY LOG:', {
-            conversationId: parseInt(conversationId),
-            parsedCID: conversationId,
-            sendAttempted: true,
-            sendStatus: 'success',
-            error: null
-          });
-          
-          // Confirm to agent
-          await sendTelegramMessage(
-            chatId,
-            `✅ Message delivered!\n\nConversation: ${conversationId}\nMessage: "${text}"`
-          );
-        } catch (error) {
-          sendStatus = 'failed';
-          errorDetails = error instanceof Error ? error.message : String(error);
-          console.error('[DaVinci Bot] ❌ Delivery failed:', error);
-          console.log('[DaVinci Bot] 📦 DELIVERY LOG:', {
-            conversationId: parseInt(conversationId),
-            parsedCID: conversationId,
-            sendAttempted: true,
-            sendStatus: 'failed',
-            error: errorDetails
-          });
-          await sendTelegramMessage(
-            chatId,
-            `❌ Delivery failed!\n\nConversation: ${conversationId}\nError: ${errorDetails}`
-          );
-        }
+    }
+
+    // STEP 3: Extract actual agent message (remove CID prefix if present)
+    let agentMessage = text;
+    if (conversationIdMatch) {
+      // Remove "Conversation ID: 123" prefix from message
+      agentMessage = text.replace(/(?:Conversation ID:|\[?CID:?\]?|#)\s*\d+\s*/, '').trim();
+    }
+
+    console.log('[DaVinci Bot] 💬 Agent message (cleaned):', agentMessage);
+
+    // STEP 4: Send message to website chat
+    const { getDb } = await import('./db');
+    const { messages: messagesTable } = await import('../drizzle/schema');
+    const db = await getDb();
+    
+    if (!db) {
+      console.error('[DaVinci Bot] ❌ website_send_attempted: false (db_unavailable)');
+      await sendTelegramMessage(chatId, '❌ Error: Database unavailable');
       return;
     }
     
-    // For any other message, treat as generic inquiry
-    console.log('[DaVinci Bot] 💬 Regular message (no conversation ID):', text);
+    console.log('[DaVinci Bot] 📤 website_send_attempted: true');
     
-    const context = {
-      user_name: message.from.first_name,
-      user_id: userId.toString(),
-      chat_id: chatId.toString(),
-      last_user_message: text,
-      timestamp: new Date(message.date * 1000).toISOString()
-    };
-
-    const { response } = await handleLinkClick(userId, context);
-    await sendTelegramMessage(chatId, response);
+    try {
+      await db.insert(messagesTable).values({
+        conversationId: parseInt(conversationId),
+        role: 'assistant',
+        content: agentMessage,
+        timestamp: new Date(),
+        intent: 'agent_message'
+      });
+      
+      console.log('[DaVinci Bot] ✅ website_send_status: success');
+      console.log('[DaVinci Bot] 📊 DELIVERY SUMMARY:', {
+        telegram_update_received: update.update_id,
+        cid_resolved: conversationId,
+        website_send_attempted: true,
+        website_send_status: 'success',
+        message_length: agentMessage.length
+      });
+      
+      // Confirm to agent
+      await sendTelegramMessage(
+        chatId,
+        `✅ Message delivered to conversation ${conversationId}!\n\n"${agentMessage.substring(0, 100)}${agentMessage.length > 100 ? '...' : ''}"`
+      );
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error('[DaVinci Bot] ❌ website_send_status: failed -', errorMsg);
+      console.log('[DaVinci Bot] 📊 DELIVERY SUMMARY:', {
+        telegram_update_received: update.update_id,
+        cid_resolved: conversationId,
+        website_send_attempted: true,
+        website_send_status: 'failed',
+        error: errorMsg
+      });
+      
+      await sendTelegramMessage(
+        chatId,
+        `❌ Delivery failed!\n\nConversation: ${conversationId}\nError: ${errorMsg}`
+      );
+    }
   }
 }
 
@@ -291,20 +307,42 @@ export function startDaVinciChatbot(app: Express): void {
 
   console.log('[DaVinci Bot] Starting @DavinciDynamics_Chatbot...');
 
-  // Webhook endpoint
-  app.post(`/api/davinci-chatbot-webhook`, async (req, res) => {
-    try {
-      const update: TelegramUpdate = req.body;
-      await processUpdate(update);
-      res.json({ ok: true });
-    } catch (error) {
-      console.error('[DaVinci Bot] Error processing update:', error);
-      res.status(500).json({ ok: false, error: 'Internal server error' });
-    }
-  });
+  // Note: Webhook endpoint is now registered in server/_core/index.ts
 
   console.log('[DaVinci Bot] ✅ Webhook endpoint ready at /api/davinci-chatbot-webhook');
   console.log('[DaVinci Bot] 📝 Configure webhook URL after deployment');
+}
+
+/**
+ * Auto-setup webhook URL on server start
+ */
+export async function setupDaVinciWebhook(port: number): Promise<void> {
+  if (!DAVINCI_BOT_TOKEN) {
+    console.error('[DaVinci Bot] DAVINCI_CHATBOT_TOKEN not configured');
+    return;
+  }
+
+  // In development, use the dev server URL
+  // In production, this should be set via environment variable
+  const baseUrl = process.env.WEBHOOK_BASE_URL || `https://3000-ivffr5j7qq1mb9nvb9hdg-c6ade6a9.us2.manus.computer`;
+  const webhookUrl = `${baseUrl}/api/davinci-chatbot-webhook`;
+
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${DAVINCI_BOT_TOKEN}/setWebhook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: webhookUrl })
+    });
+
+    if (response.ok) {
+      console.log('[DaVinci Bot] ✅ Webhook configured:', webhookUrl);
+    } else {
+      const error = await response.text();
+      console.error('[DaVinci Bot] ❌ Failed to set webhook:', error);
+    }
+  } catch (error) {
+    console.error('[DaVinci Bot] Error setting webhook:', error);
+  }
 }
 
 /**
