@@ -522,16 +522,51 @@ This customer is waiting on the website. Reply here and your message will appear
         ...history,
       ];
 
-      // Call LLM
-      const response = await invokeLLM({
-        messages: llmMessages,
-      });
-
-      const rawContent = response.choices[0].message.content;
-      const assistantMessage = typeof rawContent === 'string' 
-        ? rawContent 
-        : (Array.isArray(rawContent) ? JSON.stringify(rawContent) : 'I apologize, but I encountered an error. Please try again.');
-      const responseTime = Date.now() - startTime;
+      // Call LLM with 15-second timeout and retry
+      let response;
+      let assistantMessage: string = "Thanks for your message — one moment while I pull up the best next step for you.";
+      let responseTime: number = Date.now() - startTime;
+      let attempt = 0;
+      const maxAttempts = 2;
+      
+      while (attempt < maxAttempts) {
+        attempt++;
+        console.log(`[Leo AI] Generation attempt ${attempt}/${maxAttempts} for conversation ${conversation.id}`);
+        
+        try {
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('LLM timeout after 15s')), 15000)
+          );
+          
+          const llmPromise = invokeLLM({
+            messages: llmMessages,
+          });
+          
+          response = await Promise.race([llmPromise, timeoutPromise]) as any;
+          
+          const rawContent = response.choices[0].message.content;
+          assistantMessage = typeof rawContent === 'string' 
+            ? rawContent 
+            : (Array.isArray(rawContent) ? JSON.stringify(rawContent) : 'I apologize, but I encountered an error. Please try again.');
+          responseTime = Date.now() - startTime;
+          
+          console.log(`[Leo AI] ✅ Generation successful in ${responseTime}ms`);
+          break; // Success - exit retry loop
+          
+        } catch (error) {
+          console.error(`[Leo AI] ⚠️ Generation attempt ${attempt} failed:`, error);
+          
+          if (attempt < maxAttempts) {
+            console.log('[Leo AI] Retrying...');
+            continue;
+          }
+          
+          // Final attempt failed - use fallback message
+          console.error('[Leo AI] ❌ All attempts failed, using fallback');
+          assistantMessage = "Thanks for your message — one moment while I pull up the best next step for you.";
+          responseTime = Date.now() - startTime;
+        }
+      }
 
       // Save assistant message
       await this.saveMessage(

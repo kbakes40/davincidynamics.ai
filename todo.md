@@ -343,3 +343,13 @@
 - [x] Add comprehensive logging (conversationId, parsedCID, sendAttempted, sendStatus, error)
 - [ ] Verify webhook receives Telegram replies
 - [ ] Run live test and capture logs
+
+## LEO-FIRST Mode Implementation
+- [x] Change default conversation mode from 'bridge' to 'ai'
+- [x] Push database schema change
+- [x] Add 15-second timeout with fallback message
+- [x] Implement retry logic on Leo generation failure (2 attempts)
+- [x] Add comprehensive logging (attempt tracking, success/failure, timing)
+- [x] Verify Leo AI responds automatically on website
+- [x] Test /takeback and /handoffleo commands still work
+- [x] Verify customer can chat and get Leo response without Telegram

@@ -58,7 +58,7 @@ export const conversations = mysqlTable("conversations", {
   leadScoreChange: int("lead_score_change").default(0),
   outcome: varchar("outcome", { length: 50 }),
   metadata: text("metadata"), // JSON for additional data like handoff status
-  mode: mysqlEnum("mode", ["ai", "bridge"]).default("bridge").notNull(), // ai = Leo AI responds, bridge = forward to Telegram (DEFAULT: bridge for autonomous Leo routing)
+  mode: mysqlEnum("mode", ["ai", "bridge"]).default("ai").notNull(), // ai = Leo AI responds automatically, bridge = forward to Telegram (DEFAULT: ai for LEO-FIRST mode)
 });
 
 export const messages = mysqlTable("messages", {

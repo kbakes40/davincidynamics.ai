@@ -36,6 +36,13 @@
       "when": 1771227890608,
       "tag": "0004_chemical_vulcan",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1771229245959,
+      "tag": "0005_sudden_masque",
+      "breakpoints": true
     }
   ]
 }
