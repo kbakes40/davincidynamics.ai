@@ -163,3 +163,4 @@
 ## Chatbot UI Updates
 - [x] Update chatbot icon to AI head design with neon glow (transparent background)
 - [x] Add "Powered by Davinci Dynamics" text to chatbot icon
+- [x] Update Sophia's message avatars to use AI head icon

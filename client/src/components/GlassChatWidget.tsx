@@ -282,8 +282,18 @@ export default function GlassChatWidget() {
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} gap-2 items-end`}
                 >
+                  {msg.role === 'assistant' && (
+                    <img 
+                      src="/chatbot-icon.png" 
+                      alt="Sophia AI" 
+                      className="w-8 h-8 object-contain flex-shrink-0"
+                      style={{
+                        filter: 'drop-shadow(0 0 6px rgba(0, 217, 255, 0.5))'
+                      }}
+                    />
+                  )}
                   <div
                     className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                       msg.role === 'user'
@@ -308,7 +318,15 @@ export default function GlassChatWidget() {
               
               {/* Typing indicator */}
               {isTyping && (
-                <div className="flex justify-start">
+                <div className="flex justify-start gap-2 items-end">
+                  <img 
+                    src="/chatbot-icon.png" 
+                    alt="Sophia AI" 
+                    className="w-8 h-8 object-contain flex-shrink-0"
+                    style={{
+                      filter: 'drop-shadow(0 0 6px rgba(0, 217, 255, 0.5))'
+                    }}
+                  />
                   <div
                     className="max-w-[80%] rounded-2xl rounded-bl-sm px-4 py-3"
                     style={{
