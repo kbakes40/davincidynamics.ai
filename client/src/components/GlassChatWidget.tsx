@@ -47,7 +47,7 @@ export default function GlassChatWidget() {
         setIsEntering(false);
         setHasTypedWelcome(true);
         
-        const welcomeText = "Hi! I'm Sophia, your DaVinci Dynamics business consultant. I help entrepreneurs like you stop throwing money away on platform fees. What are you currently paying monthly for your e-commerce platform?";
+        const welcomeText = "Hi! I'm Leo, your DaVinci Dynamics business consultant. I help entrepreneurs like you stop throwing money away on platform fees. What are you currently paying monthly for your e-commerce platform?";
         const messageId = "welcome";
         
         // Add empty message placeholder
@@ -240,7 +240,7 @@ export default function GlassChatWidget() {
             <div className="relative">
               <img 
                 src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/FefxtEAbdFeGtAFo.png" 
-                alt="Sophia AI" 
+                alt="Leo AI" 
                 className="w-12 h-12 object-contain"
                 style={{
                   filter: 'drop-shadow(0 0 8px rgba(0, 217, 255, 0.6))'
@@ -248,7 +248,7 @@ export default function GlassChatWidget() {
               />
             </div>
             <div>
-              <h3 className="text-white font-semibold text-sm">Sophia</h3>
+              <h3 className="text-white font-semibold text-sm">Leo</h3>
               <p className="text-[#00D9FF] text-xs">Business Consultant • Online</p>
               <p className="text-gray-400 text-[10px] mt-0.5">Powered by Davinci Dynamics</p>
             </div>
@@ -287,7 +287,7 @@ export default function GlassChatWidget() {
                   {msg.role === 'assistant' && (
                     <img 
                       src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/FefxtEAbdFeGtAFo.png" 
-                      alt="Sophia AI" 
+                      alt="Leo AI" 
                       className="w-8 h-8 object-contain flex-shrink-0"
                       style={{
                         filter: 'drop-shadow(0 0 6px rgba(0, 217, 255, 0.5))'
@@ -321,7 +321,7 @@ export default function GlassChatWidget() {
                 <div className="flex justify-start gap-2 items-end">
                   <img 
                     src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/FefxtEAbdFeGtAFo.png" 
-                    alt="Sophia AI" 
+                    alt="Leo AI" 
                     className="w-8 h-8 object-contain flex-shrink-0"
                     style={{
                       filter: 'drop-shadow(0 0 6px rgba(0, 217, 255, 0.5))'

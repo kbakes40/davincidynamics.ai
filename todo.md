@@ -172,3 +172,4 @@
 - [x] Update Booking page CTAs to reduce sales friction
 - [x] Generate simplified chatbot icon (geometric head only, no lightning, no text, transparent background)
 - [x] Update chatbot icon file in project (replaced with simplified version)
+- [x] Rename chatbot from Sophia to Leo across all files

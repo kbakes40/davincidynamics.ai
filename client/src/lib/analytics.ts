@@ -54,7 +54,7 @@ export function trackVideoEvent(action: 'play' | 'pause' | 'complete', videoName
  */
 export function trackChatEvent(action: 'open' | 'close' | 'message_sent', additionalParams?: Record<string, any>) {
   trackEvent(`chat_${action}`, {
-    chat_bot: 'Sophia',
+    chat_bot: 'Leo',
     ...additionalParams
   });
 }
