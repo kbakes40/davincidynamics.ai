@@ -216,3 +216,16 @@
 
 ## Bug Fixes
 - [x] Fix polling error: "hooks[lastArg] is not a function" - use trpc.useUtils() instead of direct query call
+
+## Debug Telegram Message Sync
+- [ ] Verify Telegram webhook is receiving messages
+- [ ] Check if agent messages are being stored in database
+- [ ] Verify polling mechanism is fetching messages
+- [ ] Check conversation ID matching between handoff and webhook
+- [ ] Add logging to webhook and polling endpoints
+
+## Improve Telegram Message Routing
+- [x] Update webhook to route ANY message to most recent active handed-off conversation
+- [x] Remove requirement to reply to handoff notification
+- [ ] Store chat_id to conversation_id mapping in database (optional enhancement)
+- [x] Add fallback logic when no active conversation exists

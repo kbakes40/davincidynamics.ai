@@ -52,10 +52,10 @@ export async function processTelegramWebhook(update: TelegramUpdate) {
   }
 
   try {
-    // Extract conversation ID from reply_to_message or parse from text
-    // Format: "New lead from [User Name] (Conversation ID: 123)"
+    // Extract conversation ID from reply_to_message or find most recent active conversation
     let conversationId: number | null = null;
 
+    // First, try to extract from reply_to_message
     if (message.reply_to_message?.text) {
       const match = message.reply_to_message.text.match(/Conversation ID: (\d+)/);
       if (match) {
@@ -63,9 +63,28 @@ export async function processTelegramWebhook(update: TelegramUpdate) {
       }
     }
 
+    // If no conversation ID from reply, find the most recent handed-off conversation
     if (!conversationId) {
-      console.log('[Telegram Webhook] No conversation ID found, ignoring message');
-      return { success: true, message: 'No conversation context' };
+      const recentConversations = await db
+        .select()
+        .from(conversations)
+        .orderBy(desc(conversations.startedAt))
+        .limit(20);
+
+      // Find the most recent conversation that is handed off
+      for (const conv of recentConversations) {
+        const metadata = conv.metadata ? JSON.parse(conv.metadata as string) : {};
+        if (metadata.handedOff) {
+          conversationId = conv.id;
+          console.log(`[Telegram Webhook] Auto-routing to conversation ${conversationId}`);
+          break;
+        }
+      }
+    }
+
+    if (!conversationId) {
+      console.log('[Telegram Webhook] No active handed-off conversation found');
+      return { success: true, message: 'No active conversation' };
     }
 
     // Verify conversation exists and is handed off

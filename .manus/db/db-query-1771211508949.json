@@ -1,0 +1,125 @@
+{
+  "query": "SELECT id, conversation_id, role, LEFT(content, 80) as content, timestamp, intent FROM messages ORDER BY timestamp DESC LIMIT 15;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26ThCZ81siAmqDr.7e0985d8372e --database 6Cxa4yXk2NFYiChHRvSCkw --execute SELECT id, conversation_id, role, LEFT(content, 80) as content, timestamp, intent FROM messages ORDER BY timestamp DESC LIMIT 15;",
+  "rows": [
+    {
+      "id": "300004",
+      "conversation_id": "300002",
+      "role": "assistant",
+      "content": "Perfect, thank you kb! I'm connecting you with our team now for personalized ass",
+      "timestamp": "2026-02-16 03:10:23",
+      "intent": "NULL"
+    },
+    {
+      "id": "300003",
+      "conversation_id": "300002",
+      "role": "user",
+      "content": "kb kb@gmail.com 7347777777",
+      "timestamp": "2026-02-16 03:10:21",
+      "intent": "NULL"
+    },
+    {
+      "id": "300002",
+      "conversation_id": "300001",
+      "role": "assistant",
+      "content": "Thank you for sharing that. Spending around $300 a month translates to about $3,",
+      "timestamp": "2026-02-16 03:10:04",
+      "intent": "NULL"
+    },
+    {
+      "id": "300001",
+      "conversation_id": "300001",
+      "role": "user",
+      "content": "about 300 a month",
+      "timestamp": "2026-02-16 03:10:00",
+      "intent": "NULL"
+    },
+    {
+      "id": "270020",
+      "conversation_id": "270010",
+      "role": "assistant",
+      "content": "Thank you for providing your contact information! I'm connecting you with our te",
+      "timestamp": "2026-02-16 02:58:34",
+      "intent": "NULL"
+    },
+    {
+      "id": "270019",
+      "conversation_id": "270010",
+      "role": "user",
+      "content": "Kb@ ymail 7345554173",
+      "timestamp": "2026-02-16 02:58:31",
+      "intent": "NULL"
+    },
+    {
+      "id": "270018",
+      "conversation_id": "270009",
+      "role": "assistant",
+      "content": "Thank you for sharing that, it gives us a good starting point. At $300 per month",
+      "timestamp": "2026-02-16 02:58:10",
+      "intent": "NULL"
+    },
+    {
+      "id": "270017",
+      "conversation_id": "270009",
+      "role": "user",
+      "content": "300 a month ",
+      "timestamp": "2026-02-16 02:58:07",
+      "intent": "NULL"
+    },
+    {
+      "id": "270015",
+      "conversation_id": "270008",
+      "role": "user",
+      "content": "kb kb@mail.com 77777777",
+      "timestamp": "2026-02-16 02:57:25",
+      "intent": "NULL"
+    },
+    {
+      "id": "270014",
+      "conversation_id": "270007",
+      "role": "assistant",
+      "content": "Thank you for sharing that, it gives us a clear starting point. At $300 per mont",
+      "timestamp": "2026-02-16 02:57:03",
+      "intent": "NULL"
+    },
+    {
+      "id": "270013",
+      "conversation_id": "270007",
+      "role": "user",
+      "content": "300 a month",
+      "timestamp": "2026-02-16 02:56:59",
+      "intent": "NULL"
+    },
+    {
+      "id": "270012",
+      "conversation_id": "270006",
+      "role": "assistant",
+      "content": "Hello there! I understand you might be feeling overwhelmed by the sheer volume o",
+      "timestamp": "2026-02-16 02:56:09",
+      "intent": "NULL"
+    },
+    {
+      "id": "270011",
+      "conversation_id": "270006",
+      "role": "user",
+      "content": "Too much ",
+      "timestamp": "2026-02-16 02:56:05",
+      "intent": "NULL"
+    },
+    {
+      "id": "270010",
+      "conversation_id": "270005",
+      "role": "assistant",
+      "content": "Thank you, Kevin, and for providing your email, kb@gmail.com! I'm connecting you",
+      "timestamp": "2026-02-16 02:45:31",
+      "intent": "NULL"
+    }
+  ],
+  "messages": [
+    "270016\t270008\tassistant\tThank you, kb! I have your email as kb@mail.com and phone number as 77777777.",
+    "I\t2026-02-16 02:57:27\tNULL"
+  ],
+  "stdout": "id\tconversation_id\trole\tcontent\ttimestamp\tintent\n300004\t300002\tassistant\tPerfect, thank you kb! I'm connecting you with our team now for personalized ass\t2026-02-16 03:10:23\tNULL\n300003\t300002\tuser\tkb kb@gmail.com 7347777777\t2026-02-16 03:10:21\tNULL\n300002\t300001\tassistant\tThank you for sharing that. Spending around $300 a month translates to about $3,\t2026-02-16 03:10:04\tNULL\n300001\t300001\tuser\tabout 300 a month\t2026-02-16 03:10:00\tNULL\n270020\t270010\tassistant\tThank you for providing your contact information! I'm connecting you with our te\t2026-02-16 02:58:34\tNULL\n270019\t270010\tuser\tKb@ ymail 7345554173\t2026-02-16 02:58:31\tNULL\n270018\t270009\tassistant\tThank you for sharing that, it gives us a good starting point. At $300 per month\t2026-02-16 02:58:10\tNULL\n270017\t270009\tuser\t300 a month \t2026-02-16 02:58:07\tNULL\n270016\t270008\tassistant\tThank you, kb! I have your email as kb@mail.com and phone number as 77777777.\n\nI\t2026-02-16 02:57:27\tNULL\n270015\t270008\tuser\tkb kb@mail.com 77777777\t2026-02-16 02:57:25\tNULL\n270014\t270007\tassistant\tThank you for sharing that, it gives us a clear starting point. At $300 per mont\t2026-02-16 02:57:03\tNULL\n270013\t270007\tuser\t300 a month\t2026-02-16 02:56:59\tNULL\n270012\t270006\tassistant\tHello there! I understand you might be feeling overwhelmed by the sheer volume o\t2026-02-16 02:56:09\tNULL\n270011\t270006\tuser\tToo much \t2026-02-16 02:56:05\tNULL\n270010\t270005\tassistant\tThank you, Kevin, and for providing your email, kb@gmail.com! I'm connecting you\t2026-02-16 02:45:31\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

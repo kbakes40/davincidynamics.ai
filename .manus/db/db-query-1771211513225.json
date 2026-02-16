@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, user_id, started_at, ended_at, message_count, metadata FROM conversations WHERE id = 270008;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26ThCZ81siAmqDr.7e0985d8372e --database 6Cxa4yXk2NFYiChHRvSCkw --execute SELECT id, user_id, started_at, ended_at, message_count, metadata FROM conversations WHERE id = 270008;",
+  "rows": [
+    {
+      "id": "270008",
+      "user_id": "270008",
+      "started_at": "2026-02-16 02:57:25",
+      "ended_at": "2026-02-16 02:57:27",
+      "message_count": "2",
+      "metadata": "{\"handedOff\":true,\"contactCaptured\":true}"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuser_id\tstarted_at\tended_at\tmessage_count\tmetadata\n270008\t270008\t2026-02-16 02:57:25\t2026-02-16 02:57:27\t2\t{\"handedOff\":true,\"contactCaptured\":true}\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}
