@@ -336,3 +336,10 @@
 - [ ] Verify webhook delivery to Telegram
 - [ ] Run live test: website → Telegram → website
 - [ ] Capture and analyze complete log trail
+
+## Hotfix: Direct Message Delivery
+- [x] Remove owner/mode blocking for testing
+- [x] Implement direct sendMessageToConversation
+- [x] Add comprehensive logging (conversationId, parsedCID, sendAttempted, sendStatus, error)
+- [ ] Verify webhook receives Telegram replies
+- [ ] Run live test and capture logs

@@ -198,46 +198,29 @@ async function processUpdate(update: TelegramUpdate): Promise<void> {
     console.log('[DaVinci Bot] 🔍 Extracted CID:', conversationId);
     
     if (conversationId) {
-      console.log('[DaVinci Bot] 🎯 Agent message for conversation:', conversationId);
-      console.log('[DaVinci Bot] Agent message:', text);
+      console.log('[DaVinci Bot] 🔥 HOTFIX MODE - Direct delivery without blocking');
+      console.log('[DaVinci Bot] 🎯 Parsed CID:', conversationId);
+      console.log('[DaVinci Bot] 💬 Agent message:', text);
       
-      // Check if conversation is in bridge mode (owner=leo)
       const { getDb } = await import('./db');
-      const { conversations, messages: messagesTable } = await import('../drizzle/schema');
-      const { eq } = await import('drizzle-orm');
+      const { messages: messagesTable } = await import('../drizzle/schema');
       const db = await getDb();
       
+      let sendAttempted = false;
+      let sendStatus = 'not_attempted';
+      let errorDetails = null;
+      
       if (!db) {
-        console.error('[DaVinci Bot] Database connection failed');
+        console.error('[DaVinci Bot] ❌ Database connection failed');
+        sendStatus = 'db_unavailable';
         await sendTelegramMessage(chatId, '❌ Error: Database unavailable');
         return;
       }
       
-      // Verify conversation exists and is in bridge mode
-      const conv = await db
-        .select()
-        .from(conversations)
-        .where(eq(conversations.id, parseInt(conversationId)))
-        .limit(1);
+      console.log('[DaVinci Bot] 📦 Attempting direct message delivery...');
+      sendAttempted = true;
       
-      if (conv.length === 0) {
-        console.error('[DaVinci Bot] Conversation not found:', conversationId);
-        await sendTelegramMessage(chatId, `❌ Conversation ${conversationId} not found`);
-        return;
-      }
-      
-      if (conv[0].mode !== 'bridge') {
-        console.log('[DaVinci Bot] ⚠️ Conversation not in bridge mode (owner != leo):', conversationId);
-        await sendTelegramMessage(
-          chatId,
-          `⚠️ Conversation ${conversationId} is in AI mode. Use /handoffleo ${conversationId} to take control.`
-        );
-        return;
-      }
-      
-      console.log('[DaVinci Bot] ✅ Conversation verified - mode=bridge (owner=leo)');
-      
-      // Store agent message in website chat database
+      // HOTFIX: Direct delivery without owner/mode checks
       try {
           await db.insert(messagesTable).values({
             conversationId: parseInt(conversationId),
@@ -247,18 +230,35 @@ async function processUpdate(update: TelegramUpdate): Promise<void> {
             intent: 'agent_message'
           });
           
-          console.log('[DaVinci Bot] ✅ Agent message stored in website chat database');
+          sendStatus = 'success';
+          console.log('[DaVinci Bot] ✅ Message stored successfully');
+          console.log('[DaVinci Bot] 📦 DELIVERY LOG:', {
+            conversationId: parseInt(conversationId),
+            parsedCID: conversationId,
+            sendAttempted: true,
+            sendStatus: 'success',
+            error: null
+          });
           
           // Confirm to agent
           await sendTelegramMessage(
             chatId,
-            `✅ Message delivered to customer on website!\n\n"${text}"`
+            `✅ Message delivered!\n\nConversation: ${conversationId}\nMessage: "${text}"`
           );
         } catch (error) {
-          console.error('[DaVinci Bot] Error storing agent message:', error);
+          sendStatus = 'failed';
+          errorDetails = error instanceof Error ? error.message : String(error);
+          console.error('[DaVinci Bot] ❌ Delivery failed:', error);
+          console.log('[DaVinci Bot] 📦 DELIVERY LOG:', {
+            conversationId: parseInt(conversationId),
+            parsedCID: conversationId,
+            sendAttempted: true,
+            sendStatus: 'failed',
+            error: errorDetails
+          });
           await sendTelegramMessage(
             chatId,
-            `❌ Error: Could not deliver message to website chat`
+            `❌ Delivery failed!\n\nConversation: ${conversationId}\nError: ${errorDetails}`
           );
         }
       return;
