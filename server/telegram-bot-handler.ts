@@ -91,7 +91,7 @@ async function processMessage(message: TelegramUpdate['message']) {
       userMessage
     );
     
-    await sendMessage(chatId, response);
+    await sendMessage(chatId, response.message);
   } catch (error) {
     console.error('[Telegram Bot] Process message error:', error);
     await sendMessage(chatId, "Sorry, I encountered an error. Please try again or contact support.");

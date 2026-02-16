@@ -204,3 +204,12 @@
 - [x] Add conversation export to JSON
 - [x] Add route for conversation history page
 - [ ] Add conversation tags and notes for internal tracking
+
+## Bi-Directional Telegram Chat Sync
+- [x] Set up Telegram webhook endpoint to receive agent messages
+- [x] Store agent messages in conversation thread
+- [x] Implement polling on website chat to fetch new messages
+- [x] Update chat UI to display agent messages (distinguish from Leo AI)
+- [x] Add visual indicator when human agent takes over
+- [ ] Set up Telegram webhook URL with @Leo_Handoff_bot
+- [ ] Test message flow: Telegram → Database → Website Chat

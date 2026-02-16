@@ -431,7 +431,7 @@ Leo has captured their information and handed off the conversation. Please follo
       last_name?: string;
     },
     userMessage: string
-  ): Promise<string> {
+  ): Promise<{ message: string; conversationId: number; isHandedOff: boolean }> {
     const startTime = Date.now();
 
     try {
@@ -453,7 +453,11 @@ Leo has captured their information and handed off the conversation. Please follo
         if (conv.length > 0 && conv[0].endedAt) {
           const metadata = conv[0].metadata ? JSON.parse(conv[0].metadata as string) : {};
           if (metadata.handedOff) {
-            return "Your conversation has been handed off to our team. They will be in touch with you shortly!";
+            return {
+              message: "Your conversation has been handed off to our team. They will be in touch with you shortly!",
+              conversationId: conversation.id,
+              isHandedOff: true
+            };
           }
         }
       }
@@ -493,12 +497,20 @@ Leo has captured their information and handed off the conversation. Please follo
       );
 
       // Check for handoff after saving the message
-      await this.checkForHandoff(conversation.id, userMessage, assistantMessage);
+      const wasHandedOff = await this.checkForHandoff(conversation.id, userMessage, assistantMessage);
 
-      return assistantMessage;
+      return {
+        message: assistantMessage,
+        conversationId: conversation.id,
+        isHandedOff: wasHandedOff
+      };
     } catch (error) {
       console.error('Error handling message:', error);
-      return 'I apologize, but I encountered an error processing your message. Please try again.';
+      return {
+        message: 'I apologize, but I encountered an error processing your message. Please try again.',
+        conversationId: -1,
+        isHandedOff: false
+      };
     }
   }
 

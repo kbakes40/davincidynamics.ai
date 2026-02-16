@@ -26,6 +26,9 @@ export default function GlassChatWidget() {
   const [hasTypedWelcome, setHasTypedWelcome] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [conversationId, setConversationId] = useState<number | null>(null);
+  const [isHandedOff, setIsHandedOff] = useState(false);
+  const [lastMessageId, setLastMessageId] = useState<number>(0);
   
   const chatMutation = trpc.bot.chat.useMutation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -74,6 +77,40 @@ export default function GlassChatWidget() {
     }
   }, [isOpen, hasTypedWelcome]);
 
+  // Poll for new messages when conversation is handed off
+  useEffect(() => {
+    if (!conversationId || !isHandedOff) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const result = await trpc.bot.pollMessages.query({
+          conversationId,
+          lastMessageId: lastMessageId > 0 ? lastMessageId : undefined,
+        });
+
+        if (result.messages.length > 0) {
+          // Add new messages to chat
+          const newMessages = result.messages.map(msg => ({
+            id: msg.id.toString(),
+            role: msg.role as "user" | "assistant",
+            content: msg.content,
+            timestamp: new Date(msg.timestamp),
+          }));
+
+          setMessages(prev => [...prev, ...newMessages]);
+          
+          // Update last message ID
+          const maxId = Math.max(...result.messages.map(m => m.id));
+          setLastMessageId(maxId);
+        }
+      } catch (error) {
+        console.error('Error polling messages:', error);
+      }
+    }, 3000); // Poll every 3 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [conversationId, isHandedOff, lastMessageId]);
+
   // Exit animation
   const handleClose = () => {
     setIsAnimating(true);
@@ -110,7 +147,16 @@ export default function GlassChatWidget() {
       });
       
       setIsTyping(false);
-      const fullResponse = typeof response === 'string' ? response : String(response);
+      
+      // Store conversation ID and handoff status
+      if (response.conversationId && response.conversationId > 0) {
+        setConversationId(response.conversationId);
+      }
+      if (response.isHandedOff) {
+        setIsHandedOff(true);
+      }
+      
+      const fullResponse = response.message;
       
       // Stream the response character by character
       const messageId = (Date.now() + 1).toString();
@@ -246,7 +292,9 @@ export default function GlassChatWidget() {
             </div>
             <div>
               <h3 className="text-white font-semibold text-sm">Leo</h3>
-              <p className="text-[#00D9FF] text-xs">Business Consultant • Online</p>
+              <p className="text-[#00D9FF] text-xs">
+                {isHandedOff ? "Connected with Specialist" : "Business Consultant • Online"}
+              </p>
               <p className="text-gray-400 text-[10px] mt-0.5">Powered by Davinci Dynamics</p>
             </div>
           </div>

@@ -6,6 +6,8 @@
 import { z } from 'zod';
 import { publicProcedure, router } from './_core/trpc';
 import { botAI } from './bot-ai-handler';
+import { processTelegramWebhook } from './telegram-webhook';
+import { pollMessages } from './poll-messages';
 
 export const botRouter = router({
   /**
@@ -25,6 +27,15 @@ export const botRouter = router({
       // Use AI handler for full conversational responses
       const response = await botAI.handleMessage(input.telegramUser, input.message);
       return response;
+    }),
+
+  /**
+   * Telegram webhook endpoint for receiving agent messages
+   */
+  telegramWebhook: publicProcedure
+    .input(z.any()) // Telegram update object
+    .mutation(async ({ input }) => {
+      return await processTelegramWebhook(input);
     }),
 
   /**
@@ -105,6 +116,18 @@ export const botRouter = router({
     }))
     .query(async ({ input }) => {
       return await botAI.listConversations(input);
+    }),
+
+  /**
+   * Poll for new messages in a conversation
+   */
+  pollMessages: publicProcedure
+    .input(z.object({
+      conversationId: z.number(),
+      lastMessageId: z.number().optional(),
+    }))
+    .query(async ({ input }) => {
+      return await pollMessages(input);
     }),
 
   /**
