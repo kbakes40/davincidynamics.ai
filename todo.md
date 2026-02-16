@@ -256,3 +256,15 @@
 - [ ] Verify messages are being stored in database
 - [ ] Check polling mechanism is fetching messages
 - [ ] Verify conversation ID matching
+
+## New Telegram Bot: @DavinciDynamics_Chatbot with Leo AI
+- [x] Create Leo link-click handler with context parsing
+- [x] Implement intent classification (demo/solution/support/hire/generic)
+- [x] Build response generator with qualification questions
+- [x] Add pricing/demo flow logic
+- [x] Create fallback response handler
+- [x] Set up new bot webhook endpoint
+- [x] Configure bot token (DAVINCI_CHATBOT_TOKEN) via secrets
+- [x] Run setup-davinci-webhook.js after deployment
+- [x] Validate bot token with vitest
+- [x] Document trigger, routing, and response steps
