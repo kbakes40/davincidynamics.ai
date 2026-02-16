@@ -242,3 +242,17 @@
 - [x] Create script to automatically configure Telegram webhook
 - [x] Add webhook status check endpoint
 - [ ] Test webhook is receiving messages
+
+## Debug Handoff Notification
+- [ ] Check if handoff notification is being sent to Telegram
+- [ ] Verify TELEGRAM_HANDOFF_BOT_TOKEN is correct
+- [ ] Check server logs for Telegram API errors
+- [ ] Test Telegram API manually with curl
+
+## Debug Webhook Message Reception
+- [x] Check if webhook is receiving Telegram messages
+- [x] Create proper HTTP webhook endpoint (not tRPC)
+- [x] Update webhook URL to /api/telegram-handoff-webhook
+- [ ] Verify messages are being stored in database
+- [ ] Check polling mechanism is fetching messages
+- [ ] Verify conversation ID matching

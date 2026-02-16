@@ -6,7 +6,7 @@
 import 'dotenv/config';
 
 const BOT_TOKEN = process.env.TELEGRAM_HANDOFF_BOT_TOKEN;
-const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://3000-ivffr5j7qq1mb9nvb9hdg-c6ade6a9.us2.manus.computer/api/trpc/bot.telegramWebhook';
+const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://3000-ivffr5j7qq1mb9nvb9hdg-c6ade6a9.us2.manus.computer/api/telegram-handoff-webhook';
 
 async function setupWebhook() {
   if (!BOT_TOKEN) {

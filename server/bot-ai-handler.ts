@@ -306,11 +306,16 @@ export class BotAIHandler {
     userId: number;
     monthlySpend?: string;
   }) {
+    console.log('[Handoff] Attempting to send notification for conversation:', leadData.conversationId);
+    
     const token = process.env.TELEGRAM_HANDOFF_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
     
+    console.log('[Handoff] Token present:', !!token, 'Chat ID present:', !!chatId);
+    
     if (!token || !chatId) {
-      console.error('Telegram handoff bot credentials not configured');
+      console.error('[Handoff] ERROR: Telegram handoff bot credentials not configured');
+      console.error('[Handoff] Token:', token ? 'SET' : 'MISSING', 'Chat ID:', chatId ? 'SET' : 'MISSING');
       return;
     }
 
@@ -326,6 +331,8 @@ User ID: ${leadData.userId}
 
 Leo has captured their information and handed off the conversation. Please follow up!`;
 
+    console.log('[Handoff] Sending notification to chat ID:', chatId);
+    
     try {
       const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
         method: 'POST',
@@ -338,10 +345,13 @@ Leo has captured their information and handed off the conversation. Please follo
       });
 
       if (!response.ok) {
-        console.error('Failed to send handoff notification:', await response.text());
+        const errorText = await response.text();
+        console.error('[Handoff] ERROR: Failed to send notification:', errorText);
+      } else {
+        console.log('[Handoff] ✅ Notification sent successfully!');
       }
     } catch (error) {
-      console.error('Error sending handoff notification:', error);
+      console.error('[Handoff] ERROR: Exception sending notification:', error);
     }
   }
 

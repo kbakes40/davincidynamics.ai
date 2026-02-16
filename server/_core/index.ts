@@ -36,6 +36,20 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  
+  // Telegram handoff bot webhook
+  const { processTelegramWebhook } = await import('../telegram-webhook');
+  app.post('/api/telegram-handoff-webhook', async (req, res) => {
+    try {
+      console.log('[Handoff Webhook] Received request');
+      const result = await processTelegramWebhook(req.body);
+      res.json(result);
+    } catch (error) {
+      console.error('[Handoff Webhook] Error:', error);
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  });
+  
   // tRPC API
   app.use(
     "/api/trpc",
