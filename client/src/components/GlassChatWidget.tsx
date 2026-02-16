@@ -53,12 +53,21 @@ export default function GlassChatWidget() {
         setIsEntering(false);
         setHasTypedWelcome(true);
         
-        // Check if we're on the Shopify Alternative page
-        const isShopifyPage = window.location.pathname === '/shopify-alternative';
-        const welcomeText = isShopifyPage
-          ? "Hey — if you're on Shopify, I can quickly map where your costs are leaking. What are you spending monthly on Shopify + apps right now?"
-          : "Hi! I'm Leo with DaVinci Dynamics. Before we dive in — what's your first name?";
-        setIsAskingForName(!isShopifyPage); // Only ask for name if not on Shopify page
+        // Check for page-specific welcome messages
+        const pathname = window.location.pathname;
+        const isShopifyPage = pathname === '/shopify-alternative';
+        const isProfitPage = pathname === '/profit-crm-demo';
+        
+        let welcomeText;
+        if (isShopifyPage) {
+          welcomeText = "Hey — if you're on Shopify, I can quickly map where your costs are leaking. What are you spending monthly on Shopify + apps right now?";
+        } else if (isProfitPage) {
+          welcomeText = "Want a quick profit breakdown? Share your monthly revenue and current platform/tool costs, and I'll estimate your margin opportunity.";
+        } else {
+          welcomeText = "Hi! I'm Leo with DaVinci Dynamics. Before we dive in — what's your first name?";
+        }
+        
+        setIsAskingForName(!isShopifyPage && !isProfitPage); // Only ask for name on default pages
         const messageId = "welcome";
         
         // Add empty message placeholder

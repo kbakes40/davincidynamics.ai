@@ -18,6 +18,7 @@ export const leadsRouter = router({
           medium: z.string().optional(),
           campaign: z.string().optional(),
         }).optional(),
+        metadata: z.any().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -36,6 +37,7 @@ export const leadsRouter = router({
         utmSource: input.utmParams?.source,
         utmMedium: input.utmParams?.medium,
         utmCampaign: input.utmParams?.campaign,
+        metadata: input.metadata ? JSON.stringify(input.metadata) : null,
       });
 
       return { success: true, leadId: lead.insertId };

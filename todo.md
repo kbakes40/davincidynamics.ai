@@ -492,3 +492,20 @@
 - [ ] Generate mockup images for 4 unisex templates
 - [ ] Integrate preview images into template cards
 - [ ] Test image loading and save checkpoint
+
+## Add /profit-crm-demo Page
+- [x] Create ProfitCrmDemo.tsx page component with all sections
+- [x] Implement hero section with CTAs
+- [x] Add profit snapshot KPI cards section
+- [x] Build interactive profit calculator with inputs/outputs
+- [x] Create CRM pipeline demo with interactive stages
+- [x] Add before/after comparison block
+- [x] Create demo preview cards section
+- [x] Add FAQ section with schema markup
+- [x] Implement 2-step lead capture form
+- [x] Add tracking events (calculator_started, calculator_completed, demo_preview_opened, cta_clicked, form_started, form_submitted, booking_clicked)
+- [x] Add custom chat context for profit-specific first message
+- [x] Wire into App.tsx routing
+- [x] Add SEO metadata (title, description, FAQ schema, Service schema)
+- [ ] Add navigation/footer links
+- [ ] Test complete flow and save checkpoint
