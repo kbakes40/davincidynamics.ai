@@ -322,3 +322,9 @@
 - [x] Test /takeback command
 - [x] Test /handoffleo command
 - [x] Capture logs and transcript
+
+## 60-Second Timeout Fallback
+- [x] Add timeout tracking to bridge mode forwarding
+- [x] Send fallback message after 60s if no Leo reply
+- [x] Continue waiting for Leo reply after fallback
+- [x] Test timeout triggers correctly

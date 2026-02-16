@@ -9,6 +9,7 @@ import { eq } from 'drizzle-orm';
 
 /**
  * Forward customer message to @DavinciDynamics_Chatbot
+ * Includes 60-second timeout fallback
  */
 export async function forwardToTelegram(payload: {
   conversationId: number;
@@ -61,10 +62,64 @@ This customer is waiting on the website. Reply here and your message will appear
     }
 
     console.log('[Bridge] ✅ Message forwarded to Telegram successfully');
+    
+    // Set 60-second timeout for fallback message
+    setTimeout(async () => {
+      await sendTimeoutFallback(payload.conversationId);
+    }, 60000);
+    
     return true;
   } catch (error) {
     console.error('[Bridge] Error forwarding to Telegram:', error);
     return false;
+  }
+}
+
+/**
+ * Send timeout fallback message if no Leo reply within 60 seconds
+ */
+async function sendTimeoutFallback(conversationId: number): Promise<void> {
+  console.log('[Bridge] Checking if timeout fallback needed for conversation:', conversationId);
+  
+  const db = await getDb();
+  if (!db) return;
+  
+  // Check if Leo has replied in the last 60 seconds
+  const { messages: messagesTable } = await import('../drizzle/schema');
+  const { desc } = await import('drizzle-orm');
+  
+  const recentMessages = await db
+    .select()
+    .from(messagesTable)
+    .where(eq(messagesTable.conversationId, conversationId))
+    .orderBy(desc(messagesTable.timestamp))
+    .limit(5);
+  
+  // Check if the most recent message is from assistant (Leo replied)
+  const lastMessage = recentMessages[0];
+  if (lastMessage && lastMessage.role === 'assistant') {
+    const messageAge = Date.now() - new Date(lastMessage.timestamp).getTime();
+    if (messageAge < 60000) {
+      console.log('[Bridge] Leo replied within 60s - no fallback needed');
+      return;
+    }
+  }
+  
+  // Send fallback message
+  console.log('[Bridge] ⏰ Sending 60s timeout fallback message');
+  
+  try {
+    await db.insert(messagesTable).values({
+      conversationId,
+      role: 'assistant',
+      content: 'Thanks for waiting — we\'re reviewing your request now.',
+      timestamp: new Date(),
+      intent: 'timeout_fallback'
+    });
+    
+    console.log('[Bridge] ✅ Timeout fallback message sent');
+  } catch (error) {
+    console.error('[Bridge] Error sending timeout fallback:', error);
   }
 }
 
