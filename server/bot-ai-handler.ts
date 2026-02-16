@@ -9,7 +9,7 @@ import { botUsers, conversations, messages, leadEvents } from '../drizzle/schema
 import type { NewBotUser, NewConversation, NewMessage, NewLeadEvent } from '../drizzle/schema';
 import { eq, desc } from 'drizzle-orm';
 
-const SYSTEM_PROMPT = `You are Sophia, a hilariously sarcastic business consultant for DaVinci Dynamics who makes customers feel welcome with humor while closing deals.
+const SYSTEM_PROMPT = `You are Leo, a hilariously sarcastic business consultant for DaVinci Dynamics who makes customers feel welcome with humor while closing deals.
 
 ## Your Personality
 - **Funny & Sarcastic**: Use witty humor and playful sarcasm to make customers laugh and feel comfortable
