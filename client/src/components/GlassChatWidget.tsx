@@ -241,7 +241,7 @@ export default function GlassChatWidget() {
               <img 
                 src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/xaGhjEYpeTpbGiyr.png" 
                 alt="Leo AI" 
-                className="w-12 h-12 object-contain"
+                className="w-12 h-12 object-cover rounded-full"
                 style={{
                   filter: 'drop-shadow(0 0 8px rgba(0, 217, 255, 0.6))'
                 }}
@@ -288,7 +288,7 @@ export default function GlassChatWidget() {
                     <img 
                       src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/xaGhjEYpeTpbGiyr.png" 
                       alt="Leo AI" 
-                      className="w-8 h-8 object-contain flex-shrink-0"
+                      className="w-8 h-8 object-cover rounded-full flex-shrink-0"
                       style={{
                         filter: 'drop-shadow(0 0 6px rgba(0, 217, 255, 0.5))'
                       }}
@@ -322,7 +322,7 @@ export default function GlassChatWidget() {
                   <img 
                     src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/xaGhjEYpeTpbGiyr.png" 
                     alt="Leo AI" 
-                    className="w-8 h-8 object-contain flex-shrink-0"
+                    className="w-8 h-8 object-cover rounded-full flex-shrink-0"
                     style={{
                       filter: 'drop-shadow(0 0 6px rgba(0, 217, 255, 0.5))'
                     }}

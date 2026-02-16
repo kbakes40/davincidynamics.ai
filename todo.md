@@ -174,3 +174,4 @@
 - [x] Update chatbot icon file in project (replaced with simplified version)
 - [x] Rename chatbot from Sophia to Leo across all files
 - [x] Regenerate chatbot icon with fully transparent background (no black circle)
+- [x] Fix chatbot icon to display as circle (remove white square background with rounded styling)
