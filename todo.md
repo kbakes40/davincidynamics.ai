@@ -550,3 +550,10 @@
 - [x] Update route from /shopify-alternative to /shopify in App.tsx
 - [x] Update any internal links pointing to /shopify-alternative (GlassChatWidget.tsx, ShopifyAlternative.tsx)
 - [x] Test new route and save checkpoint
+
+## Investigate 404 Error on davincidynamics.ai/shopify
+
+- [ ] Check if domain is properly bound to project (User needs to verify in Settings → Domains)
+- [x] Verify route works on dev server (Confirmed working at /shopify)
+- [x] Add redirect from /shopify-alternative to /shopify for backward compatibility
+- [x] Test both URLs and confirm resolution (Both /shopify and /shopify-alternative redirect to /shopify correctly)
