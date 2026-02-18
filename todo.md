@@ -536,3 +536,11 @@
 - [x] Fix grid layout for mobile devices (changed from md:grid-cols-2 to grid-cols-1 sm:grid-cols-2)
 - [x] Ensure filter buttons are accessible on mobile (already using flex-wrap)
 - [x] Test on mobile viewport and save checkpoint
+
+## Investigate Mobile Template Visibility Issues
+
+- [x] Check if fade animations are blocking template visibility on mobile (Found: opacity-0 was hiding templates)
+- [x] Verify template section container width and padding on mobile (OK)
+- [x] Ensure template images load properly on mobile (OK)
+- [x] Add mobile-specific debugging/visibility improvements (Changed to md:opacity-0 so templates always visible on mobile)
+- [x] Test on actual mobile device and save checkpoint

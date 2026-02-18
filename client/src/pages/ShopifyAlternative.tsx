@@ -38,7 +38,7 @@ export default function ShopifyAlternative() {
   
   // Helper to get fade class
   const getFadeClass = (isVisible: boolean) => 
-    isVisible ? 'animate-fade-in-up' : 'opacity-0';
+    isVisible ? 'animate-fade-in-up' : 'md:opacity-0';
   
   // Savings calculator state
   const [shopifyPlan, setShopifyPlan] = useState("");
@@ -322,7 +322,7 @@ export default function ShopifyAlternative() {
         </section>
 
         {/* Template Showcase Section */}
-        <section ref={templateSection.ref} className={`container mx-auto px-4 py-16 ${getFadeClass(templateSection.isVisible)}`}>
+        <section ref={templateSection.ref} className={`container mx-auto px-4 py-16 ${templateSection.isVisible ? 'animate-fade-in-up' : 'md:opacity-0'}`}>
           <div className="max-w-7xl mx-auto">
             <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-5xl text-center mb-4">
               Built for <span className="text-neon">Your Audience</span>
