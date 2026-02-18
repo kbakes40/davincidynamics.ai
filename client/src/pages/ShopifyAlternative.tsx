@@ -114,7 +114,7 @@ export default function ShopifyAlternative() {
           phone: leadPhone,
           storeUrl,
           monthlySpend: parseFloat(monthlySpend),
-          sourcePage: "/shopify-alternative",
+          sourcePage: "/shopify",
           utmParams: {
             source: new URLSearchParams(window.location.search).get('utm_source') || undefined,
             medium: new URLSearchParams(window.location.search).get('utm_medium') || undefined,

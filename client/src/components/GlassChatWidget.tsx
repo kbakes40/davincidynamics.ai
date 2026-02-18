@@ -55,7 +55,7 @@ export default function GlassChatWidget() {
         
         // Check for page-specific welcome messages
         const pathname = window.location.pathname;
-        const isShopifyPage = pathname === '/shopify-alternative';
+        const isShopifyPage = pathname === '/shopify';
         const isProfitPage = pathname === '/profit-crm-demo';
         
         let welcomeText;

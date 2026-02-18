@@ -544,3 +544,9 @@
 - [x] Ensure template images load properly on mobile (OK)
 - [x] Add mobile-specific debugging/visibility improvements (Changed to md:opacity-0 so templates always visible on mobile)
 - [x] Test on actual mobile device and save checkpoint
+
+## Change Shopify Alternative Route Path
+
+- [x] Update route from /shopify-alternative to /shopify in App.tsx
+- [x] Update any internal links pointing to /shopify-alternative (GlassChatWidget.tsx, ShopifyAlternative.tsx)
+- [x] Test new route and save checkpoint
