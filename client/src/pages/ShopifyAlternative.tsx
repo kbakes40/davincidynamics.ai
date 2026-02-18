@@ -19,12 +19,12 @@ export default function ShopifyAlternative() {
   
   // Set SEO-optimized page title
   useEffect(() => {
-    document.title = "Shopify Alternative for Growing Stores | DaVinci Dynamics";
+    document.title = "Shopify Alternative for Growing Stores | davincidynamics.ai";
     
     // Set meta description
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Stop losing 60%+ of profits to Shopify fees. Own your e-commerce platform with custom automation, lower costs, and full control. Migration support included.');
+      metaDescription.setAttribute('content', 'Stop losing 60%+ of profits to Shopify fees. Own your e-commerce platform with davincidynamics.ai - custom automation, lower costs, and full control. Migration support included.');
     }
   }, []);
   
@@ -773,7 +773,7 @@ export default function ShopifyAlternative() {
                   <label className="block font-heading font-semibold mb-2 text-sm">Store URL</label>
                   <input
                     type="url"
-                    placeholder="yourstore.myshopify.com"
+                    placeholder="yourstore.myshopify.com or davincidynamics.ai"
                     value={storeUrl}
                     onChange={(e) => setStoreUrl(e.target.value)}
                     className="w-full bg-background border border-border rounded-lg px-4 py-3 font-heading focus:border-accent focus:outline-none"
@@ -806,7 +806,7 @@ export default function ShopifyAlternative() {
                   <label className="block font-heading font-semibold mb-2 text-sm">Email</label>
                   <input
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="you@davincidynamics.ai"
                     value={leadEmail}
                     onChange={(e) => setLeadEmail(e.target.value)}
                     className="w-full bg-background border border-border rounded-lg px-4 py-3 font-heading focus:border-accent focus:outline-none"
