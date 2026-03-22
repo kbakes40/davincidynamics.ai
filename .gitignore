@@ -5,6 +5,8 @@
 # Build outputs
 dist/
 build/
+# Vite production client (served by CDN on Vercel; used by `pnpm start` locally)
+/public
 *.dist
 
 # Environment variables

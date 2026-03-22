@@ -1,15 +1,9 @@
 import "dotenv/config";
-import express from "express";
 import { createServer } from "http";
 import net from "net";
-import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { registerOAuthRoutes } from "./oauth";
-import { appRouter } from "../routers";
-import { createContext } from "./context";
+import { createApp } from "./createApp";
 import { serveStatic, setupVite } from "./vite";
 import { startTelegramBot } from "../telegram-bot-handler";
-
-
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -31,41 +25,9 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
-  const app = express();
+  const app = createApp();
   const server = createServer(app);
-  // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
-  // OAuth callback under /api/oauth/callback
-  registerOAuthRoutes(app);
-  
-  // Telegram handoff bot webhook
-  const { processTelegramWebhook } = await import('../telegram-webhook');
-  app.post('/api/telegram-handoff-webhook', async (req, res) => {
-    try {
-      console.log('[Handoff Webhook] Received request');
-      const result = await processTelegramWebhook(req.body);
-      res.json(result);
-    } catch (error) {
-      console.error('[Handoff Webhook] Error:', error);
-      res.status(500).json({ success: false, error: 'Internal server error' });
-    }
-  });
-  
-  // Note: DavinciBot responses handled by OpenClaw (external system)
-  
 
-  
-  
-  // tRPC API
-  app.use(
-    "/api/trpc",
-    createExpressMiddleware({
-      router: appRouter,
-      createContext,
-    })
-  );
-  // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
@@ -79,17 +41,9 @@ async function startServer() {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
 
-  server.listen(port, async () => {
+  server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
-    
-    // Start Telegram bots
     startTelegramBot(app);
-    
-    // Note: DavinciBot webhook controlled by OpenClaw
-    
-
-    
-
   });
 }
 

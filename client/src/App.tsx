@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import SpotifyCallback from "@/pages/SpotifyCallback";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import SpotifyBottomPlayer from "./components/SpotifyBottomPlayer";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -21,10 +21,24 @@ import { BookingProvider } from "./contexts/BookingContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import GlassChatWidget from "./components/GlassChatWidget";
 
-function Router() {
-  // make sure to consider if you need authentication for certain routes
+/** Reference landing (hookahprice manus) has no sticky nav, chat bubble, or Spotify chrome. */
+function FloatingChrome() {
+  const [location] = useLocation();
+  if (location === "/") return null;
   return (
-    <div className="pb-20 md:pb-20">
+    <>
+      <SpotifyBottomPlayer />
+      <GlassChatWidget />
+    </>
+  );
+}
+
+function Router() {
+  const [location] = useLocation();
+  const mainPad =
+    location === "/" ? "pb-0" : "pb-20 md:pb-20";
+  return (
+    <div className={mainPad}>
       <Switch>
         <Route path={"/"} component={Home} />
         <Route path={"/solutions"} component={Solutions} />
@@ -60,8 +74,7 @@ function App() {
             <TooltipProvider>
               <Toaster />
               <Router />
-              <SpotifyBottomPlayer />
-              <GlassChatWidget />
+              <FloatingChrome />
             </TooltipProvider>
           </BookingProvider>
         </ChatProvider>

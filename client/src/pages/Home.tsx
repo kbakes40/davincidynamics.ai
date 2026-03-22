@@ -8,18 +8,24 @@ import { Check, ArrowRight, Zap, Shield, TrendingUp, Bot } from "lucide-react";
 import { useLocation } from "wouter";
 import Navigation from "@/components/Navigation";
 import CostSavingsCalculator from "@/components/CostSavingsCalculator";
-import { useEffect, useRef } from "react";
-import { useChat } from "@/contexts/ChatContext";
 import { useScrollFade } from "@/hooks/useScrollFade";
+import { Helmet } from "react-helmet-async";
+
+const SITE_TITLE = "DaVinci Dynamics | Own Your Ecommerce Business";
+const SITE_DESCRIPTION =
+  "Save 60-80% on e-commerce costs. DaVinci Dynamics helps Facebook & TikTok sellers build revenue-optimized systems without platform fees.";
+const SITE_URL = "https://www.davincidynamics.ai/";
+const OG_IMAGE =
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/PXfURBFNVBolMqns.png";
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const { openChat } = useChat();
-  
-  // Set SEO-optimized page title
-  useEffect(() => {
-    document.title = "Stop Paying Platform Fees - Own Your Ecommerce Business";
-  }, []);
+
+  const scrollToSavingsCalculator = () => {
+    document
+      .getElementById("savings-calculator")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   
   // Scroll fade hooks for each section
   const calculatorSection = useScrollFade();
@@ -30,6 +36,25 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
       <Navigation />
+      <Helmet>
+        <title>{SITE_TITLE}</title>
+        <meta name="description" content={SITE_DESCRIPTION} />
+        <meta
+          name="keywords"
+          content="shopify alternative, no platform fees, ecommerce automation, facebook shop, tiktok shop, DaVinci Dynamics"
+        />
+        <link rel="canonical" href={SITE_URL} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={SITE_URL} />
+        <meta property="og:title" content={SITE_TITLE} />
+        <meta property="og:description" content={SITE_DESCRIPTION} />
+        <meta property="og:image" content={OG_IMAGE} />
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={SITE_URL} />
+        <meta property="twitter:title" content={SITE_TITLE} />
+        <meta property="twitter:description" content={SITE_DESCRIPTION} />
+        <meta property="twitter:image" content={OG_IMAGE} />
+      </Helmet>
       {/* Background glow effects */}
       <div 
         className="absolute inset-0 opacity-30 pointer-events-none"
@@ -52,9 +77,8 @@ export default function Home() {
             
             <h1 className="font-display font-black text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-6 leading-tight tracking-tight animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
               Turn Your{" "}
-              <span className="text-neon">Facebook & TikTok</span>
-              <br />
-              Sales Into a Real Business
+              <span className="text-neon">Facebook & TikTok Sales</span>
+              {" "}Into a Real Business
             </h1>
             
             <p className="font-heading text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
@@ -109,9 +133,10 @@ export default function Home() {
         </section>
 
         {/* Cost Savings Calculator Section */}
-        <section 
-          ref={calculatorSection.ref as React.RefObject<HTMLElement>}
-          className={`container mx-auto px-4 py-16 scroll-fade-section ${calculatorSection.isVisible ? 'visible' : ''}`}
+        <section
+          id="savings-calculator"
+          ref={calculatorSection.ref}
+          className={`container mx-auto px-4 py-16 scroll-fade-section ${calculatorSection.isVisible ? "visible" : ""}`}
         >
           <div className="max-w-4xl mx-auto">
             <CostSavingsCalculator />
@@ -119,9 +144,9 @@ export default function Home() {
         </section>
 
         {/* Problem Section */}
-        <section 
-          ref={problemSection.ref as React.RefObject<HTMLElement>}
-          className={`container mx-auto px-4 py-16 scroll-fade-section ${problemSection.isVisible ? 'visible' : ''}`}
+        <section
+          ref={problemSection.ref}
+          className={`container mx-auto px-4 py-16 scroll-fade-section ${problemSection.isVisible ? "visible" : ""}`}
         >
           <div className="max-w-4xl mx-auto">
             <div className="glass-card-intense rounded-xl p-8 lg:p-12"
@@ -182,7 +207,7 @@ export default function Home() {
                 <Button
                   size="lg"
                   className="bg-accent text-background hover:bg-accent/90 font-heading font-bold"
-                  onClick={() => setLocation('/booking')}
+                  onClick={scrollToSavingsCalculator}
                 >
                   Calculate Your Savings
                 </Button>
@@ -192,9 +217,9 @@ export default function Home() {
         </section>
 
         {/* Who This Is For */}
-        <section 
-          ref={whoSection.ref as React.RefObject<HTMLElement>}
-          className={`container mx-auto px-4 py-16 scroll-fade-section ${whoSection.isVisible ? 'visible' : ''}`}
+        <section
+          ref={whoSection.ref}
+          className={`container mx-auto px-4 py-16 scroll-fade-section ${whoSection.isVisible ? "visible" : ""}`}
         >
           <div className="max-w-6xl mx-auto">
             <h2 className="font-display font-bold text-3xl lg:text-4xl text-center text-neon mb-12">
@@ -237,9 +262,9 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section 
-          ref={ctaSection.ref as React.RefObject<HTMLElement>}
-          className={`container mx-auto px-4 py-16 mb-24 scroll-fade-section ${ctaSection.isVisible ? 'visible' : ''}`}
+        <section
+          ref={ctaSection.ref}
+          className={`container mx-auto px-4 py-16 mb-24 scroll-fade-section ${ctaSection.isVisible ? "visible" : ""}`}
         >
           <div className="max-w-4xl mx-auto text-center">
             <div className="glass-card-intense rounded-xl p-8 lg:p-12 neon-glow"
@@ -268,7 +293,7 @@ export default function Home() {
                   size="lg"
                   variant="outline"
                   className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold text-lg px-8 py-6"
-                  onClick={openChat}
+                  onClick={scrollToSavingsCalculator}
                 >
                   Calculate My Savings
                 </Button>

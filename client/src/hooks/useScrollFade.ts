@@ -1,29 +1,38 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 
+/**
+ * Fades sections in when they enter the viewport. Uses a callback ref so the
+ * observer always attaches after the DOM node exists (ref.current is often
+ * still null inside a mount-only useEffect). Once visible, stays visible.
+ */
 export function useScrollFade() {
-  const ref = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
-  useEffect(() => {
+  const ref = useCallback((element: HTMLElement | null) => {
+    observerRef.current?.disconnect();
+    observerRef.current = null;
+    if (!element) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsVisible(entry.isIntersecting);
+        if (entry?.isIntersecting) {
+          setIsVisible(true);
+        }
       },
       {
-        threshold: 0.1,
-        rootMargin: '-50px 0px -50px 0px', // Fade out at top, fade in from below
+        threshold: 0.05,
+        rootMargin: "0px 0px -8% 0px",
       }
     );
 
-    const currentRef = ref.current;
-    if (currentRef) {
-      observer.observe(currentRef);
-    }
+    observer.observe(element);
+    observerRef.current = observer;
+  }, []);
 
+  useEffect(() => {
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
-      }
+      observerRef.current?.disconnect();
     };
   }, []);
 

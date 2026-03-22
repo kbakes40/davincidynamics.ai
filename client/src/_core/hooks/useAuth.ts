@@ -9,8 +9,9 @@ type UseAuthOptions = {
 };
 
 export function useAuth(options?: UseAuthOptions) {
-  const { redirectOnUnauthenticated = false, redirectPath = getLoginUrl() } =
-    options ?? {};
+  const redirectOnUnauthenticated =
+    options?.redirectOnUnauthenticated ?? false;
+  const redirectPathOption = options?.redirectPath;
   const utils = trpc.useUtils();
 
   const meQuery = trpc.auth.me.useQuery(undefined, {
@@ -65,12 +66,22 @@ export function useAuth(options?: UseAuthOptions) {
     if (meQuery.isLoading || logoutMutation.isPending) return;
     if (state.user) return;
     if (typeof window === "undefined") return;
-    if (window.location.pathname === redirectPath) return;
 
-    window.location.href = redirectPath
+    let targetPath: string;
+    try {
+      targetPath = redirectPathOption ?? getLoginUrl();
+    } catch {
+      console.warn(
+        "[useAuth] OAuth is not configured (VITE_OAUTH_PORTAL_URL / VITE_APP_ID); skipping auth redirect."
+      );
+      return;
+    }
+    if (window.location.pathname === targetPath) return;
+
+    window.location.href = targetPath;
   }, [
     redirectOnUnauthenticated,
-    redirectPath,
+    redirectPathOption,
     logoutMutation.isPending,
     meQuery.isLoading,
     state.user,

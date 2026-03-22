@@ -6,7 +6,6 @@
  * - Orbitron Bold for headlines, Rajdhani for subheadings
  */
 
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Check, Upload, Video, Play, Pause } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
@@ -18,9 +17,6 @@ import { Helmet } from "react-helmet-async";
 import { trackVideoEvent, trackButtonClick } from "@/lib/analytics";
 
 export default function PlatformDemo() {
-  // The userAuth hooks provides authentication state
-  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
   const [, setLocation] = useLocation();
   const { openChat } = useChat();
   
@@ -325,7 +321,7 @@ export default function PlatformDemo() {
 
         {/* Pricing Cards - Horizontal Layout for Desktop */}
         <div 
-          ref={pricingSection.ref as React.RefObject<HTMLDivElement>}
+          ref={pricingSection.ref}
           className={`grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-8 lg:mb-12 max-w-7xl mx-auto scroll-fade-section ${pricingSection.isVisible ? 'visible' : ''}`}
         >
           {/* Card 1: Starter Launch */}
