@@ -5,8 +5,8 @@
 # Build outputs
 dist/
 build/
-# Vite production client (served by CDN on Vercel; used by `pnpm start` locally)
-/public
+# Note: /public is the Vite production output — do not gitignore it; Vercel omits
+# gitignored paths from deployments, which left the site serving the wrong file.
 *.dist
 
 # Environment variables
