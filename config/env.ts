@@ -1,79 +1,92 @@
 /**
- * Application environment validation for Vinci + optional BlueBubbles follow-up.
- * Call validateAppEnvironment() once at process startup (server / Vercel function cold start).
+ * Environment validation for Vinci + optional BlueBubbles follow-up.
+ * Call `validateAppEnvironment()` once at process startup.
+ *
+ * Modes:
+ * - Skip: SKIP_APP_ENV_VALIDATION === "true" → log only, no checks, no status block.
+ * - Development: NODE_ENV !== "production" → core vars warn only; BlueBubbles strict if enabled.
+ * - Production: NODE_ENV === "production" → core + enabled BlueBubbles required (throw).
  */
 
-function requireEnv(name: string, value: string | undefined): string {
-  const v = value?.trim();
+/** Absent if missing, "", or whitespace-only; otherwise the trimmed string. */
+function getTrimmedEnv(name: string): string | undefined {
+  const raw = process.env[name];
+  if (raw === undefined) return undefined;
+  const t = raw.trim();
+  return t === "" ? undefined : t;
+}
+
+function requireEnv(name: string): string {
+  const v = getTrimmedEnv(name);
   if (!v) {
     throw new Error(`[ENV] Missing required environment variable: ${name}`);
   }
   return v;
 }
 
-/** BlueBubbles follow-up is enabled only when the flag is the literal string "true" (after trim). */
-export function isBlueBubblesFollowupEnabled(): boolean {
-  return process.env.BLUEBUBBLES_FOLLOWUP_ENABLED?.trim() === "true";
+function isProduction(): boolean {
+  return process.env.NODE_ENV === "production";
 }
 
-function validateCoreEnv(isProduction: boolean): void {
-  const hasTelegram = Boolean(process.env.TELEGRAM_BOT_TOKEN?.trim());
-  const hasDatabase = Boolean(process.env.DATABASE_URL?.trim());
+/**
+ * Enabled only when `BLUEBUBBLES_FOLLOWUP_ENABLED` trims to exactly `"true"`.
+ * Does not enable on "1", "yes", "on", etc.
+ */
+export function isBlueBubblesFollowupEnabled(): boolean {
+  return getTrimmedEnv("BLUEBUBBLES_FOLLOWUP_ENABLED") === "true";
+}
 
-  if (isProduction) {
-    requireEnv("TELEGRAM_BOT_TOKEN", process.env.TELEGRAM_BOT_TOKEN);
-    requireEnv("DATABASE_URL", process.env.DATABASE_URL);
-  } else {
-    if (!hasTelegram) {
-      console.warn(
-        "[ENV WARNING] TELEGRAM_BOT_TOKEN is missing — Vinci bot will not run"
-      );
-    }
-    if (!hasDatabase) {
-      console.warn(
-        "[ENV WARNING] DATABASE_URL is missing — leads will not be stored"
-      );
-    }
+function validateCoreEnv(): void {
+  if (isProduction()) {
+    requireEnv("TELEGRAM_BOT_TOKEN");
+    requireEnv("DATABASE_URL");
+    return;
+  }
+
+  if (!getTrimmedEnv("TELEGRAM_BOT_TOKEN")) {
+    console.warn("[ENV WARNING] TELEGRAM_BOT_TOKEN is missing or empty");
+  }
+  if (!getTrimmedEnv("DATABASE_URL")) {
+    console.warn("[ENV WARNING] DATABASE_URL is missing or empty");
   }
 }
 
+/** When BlueBubbles is enabled, required in both development and production. */
 function validateBlueBubblesEnv(): void {
   if (!isBlueBubblesFollowupEnabled()) {
     return;
   }
-  requireEnv("BLUEBUBBLES_SERVER_URL", process.env.BLUEBUBBLES_SERVER_URL);
-  requireEnv("BLUEBUBBLES_PASSWORD", process.env.BLUEBUBBLES_PASSWORD);
-  requireEnv("BLUEBUBBLES_FROM_HANDLE", process.env.BLUEBUBBLES_FROM_HANDLE);
+  requireEnv("BLUEBUBBLES_SERVER_URL");
+  requireEnv("BLUEBUBBLES_PASSWORD");
+  requireEnv("BLUEBUBBLES_FROM_HANDLE");
 }
 
-function logSystemStatus(isProduction: boolean): void {
-  const telegramOn = Boolean(process.env.TELEGRAM_BOT_TOKEN?.trim());
-  const databaseOn = Boolean(process.env.DATABASE_URL?.trim());
+function logSystemStatus(): void {
+  const envLabel = isProduction() ? "production" : "development";
+  const telegramOn = Boolean(getTrimmedEnv("TELEGRAM_BOT_TOKEN"));
+  const databaseOn = Boolean(getTrimmedEnv("DATABASE_URL"));
   const bluebubblesOn = isBlueBubblesFollowupEnabled();
 
   console.log("=== SYSTEM STATUS ===");
-  console.log(`Environment: ${isProduction ? "production" : "development"}`);
+  console.log(`Environment: ${envLabel}`);
   console.log(`Telegram: ${telegramOn ? "ON" : "OFF"}`);
   console.log(`Database: ${databaseOn ? "ON" : "OFF"}`);
   console.log(`BlueBubbles: ${bluebubblesOn ? "ON" : "OFF"}`);
 }
 
 /**
- * Validates env. Development: missing TELEGRAM_BOT_TOKEN / DATABASE_URL only warns.
- * Production: those are required. BlueBubbles vars required whenever follow-up is enabled ("true").
+ * Validates env. Development: core vars warn only. Production: core vars required.
+ * BlueBubbles vars required whenever follow-up is enabled (trimmed === "true"), any environment.
  */
 export function validateAppEnvironment(): void {
-  const isProduction = process.env.NODE_ENV === "production";
-  const skipValidation = process.env.SKIP_APP_ENV_VALIDATION === "true";
-
-  if (skipValidation) {
+  if (process.env.SKIP_APP_ENV_VALIDATION === "true") {
     console.log("[ENV] Validation skipped");
     return;
   }
 
-  validateCoreEnv(isProduction);
+  validateCoreEnv();
   validateBlueBubblesEnv();
-  logSystemStatus(isProduction);
+  logSystemStatus();
 }
 
 /** Delay before Kevin follow-up send (in-process scheduling). Default 5 minutes. */
@@ -87,6 +100,5 @@ export function getVinciFollowupDelayMs(): number {
 }
 
 export function getBookingLink(): string | undefined {
-  const u = process.env.BOOKING_LINK?.trim();
-  return u || undefined;
+  return getTrimmedEnv("BOOKING_LINK");
 }
