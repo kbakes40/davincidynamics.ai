@@ -3,7 +3,7 @@
  * Customer-facing: @VinciDynamicsBot (TELEGRAM_BOT_TOKEN)
  */
 
-import type { Express } from 'express';
+import type { Express, Request, Response, RequestHandler } from 'express';
 import { botAI } from './bot-ai-handler';
 import { scheduleDeleteVinciClosingMessage } from './vinci-leo-handoff';
 
@@ -67,6 +67,96 @@ async function sendMessage(chatId: number, text: string): Promise<number | undef
     console.error('[Telegram Bot] Send message failed:', error);
     return undefined;
   }
+}
+
+/** Shared POST handler (some hosts forward `/api/...`, others strip the prefix). */
+function createWebhookHandler(): RequestHandler {
+  return async (req: Request, res: Response) => {
+    try {
+      const body = req.body;
+      if (!body || typeof body !== "object") {
+        res.status(400).send("Bad Request");
+        return;
+      }
+      const update = body as TelegramUpdate;
+      console.log("[Telegram Bot] Webhook update received:", update.update_id);
+
+      if (update.message) {
+        processMessage(update.message).catch((err) => {
+          console.error("[Telegram Bot] Async process error:", err);
+        });
+      }
+
+      res.status(200).send("OK");
+    } catch (error) {
+      console.error("[Telegram Bot] Webhook error:", error);
+      res.status(500).send("Error");
+    }
+  };
+}
+
+/**
+ * Long polling for local dev when no public HTTPS webhook is configured.
+ * Deletes any existing webhook so Telegram delivers updates here.
+ */
+function startLongPolling(token: string): void {
+  void (async () => {
+    try {
+      await fetch(`https://api.telegram.org/bot${token}/deleteWebhook`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ drop_pending_updates: false }),
+      });
+    } catch {
+      /* ignore */
+    }
+
+    console.log(
+      "[Telegram Bot] Long polling active (dev). Set TELEGRAM_WEBHOOK_BASE_URL + redeploy for production webhooks."
+    );
+
+    let offset = 0;
+    for (;;) {
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${token}/getUpdates`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            offset,
+            timeout: 25,
+            allowed_updates: ["message"],
+          }),
+        });
+        const data = (await res.json()) as {
+          ok?: boolean;
+          result?: Array<{ update_id: number; message?: TelegramUpdate["message"] }>;
+        };
+        if (!data.ok || !Array.isArray(data.result)) {
+          await new Promise((r) => setTimeout(r, 2000));
+          continue;
+        }
+        for (const u of data.result) {
+          offset = u.update_id + 1;
+          if (u.message) {
+            processMessage(u.message).catch((err) => {
+              console.error("[Telegram Bot] Poll process error:", err);
+            });
+          }
+        }
+      } catch (e) {
+        console.error("[Telegram Bot] getUpdates error:", e);
+        await new Promise((r) => setTimeout(r, 3000));
+      }
+    }
+  })();
+}
+
+function shouldUseLongPolling(): boolean {
+  if (process.env.TELEGRAM_USE_POLLING === "1" || process.env.TELEGRAM_USE_POLLING === "true") {
+    return true;
+  }
+  const base = process.env.TELEGRAM_WEBHOOK_BASE_URL?.trim();
+  return process.env.NODE_ENV === "development" && !base;
 }
 
 /**
@@ -151,7 +241,7 @@ async function ensureTelegramWebhookRegistered(token: string): Promise<void> {
 }
 
 /**
- * Start the bot with webhook
+ * Start the bot: webhook on Express, or long polling in local dev without TELEGRAM_WEBHOOK_BASE_URL.
  */
 export function startTelegramBot(app: Express, publicUrl?: string) {
   const token = getTelegramBotToken();
@@ -160,29 +250,18 @@ export function startTelegramBot(app: Express, publicUrl?: string) {
     return;
   }
 
+  if (shouldUseLongPolling()) {
+    startLongPolling(token);
+    return;
+  }
+
   console.log('[Telegram Bot] Starting @VinciDynamicsBot (webhook)...');
 
   void ensureTelegramWebhookRegistered(token);
 
-  // Webhook endpoint
-  app.post(`/api/telegram-webhook/${token}`, async (req, res) => {
-    try {
-      const update: TelegramUpdate = req.body;
-      
-      if (update.message) {
-        // Process message asynchronously
-        processMessage(update.message).catch(err => {
-          console.error('[Telegram Bot] Async process error:', err);
-        });
-      }
-      
-      // Respond immediately to Telegram
-      res.status(200).send('OK');
-    } catch (error) {
-      console.error('[Telegram Bot] Webhook error:', error);
-      res.status(500).send('Error');
-    }
-  });
-  
-  console.log('[Telegram Bot] @VinciDynamicsBot webhook endpoint ready');
+  const webhookHandler = createWebhookHandler();
+  app.post(`/api/telegram-webhook/${token}`, webhookHandler);
+  app.post(`/telegram-webhook/${token}`, webhookHandler);
+
+  console.log('[Telegram Bot] @VinciDynamicsBot webhook routes: /api/telegram-webhook and /telegram-webhook');
 }

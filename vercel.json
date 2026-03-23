@@ -3,5 +3,13 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "rm -rf dist/public && pnpm run build:client",
   "outputDirectory": "dist/public",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "functions": {
+    "api/[[...slug]].ts": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
