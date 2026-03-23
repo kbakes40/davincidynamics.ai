@@ -16,6 +16,9 @@ import {
 import type { VinciPersisted } from './vinci-conversation-machine';
 import { createVinciHandoffFromStructured } from './vinci-leo-handoff';
 
+/** Historic conversation JSON key only (migrated into vinci on write). */
+const LEGACY_VINCI_METADATA_KEY = 'revenueEngine';
+
 export class BotAIHandler {
   private async readConversationMetadata(
     conversationId: number
@@ -38,7 +41,7 @@ export class BotAIHandler {
   private getVinciState(meta: Record<string, unknown>): Record<string, unknown> {
     const v = meta.vinci;
     if (typeof v === 'object' && v !== null) return v as Record<string, unknown>;
-    const legacy = meta.revenueEngine;
+    const legacy = meta[LEGACY_VINCI_METADATA_KEY];
     if (typeof legacy === 'object' && legacy !== null) return legacy as Record<string, unknown>;
     return {};
   }
@@ -53,7 +56,7 @@ export class BotAIHandler {
     const prev = this.getVinciState(meta);
     const vinci = { ...prev, ...patch };
     const next: Record<string, unknown> = { ...meta, vinci };
-    delete next.revenueEngine;
+    delete next[LEGACY_VINCI_METADATA_KEY];
     await db
       .update(conversations)
       .set({ metadata: JSON.stringify(next) })
@@ -70,7 +73,7 @@ export class BotAIHandler {
     const prev = this.getVinciState(meta);
     const vinci = { ...prev, handoffCompleted: true, handoffId };
     const next: Record<string, unknown> = { ...meta, vinci, handedOff: true };
-    delete next.revenueEngine;
+    delete next[LEGACY_VINCI_METADATA_KEY];
     await db
       .update(conversations)
       .set({
@@ -288,7 +291,7 @@ export class BotAIHandler {
             console.log("[Vinci] Conversation", conversation.id, "completed — user should start fresh");
             return {
               message:
-                "That conversation is complete. Send /start to begin a new one whenever you are ready.",
+                "That conversation is complete. Tap Start in the menu whenever you want a fresh chat.",
               conversationId: conversation.id,
               isHandedOff: true,
             };
