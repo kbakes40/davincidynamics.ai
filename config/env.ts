@@ -2,10 +2,15 @@
  * Environment validation for Vinci + optional BlueBubbles follow-up.
  * Call `validateAppEnvironment()` once at process startup.
  *
- * Modes:
- * - Skip: SKIP_APP_ENV_VALIDATION === "true" → log only, no checks, no status block.
- * - Development: NODE_ENV !== "production" → core vars warn only; BlueBubbles strict if enabled.
- * - Production: NODE_ENV === "production" → core + enabled BlueBubbles required (throw).
+ * 1) Skip mode — `SKIP_APP_ENV_VALIDATION === "true"`
+ *    Log `[ENV] Validation skipped` only; no core/BlueBubbles checks; no status block; no throw.
+ *
+ * 2) Development — `NODE_ENV !== "production"`
+ *    Core: missing/empty/whitespace `TELEGRAM_BOT_TOKEN` / `DATABASE_URL` → warn only, no throw.
+ *    BlueBubbles: validated only when enabled; misconfiguration throws in dev too.
+ *
+ * 3) Production — `NODE_ENV === "production"`
+ *    Core and (when enabled) BlueBubbles vars required after trim; throw `[ENV] Missing required…`.
  */
 
 /** Absent if missing, "", or whitespace-only; otherwise the trimmed string. */
@@ -29,8 +34,8 @@ function isProduction(): boolean {
 }
 
 /**
- * Enabled only when `BLUEBUBBLES_FOLLOWUP_ENABLED` trims to exactly `"true"`.
- * Does not enable on "1", "yes", "on", etc.
+ * BlueBubbles follow-up is on only when `BLUEBUBBLES_FOLLOWUP_ENABLED` (trimmed) is exactly `"true"`.
+ * Does not enable on `"1"`, `"yes"`, `"on"`, etc.
  */
 export function isBlueBubblesFollowupEnabled(): boolean {
   return getTrimmedEnv("BLUEBUBBLES_FOLLOWUP_ENABLED") === "true";
@@ -51,7 +56,7 @@ function validateCoreEnv(): void {
   }
 }
 
-/** When BlueBubbles is enabled, required in both development and production. */
+/** When enabled, all three vars required in development and production (via `requireEnv` / `getTrimmedEnv`). */
 function validateBlueBubblesEnv(): void {
   if (!isBlueBubblesFollowupEnabled()) {
     return;
@@ -75,8 +80,7 @@ function logSystemStatus(): void {
 }
 
 /**
- * Validates env. Development: core vars warn only. Production: core vars required.
- * BlueBubbles vars required whenever follow-up is enabled (trimmed === "true"), any environment.
+ * When not skipped, order is fixed: (1) core → (2) BlueBubbles → (3) status.
  */
 export function validateAppEnvironment(): void {
   if (process.env.SKIP_APP_ENV_VALIDATION === "true") {
@@ -84,8 +88,11 @@ export function validateAppEnvironment(): void {
     return;
   }
 
+  // 1. validateCoreEnv
   validateCoreEnv();
+  // 2. validateBlueBubblesEnv
   validateBlueBubblesEnv();
+  // 3. logSystemStatus
   logSystemStatus();
 }
 
