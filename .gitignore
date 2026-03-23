@@ -5,8 +5,9 @@
 # Build outputs
 dist/
 build/
-# Note: /public is the Vite production output — do not gitignore it; Vercel omits
-# gitignored paths from deployments, which left the site serving the wrong file.
+# Vite output is dist/public (ignored via dist/). Static sources live in client/public.
+# Do not commit a root /public copy of build output — it can override dist/public on Vercel.
+/public/
 *.dist
 
 # Environment variables
