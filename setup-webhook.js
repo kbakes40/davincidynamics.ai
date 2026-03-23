@@ -1,5 +1,5 @@
 /**
- * Setup Telegram Webhook for @Leo_Handoff_bot
+ * Setup Telegram webhook for TELEGRAM_HANDOFF_BOT_TOKEN (optional ops / bridge bot).
  * Run this script to configure the bot to send messages to your server
  */
 
@@ -58,7 +58,7 @@ async function setupWebhook() {
     }
 
     console.log('\n🎉 Setup complete! Your bot is now ready to receive messages.');
-    console.log('💬 Send a message to @Leo_Handoff_bot to test the webhook.');
+    console.log('💬 Send a test message to the handoff bot chat to verify the webhook.');
 
   } catch (error) {
     console.error('❌ Error setting up webhook:', error);

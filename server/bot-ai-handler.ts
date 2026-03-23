@@ -14,7 +14,7 @@ import {
   resolveStartSource,
 } from './vinci-conversation-machine';
 import type { VinciPersisted } from './vinci-conversation-machine';
-import { createVinciHandoffFromStructured } from './vinci-leo-handoff';
+import { createVinciHandoff, markConversationCompleted } from '../services/vinciHandoffService';
 
 /** Historic conversation JSON key only (migrated into vinci on write). */
 const LEGACY_VINCI_METADATA_KEY = 'revenueEngine';
@@ -60,26 +60,6 @@ export class BotAIHandler {
     await db
       .update(conversations)
       .set({ metadata: JSON.stringify(next) })
-      .where(eq(conversations.id, conversationId));
-  }
-
-  private async finalizeVinciCustomerHandoff(
-    conversationId: number,
-    handoffId: string
-  ) {
-    const db = await getDb();
-    if (!db) return;
-    const meta = await this.readConversationMetadata(conversationId);
-    const prev = this.getVinciState(meta);
-    const vinci = { ...prev, handoffCompleted: true, handoffId };
-    const next: Record<string, unknown> = { ...meta, vinci, handedOff: true };
-    delete next[LEGACY_VINCI_METADATA_KEY];
-    await db
-      .update(conversations)
-      .set({
-        endedAt: new Date(),
-        metadata: JSON.stringify(next),
-      })
       .where(eq(conversations.id, conversationId));
   }
 
@@ -338,7 +318,7 @@ export class BotAIHandler {
           .join(" ")
           .trim();
 
-        const { handoffId } = await createVinciHandoffFromStructured({
+        const { handoffId } = await createVinciHandoff({
           conversationId: conversation.id,
           botUserId: user.id,
           telegramUserId: String(telegramUser.id),
@@ -358,16 +338,17 @@ export class BotAIHandler {
           demoInterest: mergedVs.demo_interest,
         });
 
-        await this.finalizeVinciCustomerHandoff(conversation.id, handoffId);
+        await markConversationCompleted(conversation.id);
 
         if (db) {
           const leadEvent: NewLeadEvent = {
             userId: user.id,
-            eventType: "vinci_leo_handoff",
+            eventType: "vinci_handoff_completed",
             eventData: JSON.stringify({
               handoffId,
               conversationId: conversation.id,
               source: mergedVs.source,
+              followupChannel: "bluebubbles",
             }),
           };
           await db.insert(leadEvents).values(leadEvent);

@@ -1,5 +1,9 @@
 /**
- * Vinci → Leo internal handoff (customer never interacts with Leo).
+ * Vinci → internal agent handoff (customer-facing: @VinciDynamicsBot only).
+ *
+ * Source of truth: `vinci_handoffs` rows with assigned_to = internal agent id `leo`.
+ * Optional Telegram ping is gated by VINCI_LEO_TELEGRAM_NOTIFY — not OpenClaw/session routing;
+ * never use a Telegram @handle as a session label or sessions.resolve target.
  */
 
 import { randomUUID } from "crypto";
@@ -10,6 +14,9 @@ import type { NewVinciHandoff } from "../drizzle/schema";
 import { getVinciBookingUrl } from "./vinci-prompt";
 import type { VinciStartSource } from "./vinci-start";
 
+/** Internal agent id for routing, DB, and downstream automations (not a Telegram username). */
+export const VINCI_INTERNAL_AGENT_LEO = "leo" as const;
+
 /** @deprecated use vinci-conversation-machine VINCI_CLOSING_MESSAGE */
 export const VINCI_CLOSING_CUSTOMER_TEXT = `Perfect.
 
@@ -17,7 +24,7 @@ I've got what I need.
 
 We'll follow up with you shortly. ⚙️`;
 
-const ALLOWED = {
+export const VINCI_HANDOFF_ALLOWLISTS = {
   source: [
     "home",
     "pricing",
@@ -58,7 +65,11 @@ const ALLOWED = {
   contact_preference: ["telegram", "phone", "email", "both", "unknown"],
 } as const;
 
-function pick<T extends string>(val: unknown, allowed: readonly T[], fallback: T): T {
+export function pickVinciHandoffField<T extends string>(
+  val: unknown,
+  allowed: readonly T[],
+  fallback: T
+): T {
   if (typeof val === "string" && (allowed as readonly string[]).includes(val)) {
     return val as T;
   }
@@ -126,8 +137,8 @@ Fields:
 - lead_name: string or null
 - phone: string or null
 - email: string or null
-- summary: one short premium paragraph for Kevin (natural, like: "Prospect runs X... dealing with Y... Z setup... intent... treat as warm/hot.")
-- vinci_notes: short internal bullet-style string for Kevin (not shown to customer)
+- summary: one short premium paragraph for internal follow-up / agent leo (natural, like: "Prospect runs X... dealing with Y... Z setup... intent... treat as warm/hot.")
+- vinci_notes: short internal bullet-style string (not shown to customer)
 - booking_link_sent: boolean (true if assistant shared a booking URL)
 - business_type, main_problem, current_setup, urgency, lead_score, contact_preference: as above
 
@@ -153,7 +164,7 @@ If unknown, use "other" or "unknown" as appropriate for that field.`;
   }
 }
 
-function formatLeoMessage(row: NewVinciHandoff): string {
+function formatInternalHandoffNotifyText(row: NewVinciHandoff): string {
   const createdAt = new Date().toISOString();
   const uname =
     row.telegramUsername &&
@@ -161,7 +172,7 @@ function formatLeoMessage(row: NewVinciHandoff): string {
       ? row.telegramUsername
       : `@${row.telegramUsername}`);
   const lines = [
-    `Vinci handoff (internal — Kevin)`,
+    `Vinci handoff — internal_agent_id: ${VINCI_INTERNAL_AGENT_LEO}`,
     ``,
     `handoff_id: ${row.handoffId}`,
     `created_at: ${createdAt}`,
@@ -180,7 +191,7 @@ function formatLeoMessage(row: NewVinciHandoff): string {
     `booking_link_sent: ${row.bookingLinkSent ? "yes" : "no"}`,
     `contact_captured: ${row.contactCaptured ? "yes" : "no"}`,
     `handoff_status: ${row.handoffStatus}`,
-    `assigned_to: ${row.assignedTo}`,
+    `assigned_to: ${row.assignedTo} (internal agent id, not a session handle)`,
     `conversation_id: ${row.conversationId ?? "—"}`,
     `bot_user_id: ${row.botUserId ?? "—"}`,
     ``,
@@ -196,13 +207,30 @@ function formatLeoMessage(row: NewVinciHandoff): string {
   return lines.join("\n");
 }
 
-async function sendLeoTelegram(text: string): Promise<number | undefined> {
-  const token = process.env.TELEGRAM_HANDOFF_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) {
-    console.warn("[Vinci Handoff] TELEGRAM_HANDOFF_BOT_TOKEN or TELEGRAM_CHAT_ID missing — Leo notify skipped");
+/**
+ * Optional ops ping to a numeric Telegram chat (e.g. BlueBubbles mirror).
+ * Does not route through OpenClaw or sessions.resolve; does not use @bot handles as targets.
+ */
+async function maybeSendOptionalTelegramNotify(text: string): Promise<number | undefined> {
+  const enabled =
+    process.env.VINCI_LEO_TELEGRAM_NOTIFY === "1" ||
+    process.env.VINCI_LEO_TELEGRAM_NOTIFY === "true";
+  if (!enabled) {
+    console.log(
+      "[Vinci Handoff] Optional Telegram notify disabled (set VINCI_LEO_TELEGRAM_NOTIFY=true for ops ping). DB row is the handoff source of truth."
+    );
     return undefined;
   }
+
+  const token = process.env.TELEGRAM_HANDOFF_BOT_TOKEN?.trim();
+  const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
+  if (!token || !chatId) {
+    console.warn(
+      "[Vinci Handoff] VINCI_LEO_TELEGRAM_NOTIFY set but TELEGRAM_HANDOFF_BOT_TOKEN or TELEGRAM_CHAT_ID missing — skip Telegram"
+    );
+    return undefined;
+  }
+
   try {
     const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
@@ -214,12 +242,12 @@ async function sendLeoTelegram(text: string): Promise<number | undefined> {
     });
     const data = (await response.json()) as { ok?: boolean; result?: { message_id?: number } };
     if (!response.ok || !data.ok) {
-      console.error("[Vinci Handoff] Leo sendMessage failed:", data);
+      console.error("[Vinci Handoff] Optional Telegram sendMessage failed:", data);
       return undefined;
     }
     return data.result?.message_id;
   } catch (e) {
-    console.error("[Vinci Handoff] Leo send exception:", e);
+    console.error("[Vinci Handoff] Optional Telegram send exception:", e);
     return undefined;
   }
 }
@@ -257,14 +285,14 @@ export async function createVinciHandoffRecordAndNotifyLeo(
     telegramUserId: ctx.telegramUserId,
     telegramUsername: ctx.telegramUsername ?? null,
     leadName: extracted.lead_name?.trim() || ctx.leadName || null,
-    businessType: pick(extracted.business_type, ALLOWED.business_type, "other"),
-    mainProblem: pick(extracted.main_problem, ALLOWED.main_problem, "other"),
-    currentSetup: pick(extracted.current_setup, ALLOWED.current_setup, "unknown"),
-    urgency: pick(extracted.urgency, ALLOWED.urgency, "unknown"),
-    leadScore: pick(extracted.lead_score, ALLOWED.lead_score, "cold"),
-    contactPreference: pick(
+    businessType: pickVinciHandoffField(extracted.business_type, VINCI_HANDOFF_ALLOWLISTS.business_type, "other"),
+    mainProblem: pickVinciHandoffField(extracted.main_problem, VINCI_HANDOFF_ALLOWLISTS.main_problem, "other"),
+    currentSetup: pickVinciHandoffField(extracted.current_setup, VINCI_HANDOFF_ALLOWLISTS.current_setup, "unknown"),
+    urgency: pickVinciHandoffField(extracted.urgency, VINCI_HANDOFF_ALLOWLISTS.urgency, "unknown"),
+    leadScore: pickVinciHandoffField(extracted.lead_score, VINCI_HANDOFF_ALLOWLISTS.lead_score, "cold"),
+    contactPreference: pickVinciHandoffField(
       extracted.contact_preference,
-      ALLOWED.contact_preference,
+      VINCI_HANDOFF_ALLOWLISTS.contact_preference,
       "unknown"
     ),
     phone: phone ?? null,
@@ -273,7 +301,7 @@ export async function createVinciHandoffRecordAndNotifyLeo(
     lastUserMessage: ctx.lastUserMessage.slice(0, 4000) || null,
     vinciNotes: extracted.vinci_notes?.trim() || null,
     handoffStatus: "pending",
-    assignedTo: "Leo",
+    assignedTo: VINCI_INTERNAL_AGENT_LEO,
     bookingLinkSent: bookingSent ? 1 : 0,
     contactCaptured: contactCaptured ? 1 : 0,
   };
@@ -291,8 +319,11 @@ export async function createVinciHandoffRecordAndNotifyLeo(
     console.error("[Vinci Handoff] DB unavailable — handoff row not persisted");
   }
 
-  const leoText = formatLeoMessage(row);
-  await sendLeoTelegram(leoText);
+  console.log(
+    `[Vinci Handoff] Persisted handoff ${handoffId} for internal_agent_id=${VINCI_INTERNAL_AGENT_LEO}`
+  );
+  const notifyText = formatInternalHandoffNotifyText(row);
+  await maybeSendOptionalTelegramNotify(notifyText);
 
   return { handoffId, inserted };
 }
@@ -321,7 +352,7 @@ function humanPhrase(s: string): string {
   return s.replace(/_/g, " ");
 }
 
-function buildSummaryFromStructured(i: VinciStructuredHandoffInput): string {
+export function buildSummaryFromStructured(i: VinciStructuredHandoffInput): string {
   const score = i.leadScore || "warm";
   const biz = humanPhrase(i.businessType);
   const focus = humanPhrase(i.mainProblem);
@@ -346,7 +377,7 @@ function buildSummaryFromStructured(i: VinciStructuredHandoffInput): string {
   return `Prospect runs a ${biz} and is trying to improve ${focus}. ${setup} ${timing} Should be treated as a ${score} lead.`;
 }
 
-function buildVinciNotesFromStructured(i: VinciStructuredHandoffInput): string {
+export function buildVinciNotesFromStructured(i: VinciStructuredHandoffInput): string {
   const lines = [
     `source=${i.source}`,
     i.demoInterest ? `demo_interest=${i.demoInterest.slice(0, 200)}` : null,
@@ -384,14 +415,14 @@ export async function createVinciHandoffFromStructured(
     telegramUserId: input.telegramUserId,
     telegramUsername: input.telegramUsername ?? null,
     leadName: input.leadName ?? null,
-    businessType: pick(input.businessType, ALLOWED.business_type, "other"),
-    mainProblem: pick(input.mainProblem, ALLOWED.main_problem, "other"),
-    currentSetup: pick(input.currentSetup, ALLOWED.current_setup, "unknown"),
-    urgency: pick(input.urgency, ALLOWED.urgency, "unknown"),
-    leadScore: pick(input.leadScore, ALLOWED.lead_score, "warm"),
-    contactPreference: pick(
+    businessType: pickVinciHandoffField(input.businessType, VINCI_HANDOFF_ALLOWLISTS.business_type, "other"),
+    mainProblem: pickVinciHandoffField(input.mainProblem, VINCI_HANDOFF_ALLOWLISTS.main_problem, "other"),
+    currentSetup: pickVinciHandoffField(input.currentSetup, VINCI_HANDOFF_ALLOWLISTS.current_setup, "unknown"),
+    urgency: pickVinciHandoffField(input.urgency, VINCI_HANDOFF_ALLOWLISTS.urgency, "unknown"),
+    leadScore: pickVinciHandoffField(input.leadScore, VINCI_HANDOFF_ALLOWLISTS.lead_score, "warm"),
+    contactPreference: pickVinciHandoffField(
       input.contactPreference,
-      ALLOWED.contact_preference,
+      VINCI_HANDOFF_ALLOWLISTS.contact_preference,
       "unknown"
     ),
     phone: input.phone?.trim() || null,
@@ -400,7 +431,9 @@ export async function createVinciHandoffFromStructured(
     lastUserMessage: input.lastUserMessage.slice(0, 4000) || null,
     vinciNotes,
     handoffStatus: "pending",
-    assignedTo: "Leo",
+    assignedTo: "kevin_followup",
+    followupChannel: "bluebubbles",
+    bluebubblesStatus: "pending",
     bookingLinkSent: bookingSent ? 1 : 0,
     contactCaptured: contactCaptured ? 1 : 0,
   };
@@ -418,7 +451,9 @@ export async function createVinciHandoffFromStructured(
     console.error("[Vinci Handoff] DB unavailable — structured handoff not persisted");
   }
 
-  await sendLeoTelegram(formatLeoMessage(row));
+  console.log(
+    `[Vinci Handoff] Persisted structured handoff ${handoffId} (kevin_followup / bluebubbles pipeline; no public Telegram handoff)`
+  );
   return { handoffId, inserted };
 }
 

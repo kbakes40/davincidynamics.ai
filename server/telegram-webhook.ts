@@ -1,6 +1,6 @@
 /**
  * Telegram Webhook Handler
- * Receives messages from @Leo_Handoff_bot and syncs to website chat
+ * Receives Telegram webhook updates (handoff bot) and syncs agent text to website chat.
  */
 
 import { getDb } from './db';

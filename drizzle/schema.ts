@@ -98,7 +98,7 @@ export const leadEvents = mysqlTable("lead_events", {
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 
-/** Internal Leo handoff records — Vinci → Kevin workflow (not customer-facing). */
+/** Vinci → internal agent (`leo`) handoff records; not customer-facing. */
 export const vinciHandoffs = mysqlTable("vinci_handoffs", {
   id: int("id").autoincrement().primaryKey(),
   handoffId: varchar("handoff_id", { length: 64 }).notNull().unique(),
@@ -121,9 +121,14 @@ export const vinciHandoffs = mysqlTable("vinci_handoffs", {
   lastUserMessage: text("last_user_message"),
   vinciNotes: text("vinci_notes"),
   handoffStatus: varchar("handoff_status", { length: 32 }).notNull().default("pending"),
-  assignedTo: varchar("assigned_to", { length: 64 }).notNull().default("Leo"),
+  assignedTo: varchar("assigned_to", { length: 64 }).notNull().default("kevin_followup"),
   bookingLinkSent: int("booking_link_sent").notNull().default(0),
   contactCaptured: int("contact_captured").notNull().default(0),
+  followupChannel: varchar("followup_channel", { length: 32 }),
+  bluebubblesSentAt: timestamp("bluebubbles_sent_at"),
+  bluebubblesStatus: varchar("bluebubbles_status", { length: 32 }).default("pending"),
+  bluebubblesMessageId: varchar("bluebubbles_message_id", { length: 128 }),
+  invalidPhone: int("invalid_phone").notNull().default(0),
 });
 
 export const profitTracking = mysqlTable("profit_tracking", {

@@ -26,7 +26,7 @@ const handoffBot = HANDOFF_BOT_TOKEN ? new Telegraf(HANDOFF_BOT_TOKEN) : null;
 const processedMessages = new Set<string>();
 
 /**
- * Forward message from website to @Leo_Handoff_bot, which then forwards to @DavinciDynamics_Chatbot
+ * Legacy website → Telegram forward path (separate from Vinci internal handoff agent id `leo`).
  */
 export async function forwardToHandoffBot(params: {
   conversationId: number;
@@ -60,10 +60,7 @@ ${customerMessage}
 ---
 Reply to this message to respond to the customer.`;
 
-    // Step 1: Send to @Leo_Handoff_bot (just for logging/tracking)
-    // In reality, we skip this and go directly to DavinciBot since we control both
-    
-    // Step 2: Forward directly to @DavinciDynamics_Chatbot
+    // Forward to configured chatbot (numeric chat_id + bot token — not session.resolve targets).
     const response = await fetch(`https://api.telegram.org/bot${DAVINCI_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
