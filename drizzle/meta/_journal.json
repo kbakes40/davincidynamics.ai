@@ -71,6 +71,13 @@
       "when": 1771242937945,
       "tag": "0009_certain_champions",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1772000000000,
+      "tag": "0010_vinci_handoffs",
+      "breakpoints": true
     }
   ]
 }

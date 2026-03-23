@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { X, MessageCircle, Send, Minimize2, Maximize2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Streamdown } from "streamdown";
+import { TG } from "@/lib/telegramCtas";
 
 interface Message {
   role: "user" | "assistant";
@@ -43,7 +44,7 @@ export default function EmbeddedChatWidget({ bookingContext }: EmbeddedChatWidge
     return [
       {
         role: "assistant",
-        content: "👋 **Welcome to DaVinci Dynamics!**\n\nI'm here to help you navigate the website.\n\n**For detailed questions about:**\n💰 Pricing & packages\n🎥 Platform features\n🚀 How it works\n📞 Custom solutions\n\n**Please chat with our AI assistant on Telegram:**\n[Open @DaVinciAssistBot](https://t.me/DaVinciAssistBot?start=site_chat)\n\n**I can help you with:**\n📍 Navigate to booking page\n📍 View platform demo\n📍 Calculate savings\n📍 Contact information",
+        content: `👋 **Welcome to DaVinci Dynamics!**\n\nI'm here to help you navigate the website.\n\n**For detailed questions about:**\n💰 Pricing & packages\n🎥 Platform features\n🚀 How it works\n📞 Custom solutions\n\n**Chat with Vinci on Telegram:**\n[Open @VinciDynamicsBot](${TG.contact})\n\n**I can help you with:**\n📍 Navigate the site\n📍 View pricing\n📍 Contact information`,
         timestamp: new Date(),
       },
     ];

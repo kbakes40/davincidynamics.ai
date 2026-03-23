@@ -5,8 +5,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, DollarSign, Zap, Shield, TrendingUp, Package, Clock, HelpCircle } from "lucide-react";
-import { useLocation } from "wouter";
 import Navigation from "@/components/Navigation";
+import { onTelegramCta } from "@/lib/telegramCtas";
 import { useEffect, useState, useRef } from "react";
 import { useChat } from "@/contexts/ChatContext";
 import { useScrollFade } from "@/hooks/useScrollFade";
@@ -14,7 +14,6 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
 export default function ShopifyAlternative() {
-  const [, setLocation] = useLocation();
   const { openChat } = useChat();
   
   // Set SEO-optimized page title
@@ -220,7 +219,8 @@ export default function ShopifyAlternative() {
                 size="lg"
                 variant="outline"
                 className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold text-lg px-8 py-6"
-                onClick={() => setLocation('/booking')}
+                type="button"
+                onClick={onTelegramCta("audit")}
               >
                 Book Demo
               </Button>
@@ -504,7 +504,8 @@ export default function ShopifyAlternative() {
               <Button
                 size="lg"
                 className="bg-accent text-background hover:bg-accent/90 font-heading font-bold text-lg px-8 py-6 neon-glow"
-                onClick={() => setLocation('/booking')}
+                type="button"
+                onClick={onTelegramCta("audit")}
               >
                 Book Strategy Call
                 <ArrowRight className="ml-2 w-5 h-5" />
@@ -671,7 +672,8 @@ export default function ShopifyAlternative() {
               <Button
                 variant="outline"
                 className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold"
-                onClick={() => setLocation('/contact')}
+                type="button"
+                onClick={onTelegramCta("contact")}
               >
                 Contact Us
               </Button>
@@ -704,7 +706,8 @@ export default function ShopifyAlternative() {
                   size="lg"
                   variant="outline"
                   className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold text-lg px-8 py-6"
-                  onClick={() => setLocation('/booking')}
+                  type="button"
+                  onClick={onTelegramCta("audit")}
                 >
                   Book Demo
                 </Button>
@@ -747,7 +750,8 @@ export default function ShopifyAlternative() {
               <Button
                 variant="outline"
                 className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold"
-                onClick={() => setLocation('/booking')}
+                type="button"
+                onClick={onTelegramCta("audit")}
               >
                 Book Demo
               </Button>

@@ -44,7 +44,13 @@ function Router() {
         <Route path={"/solutions"} component={Solutions} />
         <Route path={"/about"} component={About} />
         <Route path={"/contact"} component={Contact} />
-        <Route path={"/platform-demo"} component={PlatformDemo} />
+        <Route path={"/pricing"} component={PlatformDemo} />
+        <Route path={"/platform-demo"}>
+          {() => {
+            window.location.replace("/pricing");
+            return null;
+          }}
+        </Route>
         <Route path={"/booking"} component={Booking} />
         <Route path={"/shopify-alternative"}>
           {() => {

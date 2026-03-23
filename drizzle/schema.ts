@@ -98,6 +98,34 @@ export const leadEvents = mysqlTable("lead_events", {
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 
+/** Internal Leo handoff records — Vinci → Kevin workflow (not customer-facing). */
+export const vinciHandoffs = mysqlTable("vinci_handoffs", {
+  id: int("id").autoincrement().primaryKey(),
+  handoffId: varchar("handoff_id", { length: 64 }).notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  conversationId: int("conversation_id"),
+  botUserId: int("bot_user_id"),
+  source: varchar("source", { length: 32 }).notNull(),
+  telegramUserId: varchar("telegram_user_id", { length: 64 }).notNull(),
+  telegramUsername: varchar("telegram_username", { length: 255 }),
+  leadName: varchar("lead_name", { length: 255 }),
+  businessType: varchar("business_type", { length: 64 }).notNull(),
+  mainProblem: varchar("main_problem", { length: 64 }).notNull(),
+  currentSetup: varchar("current_setup", { length: 64 }).notNull(),
+  urgency: varchar("urgency", { length: 32 }).notNull(),
+  leadScore: varchar("lead_score", { length: 16 }).notNull(),
+  contactPreference: varchar("contact_preference", { length: 64 }).notNull(),
+  phone: varchar("phone", { length: 50 }),
+  email: varchar("email", { length: 320 }),
+  summary: text("summary"),
+  lastUserMessage: text("last_user_message"),
+  vinciNotes: text("vinci_notes"),
+  handoffStatus: varchar("handoff_status", { length: 32 }).notNull().default("pending"),
+  assignedTo: varchar("assigned_to", { length: 64 }).notNull().default("Leo"),
+  bookingLinkSent: int("booking_link_sent").notNull().default(0),
+  contactCaptured: int("contact_captured").notNull().default(0),
+});
+
 export const profitTracking = mysqlTable("profit_tracking", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("user_id").notNull(),
@@ -126,3 +154,5 @@ export type LeadEvent = typeof leadEvents.$inferSelect;
 export type NewLeadEvent = typeof leadEvents.$inferInsert;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
+export type VinciHandoff = typeof vinciHandoffs.$inferSelect;
+export type NewVinciHandoff = typeof vinciHandoffs.$inferInsert;

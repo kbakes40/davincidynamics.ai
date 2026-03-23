@@ -1,129 +1,40 @@
 /**
- * Design Philosophy: Cyberpunk Luxury
- * - High-contrast neon blue (#00D9FF) against pure black
- * - Split-screen video layout: mobile (9:16) left, desktop (16:9) right
- * - Electric glow effects and deep shadows
- * - Orbitron Bold for headlines, Rajdhani for subheadings
+ * Pricing page — cyberpunk luxury theme (matches site).
  */
 
 import { Button } from "@/components/ui/button";
-import { Check, Upload, Video, Play, Pause } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-import { useLocation } from "wouter";
+import { Check } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import { useLgPricingHover } from "@/hooks/useLgPricingHover";
 import { useScrollFade } from "@/hooks/useScrollFade";
-import { useChat } from "@/contexts/ChatContext";
 import { Helmet } from "react-helmet-async";
-import { trackVideoEvent, trackButtonClick } from "@/lib/analytics";
+import { trackButtonClick } from "@/lib/analytics";
+import { onTelegramCta, openVinciBot } from "@/lib/telegramCtas";
+import { cn } from "@/lib/utils";
 
 export default function PlatformDemo() {
-  const [, setLocation] = useLocation();
-  const { openChat } = useChat();
-  
-  // Scroll fade for pricing section
+
   const pricingSection = useScrollFade();
-
-  const [mobileVideoUrl, setMobileVideoUrl] = useState("https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/jLsJspnqNRWGasaR.mp4");
-  const [desktopVideoUrl, setDesktopVideoUrl] = useState("https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/aGnxzoFchJWIAmvo.mp4");
-  const [mobileVideoFile, setMobileVideoFile] = useState<File | null>(null);
-  const [desktopVideoFile, setDesktopVideoFile] = useState<File | null>(null);
-  const [mobileIsPlaying, setMobileIsPlaying] = useState(true);
-  const [desktopIsPlaying, setDesktopIsPlaying] = useState(true);
-  
-  const mobileVideoRef = useRef<HTMLVideoElement>(null);
-  const desktopVideoRef = useRef<HTMLVideoElement>(null);
-
-  // Load videos from localStorage on mount
-  useEffect(() => {
-    const savedMobileVideo = localStorage.getItem('mobileVideoUrl');
-    const savedDesktopVideo = localStorage.getItem('desktopVideoUrl');
-    
-    if (savedMobileVideo) {
-      setMobileVideoUrl(savedMobileVideo);
-    }
-    if (savedDesktopVideo) {
-      setDesktopVideoUrl(savedDesktopVideo);
-    }
-  }, []);
-
-  const handleMobileFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setMobileVideoFile(file);
-      const url = URL.createObjectURL(file);
-      setMobileVideoUrl(url);
-      
-      // Save to localStorage
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        localStorage.setItem('mobileVideoUrl', base64String);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleDesktopFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setDesktopVideoFile(file);
-      const url = URL.createObjectURL(file);
-      setDesktopVideoUrl(url);
-      
-      // Save to localStorage
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        localStorage.setItem('desktopVideoUrl', base64String);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const toggleMobilePlay = () => {
-    if (mobileVideoRef.current) {
-      if (mobileIsPlaying) {
-        mobileVideoRef.current.pause();
-        trackVideoEvent('pause', 'Mobile Demo Video');
-      } else {
-        mobileVideoRef.current.play();
-        trackVideoEvent('play', 'Mobile Demo Video');
-      }
-      setMobileIsPlaying(!mobileIsPlaying);
-    }
-  };
-
-  const toggleDesktopPlay = () => {
-    if (desktopVideoRef.current) {
-      if (desktopIsPlaying) {
-        desktopVideoRef.current.pause();
-        trackVideoEvent('pause', 'Desktop Demo Video');
-      } else {
-        desktopVideoRef.current.play();
-        trackVideoEvent('play', 'Desktop Demo Video');
-      }
-      setDesktopIsPlaying(!desktopIsPlaying);
-    }
-  };
+  const { growthHovered, onGrowthEnter, onGrowthLeave } = useLgPricingHover();
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
       <Helmet>
-        <title>Platform Demo - DaVinci Dynamics</title>
-        <meta name="description" content="See how DaVinci Dynamics turns Facebook & TikTok sales into a real business. Watch live demos of our revenue-optimized ecommerce platform." />
+        <title>Pricing - DaVinci Dynamics</title>
+        <meta name="description" content="Choose the system that fits your growth stage. Conversion-focused websites, automation, and follow-up systems from DaVinci Dynamics." />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.davincidynamics.ai/platform-demo" />
-        <meta property="og:title" content="Platform Demo - DaVinci Dynamics" />
-        <meta property="og:description" content="See how DaVinci Dynamics turns Facebook & TikTok sales into a real business. Watch live demos of our revenue-optimized ecommerce platform." />
+        <meta property="og:url" content="https://www.davincidynamics.ai/pricing" />
+        <meta property="og:title" content="Pricing - DaVinci Dynamics" />
+        <meta property="og:description" content="Choose the system that fits your growth stage. Conversion-focused websites, automation, and follow-up systems from DaVinci Dynamics." />
         <meta property="og:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/PXfURBFNVBolMqns.png" />
         
         {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content="https://www.davincidynamics.ai/platform-demo" />
-        <meta property="twitter:title" content="Platform Demo - DaVinci Dynamics" />
-        <meta property="twitter:description" content="See how DaVinci Dynamics turns Facebook & TikTok sales into a real business. Watch live demos of our revenue-optimized ecommerce platform." />
+        <meta property="twitter:url" content="https://www.davincidynamics.ai/pricing" />
+        <meta property="twitter:title" content="Pricing - DaVinci Dynamics" />
+        <meta property="twitter:description" content="Choose the system that fits your growth stage. Conversion-focused websites, automation, and follow-up systems from DaVinci Dynamics." />
         <meta property="twitter:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/PXfURBFNVBolMqns.png" />
       </Helmet>
       <Navigation />
@@ -137,317 +48,223 @@ export default function PlatformDemo() {
         }}
       />
 
-      <main className="relative z-10 container mx-auto px-4 py-8 lg:py-12">
-        {/* Header Section */}
-        <header className="text-center mb-8 lg:mb-12 animate-fade-in-up">
-          <h1 className="font-display font-black text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 leading-tight tracking-tight text-foreground">
-            Turn Your Business Into a{" "}
-            <span className="text-neon">Revenue Machine</span>
-          </h1>
-          <p className="font-heading text-sm md:text-base lg:text-lg text-muted-foreground mb-6 lg:mb-8 font-medium max-w-3xl mx-auto">
-            This platform would cost $3,500 to $8,000 per month if built and managed yourself.
-          </p>
-          
-          {/* Glowing divider */}
-          <div className="relative h-px w-full max-w-md mx-auto mb-2">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent to-transparent neon-glow" />
-          </div>
-        </header>
-
-        {/* Video Display Section - Split Screen */}
-        <section className="mb-12 max-w-7xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            {/* Left: Mobile Video (9:16) */}
-            <div className="flex flex-col items-center justify-center">
-              <h2 className="font-heading font-bold text-xl lg:text-2xl text-neon mb-6 text-center">
-                Platform Mobile Demo: Retail E-commerce
-              </h2>
-              {mobileVideoUrl ? (
-                <a 
-                  href="https://www.davincidynamics.site" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-full max-w-sm relative group block cursor-pointer"
-                  onClick={(e) => {
-                    trackButtonClick('Mobile Demo Video', { location: 'platform_demo', destination: 'www.davincidynamics.site' });
-                  }}
-                >
-                  <video
-                    ref={mobileVideoRef}
-                    src={mobileVideoUrl}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    controls
-                    className="w-full h-auto rounded-xl shadow-2xl border border-accent/30 neon-glow pointer-events-none"
-                    style={{ aspectRatio: '9/16' }}
-                  />
-                  {/* Play/Pause Overlay */}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleMobilePlay();
-                    }}
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/90 p-4 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 neon-glow"
-                  >
-                    {mobileIsPlaying ? (
-                      <Pause className="w-8 h-8 text-accent" />
-                    ) : (
-                      <Play className="w-8 h-8 text-accent" />
-                    )}
-                  </button>
-                </a>
-              ) : (
-                <div className="w-full max-w-sm bg-card rounded-xl p-8 border-2 border-dashed border-accent/30 shadow-2xl"
-                  style={{
-                    backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
-                    backgroundSize: 'cover',
-                    aspectRatio: '9/16'
-                  }}
-                >
-                  <div className="flex flex-col items-center justify-center h-full space-y-4">
-                    <Video className="w-12 h-12 text-accent" />
-                    <h3 className="font-heading font-semibold text-lg text-foreground text-center">Mobile Video (9:16)</h3>
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={handleMobileFileUpload}
-                      className="hidden"
-                      id="mobile-video-upload"
-                    />
-                    <label
-                      htmlFor="mobile-video-upload"
-                      className="flex items-center justify-center gap-2 px-6 py-3 bg-accent/10 border border-accent/50 rounded-lg cursor-pointer hover:bg-accent/20 hover:border-accent transition-all"
-                    >
-                      <Upload className="w-4 h-4 text-accent" />
-                      <span className="font-heading text-sm text-accent">Upload Video</span>
-                    </label>
-                    <p className="text-xs text-muted-foreground font-heading text-center">Max 10GB</p>
-                  </div>
-                </div>
-              )}
-              <Button 
-                variant="outline" 
-                className="mt-6 border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
-                onClick={() => window.open('https://www.davincidynamics.site', '_blank')}
-              >
-                View Live Mobile Demo →
-              </Button>
-            </div>
-
-            {/* Right: Desktop Video (16:9) */}
-            <div className="flex flex-col items-center justify-center">
-              <h2 className="font-heading font-bold text-xl lg:text-2xl text-neon mb-6 text-center">
-                Desktop Version: Retail E-commerce Platform Full Walkthrough
-              </h2>
-              {desktopVideoUrl ? (
-                <a 
-                  href="https://www.bosshookah.site" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-full relative group block cursor-pointer"
-                  onClick={(e) => {
-                    trackButtonClick('Desktop Demo Video', { location: 'platform_demo', destination: 'www.bosshookah.site' });
-                  }}
-                >
-                  <video
-                    ref={desktopVideoRef}
-                    src={desktopVideoUrl}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    controls
-                    className="w-full h-auto rounded-xl shadow-2xl border border-accent/30 neon-glow pointer-events-none"
-                    style={{ aspectRatio: '16/9' }}
-                  />
-                  {/* Play/Pause Overlay */}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleDesktopPlay();
-                    }}
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/90 p-4 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 neon-glow"
-                  >
-                    {desktopIsPlaying ? (
-                      <Pause className="w-8 h-8 text-accent" />
-                    ) : (
-                      <Play className="w-8 h-8 text-accent" />
-                    )}
-                  </button>
-                </a>
-              ) : (
-                <div className="w-full bg-card rounded-xl p-8 border-2 border-dashed border-accent/30 shadow-2xl"
-                  style={{
-                    backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
-                    backgroundSize: 'cover',
-                    aspectRatio: '16/9'
-                  }}
-                >
-                  <div className="flex flex-col items-center justify-center h-full space-y-4">
-                    <Video className="w-12 h-12 text-accent" />
-                    <h3 className="font-heading font-semibold text-lg text-foreground text-center">Desktop Video (16:9)</h3>
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={handleDesktopFileUpload}
-                      className="hidden"
-                      id="desktop-video-upload"
-                    />
-                    <label
-                      htmlFor="desktop-video-upload"
-                      className="flex items-center justify-center gap-2 px-6 py-3 bg-accent/10 border border-accent/50 rounded-lg cursor-pointer hover:bg-accent/20 hover:border-accent transition-all"
-                    >
-                      <Upload className="w-4 h-4 text-accent" />
-                      <span className="font-heading text-sm text-accent">Upload Video</span>
-                    </label>
-                    <p className="text-xs text-muted-foreground font-heading text-center">Max 10GB</p>
-                  </div>
-                </div>
-              )}
-              <Button 
-                variant="outline" 
-                className="mt-6 border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
-                onClick={() => window.open('https://www.bosshookah.site', '_blank')}
-              >
-                View Live Desktop Demo →
-              </Button>
-            </div>
-          </div>
-        </section>
-
+      <main className="relative z-10 container mx-auto px-4 py-6 lg:py-8">
         {/* Pricing Cards - Horizontal Layout for Desktop */}
-        <div 
+        <div
           ref={pricingSection.ref}
-          className={`grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-8 lg:mb-12 max-w-7xl mx-auto scroll-fade-section ${pricingSection.isVisible ? 'visible' : ''}`}
+          className={`relative max-w-6xl mx-auto scroll-fade-section px-4 sm:px-6 pt-24 pb-24 md:pt-28 md:pb-28 lg:pt-32 lg:pb-32 ${pricingSection.isVisible ? "visible" : ""}`}
         >
-          {/* Card 1: Starter Launch */}
+          {/* Subtle atmospheric glow — grounds the tier cards */}
+          <div
+            className="pointer-events-none absolute left-1/2 top-[38%] h-[min(440px,58vh)] w-[min(880px,92vw)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_72%_65%_at_50%_50%,rgba(0,200,255,0.09),transparent_70%)] blur-[72px] opacity-70"
+            aria-hidden
+          />
+
+          <div className="relative z-[1]">
+          <div className="text-center mb-12 md:mb-14 lg:mb-16 max-w-3xl mx-auto">
+            <h2 className="font-display font-black text-2xl md:text-3xl lg:text-[2.25rem] leading-[1.12] tracking-tight text-foreground mb-4 md:mb-5">
+              Choose the System That Fits Your Growth Stage
+            </h2>
+            <p className="font-heading text-base md:text-lg text-muted-foreground/80 font-normal max-w-2xl mx-auto leading-relaxed">
+              Every build is designed to convert, automate, and scale your business, not just launch a website.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-7 lg:gap-10 mb-10 lg:mb-12">
+          {/* Card 1: Starter */}
           <div 
-            className="glass-card rounded-xl p-6 lg:p-8 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(0,217,255,0.25)] hover:border-accent/40 flex flex-col"
+            className={cn(
+              "group/starter relative flex flex-col overflow-hidden rounded-xl p-7 lg:p-8",
+              "border border-white/[0.08] bg-card/45 backdrop-blur-md",
+              "shadow-[0_4px_28px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.06)]",
+              "before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/18 before:to-transparent",
+              "transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
+              "lg:hover:-translate-y-1.5 lg:hover:shadow-[0_16px_48px_rgba(0,0,0,0.48),inset_0_1px_0_rgba(255,255,255,0.08)]",
+              growthHovered && "lg:opacity-[0.68] lg:scale-[0.985]"
+            )}
             style={{
               backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
               backgroundSize: 'cover',
               animationDelay: '0.2s'
             }}
           >
-            <h3 className="font-heading font-bold text-xl lg:text-2xl mb-3 text-foreground">Starter Launch</h3>
+            <h3 className="font-heading text-lg font-bold tracking-tight text-foreground md:text-xl lg:text-xl mb-3">
+              Starter
+            </h3>
             <div className="mb-4">
-              <p className="text-muted-foreground text-xs lg:text-sm font-heading">Setup: <span className="text-foreground font-semibold">$2,500</span></p>
-              <p className="text-accent text-2xl lg:text-3xl font-display font-black">$500<span className="text-sm lg:text-base text-muted-foreground font-heading font-normal">/month</span></p>
+              <p className="font-display text-3xl font-black tracking-tight text-accent drop-shadow-[0_0_24px_rgba(0,217,255,0.12)] lg:text-4xl">
+                $1,500
+              </p>
             </div>
+            <p className="mb-6 text-sm font-heading leading-relaxed text-muted-foreground/90">
+              Perfect for businesses that need a clean, conversion-ready foundation.
+            </p>
             
-            <ul className="space-y-2 mb-6 flex-grow">
+            <ul className="mb-6 flex-grow space-y-3">
               {[
-                "Full e-commerce website",
-                "In store pickup and shipping",
-                "Zelle integration",
-                "Live order dashboard",
-                "Text notifications",
-                "Basic support"
+                "Conversion-focused website",
+                "Lead capture setup",
+                "Basic automation",
+                "Mobile optimized design",
               ].map((feature, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-xs lg:text-sm text-foreground/90">
-                  <Check className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                <li key={idx} className="flex items-start gap-2.5 text-sm leading-snug text-foreground/95">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent/90" strokeWidth={2} />
                   <span className="font-heading">{feature}</span>
                 </li>
               ))}
             </ul>
+
+            <p className="mb-0 text-center text-[11px] font-heading leading-relaxed text-muted-foreground/65">
+              Built to launch fast and start capturing leads
+            </p>
             
             <Button 
+              type="button"
               variant="outline" 
-              className="w-full border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
-              onClick={() => window.open('https://www.davincidynamics.ai', '_blank')}
+              className="mt-6 h-12 w-full rounded-lg border border-accent/35 font-heading text-sm font-semibold text-accent shadow-sm transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] hover:bg-accent/10 lg:hover:border-accent/55 lg:hover:shadow-[0_0_18px_rgba(0,200,255,0.12)]"
+              onClick={onTelegramCta("pricing")}
             >
-              Get My Starter Platform
+              Book Your Strategy Call
             </Button>
           </div>
 
-          {/* Card 2: Growth System (Featured) */}
+          {/* Card 2: Growth (Featured) */}
           <div 
-            className="bg-card rounded-xl p-6 lg:p-8 border-2 border-accent shadow-2xl relative transition-all duration-300 hover:scale-[1.02] neon-glow animate-fade-in-up flex flex-col lg:scale-105"
+            className={cn(
+              "group/growth relative z-[2] flex flex-col overflow-visible rounded-xl px-7 pb-7 pt-10 animate-fade-in-up lg:px-8 lg:pb-8 lg:pt-11",
+              "border border-cyan-400/40 bg-card/55 backdrop-blur-md",
+              "shadow-[0_0_0_1px_rgba(0,200,255,0.14),0_8px_36px_rgba(0,0,0,0.42),0_0_100px_-28px_rgba(0,200,255,0.18)]",
+              "before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-cyan-400/45 before:to-transparent",
+              "transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
+              "lg:scale-[1.035]",
+              "lg:hover:-translate-y-2 lg:hover:scale-[1.055] lg:hover:border-cyan-400/65",
+              "lg:hover:shadow-[0_0_0_1px_rgba(0,200,255,0.28),0_22px_56px_rgba(0,0,0,0.55),0_0_120px_-24px_rgba(0,200,255,0.22)]"
+            )}
+            onMouseEnter={onGrowthEnter}
+            onMouseLeave={onGrowthLeave}
             style={{
               backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
               backgroundSize: 'cover',
               animationDelay: '0.3s'
             }}
           >
-            {/* Most Popular Badge */}
-            <div className="absolute -top-3 right-4 bg-accent text-background px-3 py-1 rounded-full text-xs font-heading font-bold shadow-lg">
+            <div
+              className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl bg-gradient-to-b from-[rgba(0,200,255,0.07)] via-transparent to-transparent opacity-0 transition-opacity duration-500 ease-out lg:group-hover/growth:opacity-100"
+              aria-hidden
+            />
+            {/* Most Popular Badge — centered, overlaps top edge */}
+            <div
+              className="absolute left-1/2 top-[-11px] z-20 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/20 px-4 py-1.5 text-[11px] font-heading font-semibold tracking-wide text-white/95 shadow-[0_2px_16px_rgba(0,200,255,0.35),0_0_32px_rgba(0,200,255,0.12)]"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(0,214,255,0.92) 0%, rgba(0,165,230,0.88) 50%, rgba(0,130,210,0.9) 100%)",
+              }}
+            >
               Most Popular
             </div>
             
-            <h3 className="font-heading font-bold text-xl lg:text-2xl mb-3 text-foreground">Growth System</h3>
+            <h3 className="font-heading text-lg font-bold tracking-tight text-foreground md:text-xl lg:text-xl mb-3">Growth</h3>
             <div className="mb-4">
-              <p className="text-muted-foreground text-xs lg:text-sm font-heading">Setup: <span className="text-foreground font-semibold">$3,500 to $5,000</span></p>
-              <p className="text-accent text-2xl lg:text-3xl font-display font-black">$1,000 to $1,500<span className="text-sm lg:text-base text-muted-foreground font-heading font-normal">/month</span></p>
+              <p className="font-display text-3xl font-black tracking-tight text-accent drop-shadow-[0_0_28px_rgba(0,217,255,0.18)] lg:text-4xl">
+                $3,000
+              </p>
             </div>
+            <p className="mb-6 text-sm font-heading leading-relaxed text-muted-foreground/90">
+              For businesses ready to scale with better systems and follow-up.
+            </p>
             
-            <ul className="space-y-2 mb-6 flex-grow">
+            <ul className="mb-6 flex-grow space-y-3">
               {[
                 "Everything in Starter",
-                "Authorize.net card processing",
-                "Cleaner checkout flows",
-                "Saved customer accounts",
-                "Stored ID verification",
-                "Email marketing setup",
+                "Funnel structure",
+                "Automated follow-up system",
+                "Lead routing logic",
                 "Conversion optimization",
-                "Ongoing management"
               ].map((feature, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-xs lg:text-sm text-foreground/90">
-                  <Check className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                <li key={idx} className="flex items-start gap-2.5 text-sm leading-snug text-foreground/95">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent/90" strokeWidth={2} />
                   <span className="font-heading">{feature}</span>
                 </li>
               ))}
             </ul>
+
+            <p className="mb-0 text-center text-[11px] font-heading leading-relaxed text-muted-foreground/65">
+              Designed to turn traffic into consistent customers
+            </p>
             
             <Button 
-              className="w-full bg-accent text-background hover:bg-accent/90 font-heading font-bold transition-all duration-300 neon-glow-intense"
-              onClick={() => window.open('https://www.davincidynamics.ai', '_blank')}
+              type="button"
+              className="relative z-10 mt-6 h-12 w-full rounded-lg bg-accent font-heading text-sm font-bold text-background shadow-[0_2px_16px_rgba(0,200,255,0.38),inset_0_1px_0_rgba(255,255,255,0.22)] transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] hover:bg-accent/92 hover:shadow-[0_4px_22px_rgba(0,200,255,0.45),inset_0_1px_0_rgba(255,255,255,0.26)] lg:group-hover/growth:shadow-[0_4px_26px_rgba(0,200,255,0.48),inset_0_1px_0_rgba(255,255,255,0.28)]"
+              onClick={onTelegramCta("pricing")}
             >
-              Configure My Growth System
+              Book Your Strategy Call
             </Button>
           </div>
 
-          {/* Card 3: Scale Partner */}
+          {/* Card 3: Scale */}
           <div 
-            className="glass-card rounded-xl p-6 lg:p-8 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(0,217,255,0.25)] hover:border-accent/40 flex flex-col"
+            className={cn(
+              "group/scale relative flex flex-col overflow-hidden rounded-xl p-7 lg:p-8",
+              "border border-white/[0.08] bg-card/45 backdrop-blur-md",
+              "shadow-[0_4px_28px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.06)]",
+              "before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/18 before:to-transparent",
+              "transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
+              "lg:hover:-translate-y-1.5 lg:hover:shadow-[0_16px_48px_rgba(0,0,0,0.48),inset_0_1px_0_rgba(255,255,255,0.08)]",
+              growthHovered && "lg:opacity-[0.68] lg:scale-[0.985]"
+            )}
             style={{
               backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__')`,
               backgroundSize: 'cover',
               animationDelay: '0.4s'
             }}
           >
-            <h3 className="font-heading font-bold text-xl lg:text-2xl mb-3 text-foreground">Scale Partner</h3>
+            <h3 className="font-heading text-lg font-bold tracking-tight text-foreground md:text-xl lg:text-xl mb-3">
+              Scale
+            </h3>
             <div className="mb-4">
-              <p className="text-muted-foreground text-xs lg:text-sm font-heading">Setup: <span className="text-foreground font-semibold">$5,000+</span></p>
-              <p className="text-accent text-2xl lg:text-3xl font-display font-black">$2,000+<span className="text-sm lg:text-base text-muted-foreground font-heading font-normal">/month or revenue share</span></p>
+              <p className="font-display text-3xl font-black tracking-tight text-accent drop-shadow-[0_0_24px_rgba(0,217,255,0.12)] lg:text-4xl">
+                $5,000+
+              </p>
             </div>
+            <p className="mb-6 text-sm font-heading leading-relaxed text-muted-foreground/90">
+              For businesses that want a full revenue system built to scale.
+            </p>
             
-            <ul className="space-y-2 mb-6 flex-grow">
+            <ul className="mb-6 flex-grow space-y-3">
               {[
-                "Full ad management",
-                "Google and social strategy",
-                "SMS campaigns",
-                "Backend automation",
-                "Reporting dashboards",
-                "Aggressive growth strategy"
+                "Everything in Growth",
+                "Advanced automation workflows",
+                "CRM pipeline setup",
+                "Reporting and tracking systems",
+                "Custom system architecture",
               ].map((feature, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-xs lg:text-sm text-foreground/90">
-                  <Check className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                <li key={idx} className="flex items-start gap-2.5 text-sm leading-snug text-foreground/95">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent/90" strokeWidth={2} />
                   <span className="font-heading">{feature}</span>
                 </li>
               ))}
             </ul>
+
+            <p className="mb-0 text-center text-[11px] font-heading leading-relaxed text-muted-foreground/65">
+              Built for performance, automation, and long-term growth
+            </p>
             
             <Button 
+              type="button"
               variant="outline" 
-              className="w-full border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold transition-all duration-300"
-              onClick={() => window.open('https://www.davincidynamics.ai', '_blank')}
+              className="mt-6 h-12 w-full rounded-lg border border-accent/35 font-heading text-sm font-semibold text-accent shadow-sm transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] hover:bg-accent/10 lg:hover:border-accent/55 lg:hover:shadow-[0_0_18px_rgba(0,200,255,0.12)]"
+              onClick={onTelegramCta("pricing")}
             >
-              Request Scaling Audit
+              Book Your Strategy Call
             </Button>
+          </div>
+          </div>
+
+          <div className="mx-auto mt-4 max-w-3xl border-t border-white/[0.06] px-4 pt-10 md:pt-12">
+            <p className="text-center text-sm font-heading leading-relaxed text-muted-foreground/85">
+              Every system is customized based on your business. Final scope and pricing may vary depending on complexity and goals.
+            </p>
+          </div>
           </div>
         </div>
 
@@ -462,22 +279,28 @@ export default function PlatformDemo() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
+              type="button"
               size="lg"
               className="w-full sm:w-auto lg:px-16 bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base lg:text-lg py-6 transition-all duration-300 neon-glow-intense"
-              onClick={() => {
-                trackButtonClick('Get My Custom Platform', { location: 'platform_demo' });
-                openChat();
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                trackButtonClick('Book Your System Walkthrough', { location: 'platform_demo' });
+                openVinciBot("demo");
               }}
             >
-              Get My Custom Platform
+              Book Your System Walkthrough
             </Button>
             <Button 
+              type="button"
               size="lg"
               variant="outline"
               className="w-full sm:w-auto lg:px-16 border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-bold text-base lg:text-lg py-6 transition-all duration-300"
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 trackButtonClick('Book Demo', { location: 'platform_demo' });
-                setLocation('/booking');
+                openVinciBot("demo");
               }}
             >
               Book a Demo

@@ -11,6 +11,7 @@ import { Phone, Mail, MapPin } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { onTelegramCta } from "@/lib/telegramCtas";
 
 export default function Contact() {
   const [formData, setFormData] = useState<{
@@ -216,12 +217,12 @@ export default function Contact() {
                 </div>
 
                 <Button
-                  type="submit"
+                  type="button"
                   size="lg"
                   className="w-full bg-accent text-background hover:bg-accent/90 font-heading font-bold"
-                  disabled={submitInquiry.isPending}
+                  onClick={onTelegramCta("contact")}
                 >
-                  {submitInquiry.isPending ? "Sending..." : "Send Message"}
+                  Let's Map It Out
                 </Button>
               </form>
             </div>

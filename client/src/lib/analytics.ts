@@ -62,7 +62,7 @@ export function trackChatEvent(action: 'open' | 'close' | 'message_sent', additi
 /**
  * Track conversion events
  */
-export function trackConversion(conversionType: 'demo_booking' | 'fiverr_click' | 'chat_started') {
+export function trackConversion(conversionType: "demo_booking" | "chat_started") {
   trackEvent('conversion', {
     conversion_type: conversionType
   });

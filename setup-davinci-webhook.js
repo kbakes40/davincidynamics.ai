@@ -18,7 +18,6 @@ async function setupWebhook() {
 
   console.log('🔧 Setting up @DavinciDynamics_Chatbot webhook...');
   console.log('📍 Webhook URL:', WEBHOOK_URL);
-  console.log('🤖 Bot Token:', BOT_TOKEN.substring(0, 10) + '...');
 
   try {
     // Set webhook

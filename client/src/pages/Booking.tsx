@@ -11,13 +11,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { useBooking } from "@/contexts/BookingContext";
-import { useChat } from "@/contexts/ChatContext";
+import { onTelegramCta } from "@/lib/telegramCtas";
 
 type PackageTier = "starter" | "growth" | "scale" | null;
 
 export default function Booking() {
   const { setBookingData } = useBooking();
-  const { openChat } = useChat();
   const [selectedTier, setSelectedTier] = useState<PackageTier>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -357,23 +356,26 @@ export default function Booking() {
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Button
+                  type="button"
                   variant="default"
                   className="bg-accent text-background hover:bg-accent/90 font-heading font-bold"
-                  onClick={openChat}
+                  onClick={onTelegramCta("contact")}
                 >
                   Get My Custom Plan
                 </Button>
                 <Button
+                  type="button"
                   variant="outline"
                   className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold"
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  onClick={onTelegramCta("pricing")}
                 >
                   View Pricing
                 </Button>
                 <Button
+                  type="button"
                   variant="outline"
                   className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold"
-                  onClick={() => window.location.href = '/platform-demo'}
+                  onClick={onTelegramCta("demo")}
                 >
                   Watch Demo
                 </Button>
@@ -590,9 +592,10 @@ export default function Booking() {
               Join dozens of store owners who've cut their costs by 60%+ with transparent all-in-one pricing that covers hosting, ads, and automation.
             </p>
             <Button
+              type="button"
               size="lg"
               className="bg-accent text-background hover:bg-accent/90 font-heading font-bold neon-glow-intense"
-              onClick={() => scrollToSection("booking-section")}
+              onClick={onTelegramCta("demo")}
             >
               Book Your Demo Now
             </Button>

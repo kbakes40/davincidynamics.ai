@@ -8,6 +8,7 @@ import { Link, useLocation } from "wouter";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { trackButtonClick, trackConversion } from "@/lib/analytics";
+import { openVinciBot } from "@/lib/telegramCtas";
 
 export default function Navigation() {
   const [location] = useLocation();
@@ -15,7 +16,7 @@ export default function Navigation() {
 
   const navItems = [
     { name: "Home", path: "/" },
-    { name: "Platform Demo", path: "/platform-demo" },
+    { name: "Pricing", path: "/pricing" },
     { name: "Solutions", path: "/solutions" },
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
@@ -47,35 +48,20 @@ export default function Navigation() {
                 {item.name}
               </Link>
             ))}
-            <a 
-              href="https://www.fiverr.com/davincidynamics/build-a-revenue-optimized-ecommerce-system-with-automation" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              onClick={() => {
-                trackButtonClick('Hire via Fiverr', { location: 'header' });
-                trackConversion('fiverr_click');
+            <Button
+              type="button"
+              size="sm"
+              className="bg-accent text-background hover:bg-accent/90 font-heading font-bold neon-glow"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                trackButtonClick("Get a Breakdown", { location: "header" });
+                trackConversion("demo_booking");
+                openVinciBot("audit");
               }}
             >
-              <Button
-                size="sm"
-                variant="outline"
-                className="border-accent/50 text-accent hover:bg-accent/10 font-heading font-bold"
-              >
-                Hire via Fiverr
-              </Button>
-            </a>
-            <Link href="/booking">
-              <Button
-                size="sm"
-                className="bg-accent text-background hover:bg-accent/90 font-heading font-bold neon-glow"
-                onClick={() => {
-                  trackButtonClick('Book Demo', { location: 'header' });
-                  trackConversion('demo_booking');
-                }}
-              >
-                Book Demo
-              </Button>
-            </Link>
+              Get a Breakdown
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -105,29 +91,21 @@ export default function Navigation() {
                   {item.name}
                 </Link>
               ))}
-              <a 
-                href="https://www.fiverr.com/davincidynamics/build-a-revenue-optimized-ecommerce-system-with-automation" 
-                target="_blank" 
-                rel="noopener noreferrer"
+              <Button
+                type="button"
+                size="sm"
+                className="bg-accent text-background hover:bg-accent/90 font-heading font-bold w-full"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setMobileMenuOpen(false);
+                  trackButtonClick("Get a Breakdown", { location: "header_mobile" });
+                  trackConversion("demo_booking");
+                  openVinciBot("audit");
+                }}
               >
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-accent/50 text-accent hover:bg-accent/10 font-heading font-bold w-full"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Hire via Fiverr
-                </Button>
-              </a>
-              <Link href="/booking">
-                <Button
-                  size="sm"
-                  className="bg-accent text-background hover:bg-accent/90 font-heading font-bold w-full"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Book Demo
-                </Button>
-              </Link>
+                Get a Breakdown
+              </Button>
             </div>
           </div>
         )}

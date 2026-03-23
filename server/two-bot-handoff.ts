@@ -1,6 +1,6 @@
 /**
- * Two-Bot Handoff System
- * Flow: Website → @Leo_Handoff_bot → @DavinciDynamics_Chatbot → Website
+ * Website chat → agent pipeline (legacy widget path).
+ * Vinci Telegram customers use vinci-leo-handoff.ts (internal Leo notes only).
  */
 
 import { Telegraf } from 'telegraf';

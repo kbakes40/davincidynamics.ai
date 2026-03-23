@@ -19,6 +19,6 @@ describe('Telegram Bot Configuration', () => {
     expect(response.ok).toBe(true);
     expect(data.ok).toBe(true);
     expect(data.result).toBeDefined();
-    expect(data.result.username).toBe('DaVinciAssistBot');
+    expect(data.result.username).toBe('VinciDynamicsBot');
   });
 });
