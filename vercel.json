@@ -5,7 +5,6 @@
   "buildCommand": "rm -rf dist/public && pnpm run build:client",
   "outputDirectory": "dist/public",
   "rewrites": [
-    { "handle": "filesystem" },
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
