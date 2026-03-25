@@ -11,7 +11,14 @@ interface Message {
 }
 
 export default function GlassChatWidget() {
-  const { isOpen, closeChat } = useChat();
+  const { isOpen } = useChat();
+  if (!isOpen) return null;
+  return <GlassChatWidgetOpen />;
+}
+
+/** Mounted only while chat is open so tRPC hooks never hit the network when the panel is closed. */
+function GlassChatWidgetOpen() {
+  const { closeChat } = useChat();
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -44,7 +51,7 @@ export default function GlassChatWidget() {
 
   // Welcome message with typing animation
   useEffect(() => {
-    if (isOpen && messages.length === 0 && !hasTypedWelcome) {
+    if (messages.length === 0 && !hasTypedWelcome) {
       // Start entrance animation
       setIsEntering(true);
       
@@ -92,7 +99,7 @@ export default function GlassChatWidget() {
         }
       }, 400); // Match entrance animation duration
     }
-  }, [isOpen, hasTypedWelcome]);
+  }, [hasTypedWelcome]);
 
   // Poll for new messages when conversation is handed off
   useEffect(() => {
@@ -294,10 +301,6 @@ export default function GlassChatWidget() {
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, dragOffset]);
-
-  if (!isOpen) {
-    return null;
-  }
 
   return (
     <>

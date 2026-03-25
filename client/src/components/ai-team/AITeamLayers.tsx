@@ -31,21 +31,23 @@ export function AITeamLayers({ onLayerHover }: AITeamLayersProps) {
         <div
           key={layer.id}
           className={cn(
-            "group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[linear-gradient(145deg,rgba(6,10,18,0.92),rgba(3,6,14,0.78))] p-6 shadow-[0_28px_80px_rgba(0,0,0,0.52)] backdrop-blur-xl transition-all duration-300",
+            "group pointer-events-none relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[linear-gradient(145deg,rgba(6,10,18,0.92),rgba(3,6,14,0.78))] shadow-[0_28px_80px_rgba(0,0,0,0.52)] backdrop-blur-xl transition-all duration-300",
             "before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/15 before:to-transparent",
             LAYER_HOVER[layer.id]
           )}
-          onMouseEnter={() => onLayerHover(layer.botIds)}
-          onMouseLeave={() => onLayerHover(null)}
         >
           <div
             className={cn(
-              "absolute left-0 top-6 h-11 w-1 rounded-r-full bg-gradient-to-b opacity-80 transition group-hover:opacity-100",
+              "pointer-events-none absolute left-0 top-6 h-11 w-1 rounded-r-full bg-gradient-to-b opacity-80 transition group-hover:opacity-100",
               LAYER_BAR[layer.id]
             )}
             aria-hidden
           />
-          <div className="relative space-y-4 pl-4">
+          <div
+            className="relative cursor-default space-y-4 p-6 pl-8 pointer-events-auto"
+            onMouseEnter={() => onLayerHover(layer.botIds)}
+            onMouseLeave={() => onLayerHover(null)}
+          >
             <div className="flex items-baseline justify-between gap-3">
               <h3 className="font-display text-base font-semibold tracking-tight text-white md:text-lg">
                 {layer.title}

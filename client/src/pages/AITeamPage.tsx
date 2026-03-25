@@ -140,7 +140,9 @@ export default function AITeamPage() {
 
       <Navigation />
 
-      <main className="relative overflow-x-hidden">
+      {/* No overflow-x-hidden: paired with default overflow-y it forces overflow-y:auto on main (CSS),
+          which can make the first wheel hit a non-scrollable scrollport and break document scroll. */}
+      <main className="relative">
         {/* Global motif: faint diagonal data lines */}
         <div
           className="ai-team-motif-diagonal pointer-events-none fixed inset-0 -z-20 opacity-50"
@@ -261,7 +263,7 @@ export default function AITeamPage() {
         </Reveal>
 
         {/* Final CTA — isolated band + stronger glow */}
-        <section className="relative isolate mt-4 border-t border-white/[0.1] py-28 md:py-40">
+        <section className="pointer-events-none relative isolate mt-4 border-t border-white/[0.1] py-28 md:py-40">
           <div
             className="ai-team-cta-glow-pulse pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_95%_65%_at_50%_45%,rgba(34,211,238,0.16),rgba(99,102,241,0.07)_45%,transparent_72%)]"
             aria-hidden
@@ -271,7 +273,7 @@ export default function AITeamPage() {
             aria-hidden
           />
 
-          <div className="group/cta container relative mx-auto max-w-3xl px-4 text-center">
+          <div className="group/cta container pointer-events-auto relative mx-auto max-w-3xl px-4 text-center">
             <div
               className="ai-team-cta-float-node pointer-events-none absolute -left-2 top-4 size-[5.5rem] rounded-full border border-cyan-400/25 bg-cyan-400/[0.07] blur-[0.5px] shadow-[0_0_60px_-12px_rgba(34,211,238,0.45)] transition duration-500 group-hover/cta:scale-105 md:-left-6"
               aria-hidden

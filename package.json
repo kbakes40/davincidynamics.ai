@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
+    "dev:ai-team": "VITE_STATIC_MARKETING=true vite --host --open /ai-team",
     "build": "pnpm run build:client && pnpm run build:local-server",
     "build:client": "vite build",
     "build:local-server": "esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/local-server.mjs",

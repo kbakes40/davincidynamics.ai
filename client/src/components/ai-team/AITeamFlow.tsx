@@ -34,7 +34,8 @@ export function AITeamFlow({
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-x-auto pb-3">
+      {/* overflow-y-clip avoids overflow-x:auto forcing overflow-y:auto (scroll container) on this node. */}
+      <div className="relative overflow-x-auto overflow-y-clip pb-3">
         <div
           className={cn(
             "ai-team-flow-halo pointer-events-none absolute -inset-x-6 -inset-y-10 -z-10 rounded-[3rem] bg-gradient-to-r from-cyan-400/[0.08] via-sky-300/[0.14] to-cyan-400/[0.08] blur-2xl transition-opacity duration-500 md:blur-3xl",

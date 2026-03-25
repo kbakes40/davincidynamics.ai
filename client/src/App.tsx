@@ -22,10 +22,12 @@ import { BookingProvider } from "./contexts/BookingContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import GlassChatWidget from "./components/GlassChatWidget";
 
+const staticMarketing = import.meta.env.VITE_STATIC_MARKETING === "true";
+
 /** Reference landing (hookahprice manus) has no sticky nav, chat bubble, or Spotify chrome. */
 function FloatingChrome() {
   const [location] = useLocation();
-  if (location === "/") return null;
+  if (location === "/" || staticMarketing) return null;
   return (
     <>
       <SpotifyBottomPlayer />
@@ -37,7 +39,7 @@ function FloatingChrome() {
 function Router() {
   const [location] = useLocation();
   const mainPad =
-    location === "/" ? "pb-0" : "pb-20 md:pb-20";
+    location === "/" || staticMarketing ? "pb-0" : "pb-20 md:pb-20";
   return (
     <div className={mainPad}>
       <Switch>
