@@ -91,20 +91,18 @@ export function AITeamModal({ bot, open, onClose }: AITeamModalProps) {
         </div>
 
         {bot.mascotSrc ? (
-          <div className="border-b border-white/[0.06] bg-transparent px-6 py-4 sm:px-8">
-            <div className="ai-team-premium-mascot-wrap flex w-full justify-center">
-              <div className="flex h-[320px] w-full max-w-[368px] items-center justify-center sm:h-[348px] sm:max-w-[400px]">
-                <img
-                  src={bot.mascotSrc}
-                  alt={`${bot.name} mascot`}
-                  width={1376}
-                  height={768}
-                  loading="lazy"
-                  decoding="async"
-                  draggable={false}
-                  className="pointer-events-none h-auto max-h-full w-auto max-w-full object-contain object-center select-none"
-                />
-              </div>
+          <div className="border-b border-white/[0.06] bg-transparent">
+            <div className="ai-team-modal-mascot-hero">
+              <img
+                src={bot.mascotSrc}
+                alt={`${bot.name} mascot`}
+                width={1376}
+                height={768}
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+                className="ai-team-modal-mascot-img pointer-events-none object-contain object-center select-none"
+              />
             </div>
           </div>
         ) : null}

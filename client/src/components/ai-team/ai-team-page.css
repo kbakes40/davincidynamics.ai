@@ -270,6 +270,36 @@
   animation: ai-team-modal-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+/* Detail modal only: larger centered mascot (grid cards / thumbnails unchanged) */
+.ai-team-os .ai-team-modal-panel .ai-team-modal-mascot-hero {
+  display: flex;
+  min-height: 0;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.ai-team-os .ai-team-modal-panel .ai-team-modal-mascot-img {
+  display: block;
+  width: min(36vw, 500px);
+  max-width: 500px;
+  height: auto;
+  margin: 32px auto 28px auto;
+  background: transparent !important;
+  filter: none !important;
+  box-shadow: none !important;
+  mix-blend-mode: normal;
+}
+
+@media (max-width: 767px) {
+  .ai-team-os .ai-team-modal-panel .ai-team-modal-mascot-img {
+    width: min(80vw, 340px);
+    max-width: 340px;
+    height: auto;
+    margin: 28px auto 24px auto;
+  }
+}
+
 .ai-team-hero-mesh line {
   animation: ai-team-hero-nodes 5s ease-in-out infinite alternate;
 }

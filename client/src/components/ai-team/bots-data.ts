@@ -88,6 +88,7 @@ export const BOTS: Bot[] = [
     systemFunction: "Receives lead context and supports personal follow-up and closing.",
     connectedWith: ["vinci", "atlas"],
     modalCta: { label: "Open Leo", href: "https://t.me/Leo_Handoff_bot" },
+    mascotSrc: "/ai-team/leo-icon.png?v=5",
   },
   {
     id: "atlas",
@@ -124,6 +125,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Turns requirements into durable software paths the business can rely on.",
     systemFunction: "Builds tools, systems, and automation infrastructure.",
     connectedWith: ["atlas", "relay", "kernel", "vector", "patch"],
+    mascotSrc: "/ai-team/forge-icon.png?v=5",
   },
   {
     id: "vector",
