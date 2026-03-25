@@ -14,13 +14,13 @@ export const BOT_IDS = [
 
 export type BotId = (typeof BOT_IDS)[number];
 
-/** Card / modal accent: Growth=violet·blue, Revenue=cyan, Ops=emerald·teal, Engineering=orange|indigo */
-export type VisualAccent = "violet" | "cyan" | "emerald" | "orange" | "indigo";
+/** Card / modal accent: Growth=violet·blue, Revenue=cyan|mint (Leo), Ops=emerald·teal, Engineering=orange|indigo */
+export type VisualAccent = "violet" | "cyan" | "mint" | "emerald" | "orange" | "indigo";
 
 export const BOT_VISUAL_ACCENTS: Record<BotId, VisualAccent> = {
   nova: "violet",
   vinci: "cyan",
-  leo: "cyan",
+  leo: "mint",
   atlas: "emerald",
   aegis: "emerald",
   forge: "orange",
@@ -79,16 +79,16 @@ export const BOTS: Bot[] = [
   {
     id: "leo",
     name: "Leo",
-    role: "Follow-Up Coordinator (@Leo_Handoff_bot)",
-    personality: "Direct, professional, and focused on closing the loop.",
-    statusLabel: "Follow Up",
+    role: "Follow-Up Coordinator (@Leo_Handoff_Bot)",
+    personality: "Reliable, precise, and always following through.",
+    statusLabel: "FOLLOW UP",
     filterCategory: "customer-facing",
     shortDescription:
-      "Owns handoff context—making follow-up decisive instead of improvised.",
+      "Direct, professional, and focused on closing the loop. Owns handoff context—making follow-up decisive instead of improvised.",
     systemFunction: "Receives lead context and supports personal follow-up and closing.",
     connectedWith: ["vinci", "atlas"],
-    modalCta: { label: "Open Leo", href: "https://t.me/Leo_Handoff_bot" },
-    mascotSrc: "/ai-team/leo-icon.png?v=5",
+    modalCta: { label: "Open Leo", href: "https://t.me/Leo_Handoff_Bot" },
+    mascotSrc: "/ai-team/leo-icon.png?v=8",
   },
   {
     id: "atlas",
@@ -125,7 +125,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Turns requirements into durable software paths the business can rely on.",
     systemFunction: "Builds tools, systems, and automation infrastructure.",
     connectedWith: ["atlas", "relay", "kernel", "vector", "patch"],
-    mascotSrc: "/ai-team/forge-icon.png?v=5",
+    mascotSrc: "/ai-team/forge-icon.png?v=10",
   },
   {
     id: "vector",

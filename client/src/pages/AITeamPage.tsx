@@ -12,6 +12,7 @@ import { BOTS, BOT_BY_ID, type BotId, type FilterId } from "@/components/ai-team
 import { AITeamFlow } from "@/components/ai-team/AITeamFlow";
 import { AITeamLayers } from "@/components/ai-team/AITeamLayers";
 import { AITeamLiveStrip } from "@/components/ai-team/AITeamLiveStrip";
+import { BotChatModal } from "@/components/ai-team/BotChatModal";
 import { AITeamModal } from "@/components/ai-team/AITeamModal";
 import { AITeamSection } from "@/components/ai-team/AITeamSection";
 
@@ -84,14 +85,20 @@ function HeroNodeMesh() {
 export default function AITeamPage() {
   const [filter, setFilter] = useState<FilterId>("all");
   const [modalBotId, setModalBotId] = useState<BotId | null>(null);
+  const [leoChatOpen, setLeoChatOpen] = useState(false);
   const [hoveredCardId, setHoveredCardId] = useState<BotId | null>(null);
   const [hoveredFlowId, setHoveredFlowId] = useState<BotId | null>(null);
   const [flowPinnedId, setFlowPinnedId] = useState<BotId | null>(null);
   const [layerBoostIds, setLayerBoostIds] = useState<Set<BotId> | null>(null);
 
   const focusId = useMemo(
-    () => modalBotId ?? hoveredCardId ?? hoveredFlowId ?? flowPinnedId ?? null,
-    [modalBotId, hoveredCardId, hoveredFlowId, flowPinnedId]
+    () =>
+      (modalBotId ?? (leoChatOpen ? ("leo" as const) : null)) ??
+      hoveredCardId ??
+      hoveredFlowId ??
+      flowPinnedId ??
+      null,
+    [modalBotId, leoChatOpen, hoveredCardId, hoveredFlowId, flowPinnedId]
   );
 
   const visibleBots = useMemo(() => {
@@ -106,6 +113,10 @@ export default function AITeamPage() {
   }, []);
 
   const onSelectCard = useCallback((id: BotId) => {
+    if (id === "leo") {
+      setLeoChatOpen(true);
+      return;
+    }
     setModalBotId(id);
   }, []);
 
@@ -244,6 +255,7 @@ export default function AITeamPage() {
                 onFlowPinToggle={onFlowPinToggle}
                 onFlowPinClear={onFlowPinClear}
                 onStepHover={setHoveredFlowId}
+                onStepOpen={onSelectCard}
               />
             </div>
           </div>
@@ -307,6 +319,12 @@ export default function AITeamPage() {
       </main>
 
       <AITeamModal bot={modalBot} open={Boolean(modalBot)} onClose={onCloseModal} />
+
+      <BotChatModal
+        open={leoChatOpen}
+        onClose={() => setLeoChatOpen(false)}
+        mascotSrc={BOT_BY_ID.leo.mascotSrc}
+      />
     </div>
   );
 }

@@ -19,6 +19,12 @@
   --va2: 34, 211, 238;
 }
 
+/* Leo — Follow-Up / Vinci teal-cyan (#00BCD4) */
+.ai-team-os [data-visual-accent="mint"] {
+  --va: 0, 188, 212;
+  --va2: 0, 151, 167;
+}
+
 .ai-team-os [data-visual-accent="emerald"] {
   --va: 52, 211, 153;
   --va2: 45, 212, 191;
@@ -284,7 +290,12 @@
   width: min(36vw, 500px);
   max-width: 500px;
   height: auto;
-  margin: 32px auto 28px auto;
+  object-fit: contain;
+  object-position: center;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 32px;
+  margin-bottom: 28px;
   background: transparent !important;
   filter: none !important;
   box-shadow: none !important;
@@ -296,7 +307,12 @@
     width: min(80vw, 340px);
     max-width: 340px;
     height: auto;
-    margin: 28px auto 24px auto;
+    object-fit: contain;
+    object-position: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 28px;
+    margin-bottom: 24px;
   }
 }
 
@@ -322,6 +338,9 @@
 }
 .ai-team-os .ai-team-modal-pill[data-visual-accent="cyan"] {
   --va: 56, 189, 248;
+}
+.ai-team-os .ai-team-modal-pill[data-visual-accent="mint"] {
+  --va: 0, 188, 212;
 }
 .ai-team-os .ai-team-modal-pill[data-visual-accent="emerald"] {
   --va: 52, 211, 153;
@@ -422,6 +441,10 @@
 
 .ai-team-os .ai-team-premium-mascot-wrap img {
   display: block;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
   margin-left: auto;
   margin-right: auto;
   background: transparent !important;
@@ -456,6 +479,15 @@
 }
 
 .ai-team-os .ai-team-card-mascot-canvas img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  margin-left: auto;
+  margin-right: auto;
   transform: scale(1.58);
   transform-origin: center center;
 }

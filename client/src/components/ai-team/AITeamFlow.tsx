@@ -10,6 +10,8 @@ interface AITeamFlowProps {
   onFlowPinToggle: (id: BotId) => void;
   onFlowPinClear: () => void;
   onStepHover: (id: BotId | null) => void;
+  /** Double-click a stage to open its card modal (Leo opens live chat). Pin state is unchanged. */
+  onStepOpen?: (id: BotId) => void;
 }
 
 export function AITeamFlow({
@@ -18,6 +20,7 @@ export function AITeamFlow({
   onFlowPinToggle,
   onFlowPinClear,
   onStepHover,
+  onStepOpen,
 }: AITeamFlowProps) {
   const description = useMemo(() => {
     const idForCopy =
@@ -65,6 +68,10 @@ export function AITeamFlow({
                 onMouseEnter={() => onStepHover(id)}
                 onMouseLeave={() => onStepHover(null)}
                 onClick={() => onFlowPinToggle(id)}
+                onDoubleClick={e => {
+                  e.preventDefault();
+                  onStepOpen?.(id);
+                }}
               >
                 <span className="font-display text-xs font-semibold text-white md:text-sm">{bot.name}</span>
                 <span className="font-heading text-[9px] font-medium uppercase tracking-wider text-cyan-100/60">
@@ -107,15 +114,22 @@ export function AITeamFlow({
           Active channel
         </p>
         <p className="mt-2 font-body text-sm leading-relaxed text-white/78">{description}</p>
-        {flowPinnedId ? (
-          <button
-            type="button"
-            className="mt-3 font-heading text-xs font-semibold text-cyan-200/70 underline-offset-4 hover:text-cyan-100 hover:underline"
-            onClick={onFlowPinClear}
-          >
-            Clear pinned stage
-          </button>
-        ) : null}
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          {onStepOpen ? (
+            <p className="font-mono text-[10px] tracking-[0.12em] text-white/32">
+              Double-click a stage to open its profile — Leo opens live chat.
+            </p>
+          ) : null}
+          {flowPinnedId ? (
+            <button
+              type="button"
+              className="font-heading text-xs font-semibold text-cyan-200/70 underline-offset-4 hover:text-cyan-100 hover:underline"
+              onClick={onFlowPinClear}
+            >
+              Clear pinned stage
+            </button>
+          ) : null}
+        </div>
       </div>
     </div>
   );

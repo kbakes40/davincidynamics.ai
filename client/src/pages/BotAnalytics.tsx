@@ -106,7 +106,11 @@ export default function BotAnalytics() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{analytics.avgMessagesPerConversation}</div>
+                <div className="text-2xl font-bold">
+                  {analytics.totalConversations > 0
+                    ? (analytics.totalMessages / analytics.totalConversations).toFixed(1)
+                    : "—"}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Engagement metric
                 </p>
@@ -116,36 +120,39 @@ export default function BotAnalytics() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Outcomes
+                  Lead events
                 </CardTitle>
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{analytics.outcomes.length}</div>
+                <div className="text-2xl font-bold">{analytics.events.length}</div>
                 <p className="text-xs text-muted-foreground">
-                  Completed conversations
+                  Logged funnel events
                 </p>
               </CardContent>
             </Card>
           </div>
         )}
 
-        {analytics && analytics.outcomes.length > 0 && (
+        {analytics && analytics.events.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Conversation Outcomes</CardTitle>
+              <CardTitle>Lead events</CardTitle>
               <CardDescription>
-                How conversations ended for this user
+                Recent activity recorded for this user
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {analytics.outcomes.map((outcome, idx) => (
+                {analytics.events.map((ev, idx) => (
                   <div
-                    key={idx}
+                    key={ev.id ?? idx}
                     className="flex items-center justify-between p-3 bg-muted rounded-lg"
                   >
-                    <span className="font-medium">{outcome || 'Unknown'}</span>
+                    <span className="font-medium">{ev.eventType || "event"}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {ev.timestamp ? new Date(ev.timestamp).toLocaleString() : ""}
+                    </span>
                   </div>
                 ))}
               </div>

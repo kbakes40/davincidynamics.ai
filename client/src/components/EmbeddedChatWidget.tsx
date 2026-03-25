@@ -61,12 +61,17 @@ export default function EmbeddedChatWidget({ bookingContext }: EmbeddedChatWidge
   const [sessionId] = useState(() => Math.floor(Math.random() * 1000000000));
 
   const chatMutation = trpc.bot.chat.useMutation({
-    onSuccess: (response) => {
-      setMessages((prev) => [
+    onSuccess: response => {
+      const content =
+        response.message?.trim() ||
+        (response.isHandedOff
+          ? "Your message was routed to our team. Continue on Telegram with Vinci if you started there, or try again shortly."
+          : "Thanks — we're on it.");
+      setMessages(prev => [
         ...prev,
         {
           role: "assistant",
-          content: response,
+          content,
           timestamp: new Date(),
         },
       ]);

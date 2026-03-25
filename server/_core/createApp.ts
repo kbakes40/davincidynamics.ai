@@ -1,5 +1,6 @@
 import express from "express";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
+import { registerOpenAIChatRoute } from "../chat/openaiChatRoute";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
@@ -15,6 +16,7 @@ export function createApp(): express.Express {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
   registerOAuthRoutes(app);
+  registerOpenAIChatRoute(app);
 
   app.post("/api/telegram-handoff-webhook", async (req, res) => {
     try {

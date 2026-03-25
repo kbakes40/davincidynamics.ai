@@ -101,7 +101,7 @@ export function AITeamModal({ bot, open, onClose }: AITeamModalProps) {
                 loading="lazy"
                 decoding="async"
                 draggable={false}
-                className="ai-team-modal-mascot-img pointer-events-none object-contain object-center select-none"
+                className="ai-team-modal-mascot-img pointer-events-none select-none"
               />
             </div>
           </div>
