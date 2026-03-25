@@ -30,58 +30,66 @@ export function AITeamFlow({
     return "Follow the sequence to see how attention becomes qualified pipeline, then coordinated follow-up.";
   }, [flowPinnedId, focusId]);
 
+  const focusInFlow = Boolean(focusId && FLOW_STEP_IDS.includes(focusId));
+
   return (
     <div className="space-y-8">
-      <div className="relative overflow-x-auto pb-2">
-        <div className="flex min-w-[640px] items-center justify-between gap-0 md:min-w-0">
+      <div className="relative overflow-x-auto pb-3">
+        <div
+          className={cn(
+            "ai-team-flow-halo pointer-events-none absolute -inset-x-6 -inset-y-10 -z-10 rounded-[3rem] bg-gradient-to-r from-cyan-400/[0.08] via-sky-300/[0.14] to-cyan-400/[0.08] blur-2xl transition-opacity duration-500 md:blur-3xl",
+            focusInFlow ? "opacity-100" : "opacity-0"
+          )}
+          aria-hidden
+        />
+        <div className="relative flex min-w-[640px] items-center justify-between gap-0 md:min-w-0">
           {FLOW_STEP_IDS.map((id, index) => {
             const bot = BOT_BY_ID[id];
             const tier = flowNodeTier(index, focusId);
             const isLast = index === FLOW_STEP_IDS.length - 1;
+            const edgeActive = flowEdgeLit(index, focusId);
 
             const node = (
               <button
                 type="button"
                 className={cn(
                   "relative z-[2] flex min-w-[92px] flex-col items-center gap-2 rounded-2xl border px-3 py-3 text-center transition-all duration-300 md:min-w-[100px]",
-                  tier === "idle" && "border-white/[0.07] bg-black/30 opacity-45",
+                  "hover:scale-[1.02] hover:shadow-[0_0_36px_-8px_rgba(34,211,238,0.45)]",
+                  tier === "idle" && "border-white/[0.08] bg-black/35 opacity-50",
                   tier === "path" &&
-                    "border-cyan-400/25 bg-cyan-400/[0.07] shadow-[0_0_36px_-14px_rgba(34,211,238,0.35)]",
+                    "border-cyan-400/38 bg-cyan-400/[0.1] shadow-[0_0_44px_-12px_rgba(34,211,238,0.42)]",
                   tier === "active" &&
-                    "border-cyan-300/50 bg-cyan-500/15 shadow-[0_0_48px_-10px_rgba(34,211,238,0.45)]"
+                    "z-[3] border-cyan-300/60 bg-cyan-500/[0.18] shadow-[0_0_56px_-8px_rgba(34,211,238,0.52),0_0_0_1px_rgba(165,243,252,0.2)]"
                 )}
                 onMouseEnter={() => onStepHover(id)}
                 onMouseLeave={() => onStepHover(null)}
                 onClick={() => onFlowPinToggle(id)}
               >
-                <span className="font-display text-xs font-semibold text-white md:text-sm">
-                  {bot.name}
-                </span>
-                <span className="font-heading text-[9px] font-medium uppercase tracking-wider text-cyan-100/55">
+                <span className="font-display text-xs font-semibold text-white md:text-sm">{bot.name}</span>
+                <span className="font-heading text-[9px] font-medium uppercase tracking-wider text-cyan-100/60">
                   Stage {index + 1}
                 </span>
               </button>
             );
 
-            const connector =
-              !isLast ? (
+            const connector = !isLast ? (
+              <div className="relative mx-1 flex min-w-[24px] flex-1 items-center" aria-hidden>
                 <div
-                  className="relative mx-1 flex min-w-[24px] flex-1 items-center"
-                  aria-hidden
-                >
-                  <div
-                    className={cn(
-                      "h-px w-full rounded-full transition-all duration-300",
-                      flowEdgeLit(index, focusId)
-                        ? "bg-gradient-to-r from-cyan-400/55 via-cyan-200/45 to-cyan-400/35 shadow-[0_0_16px_rgba(34,211,238,0.35)]"
-                        : "bg-white/[0.08]"
-                    )}
-                  />
-                  {flowEdgeLit(index, focusId) ? (
-                    <div className="ai-team-flow-line--pulse pointer-events-none absolute inset-0 h-px w-full bg-gradient-to-r from-transparent via-cyan-200/60 to-transparent opacity-70" />
-                  ) : null}
-                </div>
-              ) : null;
+                  className={cn(
+                    "h-px w-full rounded-full transition-all duration-300",
+                    edgeActive
+                      ? "bg-gradient-to-r from-cyan-400/75 via-cyan-100/65 to-cyan-400/75 shadow-[0_0_22px_rgba(34,211,238,0.45)]"
+                      : "bg-white/[0.1]"
+                  )}
+                />
+                {edgeActive ? (
+                  <>
+                    <div className="ai-team-flow-line--pulse pointer-events-none absolute inset-0 h-px w-full bg-gradient-to-r from-transparent via-cyan-100/75 to-transparent opacity-80" />
+                    <div className="ai-team-flow-travel" />
+                  </>
+                ) : null}
+              </div>
+            ) : null;
 
             return (
               <Fragment key={id}>
@@ -93,18 +101,15 @@ export function AITeamFlow({
         </div>
       </div>
 
-      <div
-        className="rounded-2xl border border-white/[0.06] bg-black/35 px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-md md:px-7 md:py-5"
-        aria-live="polite"
-      >
-        <p className="font-heading text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-200/45">
+      <div className="rounded-2xl border border-white/[0.08] bg-black/40 px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-lg md:px-7 md:py-5">
+        <p className="font-heading text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-200/50">
           Active channel
         </p>
-        <p className="mt-2 font-body text-sm leading-relaxed text-white/76">{description}</p>
+        <p className="mt-2 font-body text-sm leading-relaxed text-white/78">{description}</p>
         {flowPinnedId ? (
           <button
             type="button"
-            className="mt-3 font-heading text-xs font-semibold text-cyan-200/65 underline-offset-4 hover:text-cyan-100 hover:underline"
+            className="mt-3 font-heading text-xs font-semibold text-cyan-200/70 underline-offset-4 hover:text-cyan-100 hover:underline"
             onClick={onFlowPinClear}
           >
             Clear pinned stage

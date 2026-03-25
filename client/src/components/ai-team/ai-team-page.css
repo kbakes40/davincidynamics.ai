@@ -3,8 +3,48 @@
 .ai-team-os {
   --ai-glow: rgba(0, 210, 255, 0.45);
   --ai-glow-soft: rgba(56, 189, 248, 0.12);
-  --ai-panel: rgba(10, 18, 32, 0.72);
+  --ai-panel: rgba(6, 11, 22, 0.88);
+  --ai-card-bg: rgba(4, 8, 18, 0.92);
   --ai-line: rgba(56, 189, 248, 0.35);
+}
+
+/* Category accents — subtle, premium */
+.ai-team-os [data-visual-accent="violet"] {
+  --va: 167, 139, 250;
+  --va2: 99, 102, 241;
+}
+
+.ai-team-os [data-visual-accent="cyan"] {
+  --va: 56, 189, 248;
+  --va2: 34, 211, 238;
+}
+
+.ai-team-os [data-visual-accent="emerald"] {
+  --va: 52, 211, 153;
+  --va2: 45, 212, 191;
+}
+
+.ai-team-os [data-visual-accent="orange"] {
+  --va: 251, 146, 60;
+  --va2: 249, 115, 22;
+}
+
+.ai-team-os [data-visual-accent="indigo"] {
+  --va: 129, 140, 248;
+  --va2: 99, 102, 241;
+}
+
+.ai-team-os .ai-team-card .ai-team-card-role {
+  color: rgba(var(--va), 0.82);
+}
+
+.ai-team-os .ai-team-card .ai-team-card-dot {
+  background: rgba(var(--va), 0.92) !important;
+  box-shadow: 0 0 12px rgba(var(--va), 0.32);
+}
+
+.ai-team-os .ai-team-modal-panel .ai-team-modal-role {
+  color: rgba(var(--va), 0.9);
 }
 
 .ai-team-os .custom-scrollbar {
@@ -80,6 +120,136 @@
   }
 }
 
+/* Hero: slow parallax-style drift (no JS) */
+@keyframes ai-team-hero-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(-1.2%, 0.8%, 0) scale(1.03);
+  }
+}
+
+@keyframes ai-team-hero-grid-fade {
+  0%,
+  100% {
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.38;
+  }
+}
+
+@keyframes ai-team-headline-breathe {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.92;
+    transform: scale(1.02);
+  }
+}
+
+/* Live status strip */
+@keyframes ai-team-strip-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes ai-team-strip-dot {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.ai-team-live-strip__track {
+  animation: ai-team-strip-scroll 48s linear infinite;
+}
+
+.ai-team-live-strip__dot {
+  animation: ai-team-strip-dot 2.8s ease-in-out infinite;
+}
+
+/* Flow: traveling pulse along active edge */
+@keyframes ai-team-flow-travel {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  85% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(220%);
+    opacity: 0;
+  }
+}
+
+.ai-team-flow-travel {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.ai-team-flow-travel::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 42%;
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(200, 250, 255, 0.35),
+    rgba(165, 243, 252, 0.55),
+    rgba(200, 250, 255, 0.35),
+    transparent
+  );
+  filter: blur(2px);
+  animation: ai-team-flow-travel 3.2s ease-in-out infinite;
+}
+
+/* CTA ambient */
+@keyframes ai-team-cta-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes ai-team-cta-nodes {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-6px);
+  }
+}
+
 .ai-team-status-dot {
   animation: ai-team-pulse-dot 3.2s ease-in-out infinite;
 }
@@ -104,13 +274,82 @@
   animation: ai-team-hero-nodes 5s ease-in-out infinite alternate;
 }
 
+.ai-team-hero-parallax {
+  animation: ai-team-hero-drift 22s ease-in-out infinite alternate;
+}
+
+.ai-team-hero-grid-field {
+  animation: ai-team-hero-grid-fade 8s ease-in-out infinite;
+}
+
+.ai-team-headline-halo {
+  animation: ai-team-headline-breathe 10s ease-in-out infinite;
+}
+
+/* Modal connected pills */
+.ai-team-os .ai-team-modal-pill[data-visual-accent="violet"] {
+  --va: 167, 139, 250;
+}
+.ai-team-os .ai-team-modal-pill[data-visual-accent="cyan"] {
+  --va: 56, 189, 248;
+}
+.ai-team-os .ai-team-modal-pill[data-visual-accent="emerald"] {
+  --va: 52, 211, 153;
+}
+.ai-team-os .ai-team-modal-pill[data-visual-accent="orange"] {
+  --va: 251, 146, 60;
+}
+.ai-team-os .ai-team-modal-pill[data-visual-accent="indigo"] {
+  --va: 129, 140, 248;
+}
+
+.ai-team-modal-pill {
+  box-shadow:
+    0 0 0 1px rgba(var(--va), 0.22),
+    0 0 20px -4px rgba(var(--va), 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: rgba(var(--va), 0.1);
+  border-color: rgba(var(--va), 0.35) !important;
+}
+
+/* Motif: faint diagonal data lines (page backdrop) */
+.ai-team-motif-diagonal {
+  background-image: repeating-linear-gradient(
+    -28deg,
+    transparent,
+    transparent 52px,
+    rgba(56, 189, 248, 0.035) 52px,
+    rgba(56, 189, 248, 0.035) 53px
+  );
+}
+
+/* Flow route halo */
+.ai-team-flow-halo {
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ai-team-status-dot,
   .ai-team-flow-line--pulse,
   .ai-team-reveal.is-visible,
   .ai-team-modal-panel,
-  .ai-team-hero-mesh line {
+  .ai-team-hero-mesh line,
+  .ai-team-hero-parallax,
+  .ai-team-hero-grid-field,
+  .ai-team-headline-halo,
+  .ai-team-live-strip__track,
+  .ai-team-live-strip__dot,
+  .ai-team-flow-travel::after,
+  .ai-team-cta-glow-pulse,
+  .ai-team-cta-float-node {
     animation: none !important;
+  }
+
+  .ai-team-flow-travel::after {
+    transform: translateX(40%);
+    opacity: 0.35;
   }
 
   .ai-team-reveal.is-visible {
@@ -122,4 +361,41 @@
     opacity: 1;
     transform: none;
   }
+
+  .ai-team-live-strip__track {
+    transform: none;
+  }
+
+  .ai-team-hero-parallax {
+    transform: none;
+  }
+
+  .ai-team-headline-halo {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.95;
+  }
+}
+
+.ai-team-cta-glow-pulse {
+  animation: ai-team-cta-glow 7s ease-in-out infinite;
+}
+
+.ai-team-cta-float-node {
+  animation: ai-team-cta-nodes 6s ease-in-out infinite;
+}
+
+/* Nova mascot: pure transparency, no filters or glow (avoids halo on dark cards) */
+.ai-team-os .ai-team-nova-mascot-wrap {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.ai-team-os .ai-team-nova-mascot-wrap img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  background: transparent !important;
+  filter: none !important;
+  box-shadow: none !important;
+  mix-blend-mode: normal;
 }

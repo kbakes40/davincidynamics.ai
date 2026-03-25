@@ -14,6 +14,23 @@ export const BOT_IDS = [
 
 export type BotId = (typeof BOT_IDS)[number];
 
+/** Card / modal accent: Growth=violet·blue, Revenue=cyan, Ops=emerald·teal, Engineering=orange|indigo */
+export type VisualAccent = "violet" | "cyan" | "emerald" | "orange" | "indigo";
+
+export const BOT_VISUAL_ACCENTS: Record<BotId, VisualAccent> = {
+  nova: "violet",
+  vinci: "cyan",
+  leo: "cyan",
+  atlas: "emerald",
+  aegis: "emerald",
+  forge: "orange",
+  vector: "orange",
+  kernel: "indigo",
+  patch: "orange",
+  relay: "indigo",
+  orbit: "indigo",
+};
+
 export type FilterId = "all" | "growth" | "customer-facing" | "operations" | "engineering";
 
 export interface Bot {
@@ -27,6 +44,8 @@ export interface Bot {
   systemFunction: string;
   connectedWith: BotId[];
   modalCta?: { label: string; href: string };
+  /** Public URL under client/public (e.g. /ai-team/nova-icon.png) */
+  mascotSrc?: string;
 }
 
 export const BOTS: Bot[] = [
@@ -42,6 +61,7 @@ export const BOTS: Bot[] = [
     systemFunction:
       "Generates demand, sharpens offers, and improves the quality of leads entering the system.",
     connectedWith: ["vinci"],
+    mascotSrc: "/ai-team/nova-icon.png?v=8",
   },
   {
     id: "vinci",
