@@ -125,7 +125,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Turns requirements into durable software paths the business can rely on.",
     systemFunction: "Builds tools, systems, and automation infrastructure.",
     connectedWith: ["atlas", "relay", "kernel", "vector", "patch"],
-    mascotSrc: "/ai-team/forge-icon.png?v=4",
+    mascotSrc: "/ai-team/forge-icon.png?v=6",
   },
   {
     id: "vector",
