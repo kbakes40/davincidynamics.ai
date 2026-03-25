@@ -16,12 +16,9 @@ export function AITeamCard({ bot, highlight, onSelect, onHover, onLeave }: AITea
 
   return (
     <article
-      role="button"
-      tabIndex={0}
-      aria-label={bot.mascotSrc ? `${bot.name}. ${bot.role}.` : undefined}
       data-visual-accent={accent}
       className={cn(
-        "ai-team-card group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border bg-[var(--ai-card-bg)] p-6 backdrop-blur-xl transition-all duration-300 ease-out outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50",
+        "ai-team-card group relative flex h-full pointer-events-none flex-col overflow-hidden rounded-2xl border bg-[var(--ai-card-bg)] backdrop-blur-xl transition-all duration-300 ease-out",
         "shadow-[0_24px_70px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.07)]",
         "after:pointer-events-none after:absolute after:inset-0 after:rounded-2xl after:bg-gradient-to-br after:from-white/[0.055] after:via-transparent after:to-transparent after:opacity-80",
         "before:pointer-events-none before:absolute before:inset-y-4 before:left-0 before:z-[1] before:w-px before:rounded-full before:bg-[rgba(var(--va),0.6)] before:shadow-[0_0_18px_2px_rgba(var(--va),0.18)] before:content-['']",
@@ -33,21 +30,29 @@ export function AITeamCard({ bot, highlight, onSelect, onHover, onLeave }: AITea
         highlight === "none" &&
           "border-white/[0.09] hover:-translate-y-1 hover:border-[rgba(var(--va),0.45)] hover:shadow-[0_32px_90px_rgba(0,0,0,0.55),0_0_68px_-12px_rgba(var(--va),0.22),inset_0_1px_0_rgba(255,255,255,0.09)]"
       )}
-      onMouseEnter={() => onHover(bot.id)}
-      onMouseLeave={onLeave}
-      onClick={() => onSelect(bot.id)}
-      onKeyDown={e => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onSelect(bot.id);
-        }
-      }}
     >
-      <div className="relative z-10 flex flex-1 flex-col gap-4">
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label={bot.mascotSrc ? `${bot.name}. ${bot.role}.` : undefined}
+        className="relative z-10 flex min-h-0 flex-1 cursor-pointer flex-col gap-4 p-6 outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 pointer-events-auto"
+        onMouseEnter={() => onHover(bot.id)}
+        onMouseLeave={onLeave}
+        onClick={() => onSelect(bot.id)}
+        onKeyDown={e => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onSelect(bot.id);
+          }
+        }}
+      >
         {bot.mascotSrc ? (
           <>
             <div className="ai-team-premium-mascot-wrap -mx-1 flex w-full min-w-0 shrink-0 justify-center px-1 pb-1.5 pt-0.5 md:-mx-0">
-              <figure className="ai-team-card-mascot-figure ai-team-card-mascot-figure--playing m-0 flex w-full max-w-[min(100%,288px)] flex-col items-stretch md:max-w-[min(100%,304px)] xl:max-w-[min(100%,320px)]">
+              <figure
+                className="ai-team-card-mascot-figure ai-team-card-mascot-figure--playing m-0 flex w-full max-w-[min(100%,288px)] flex-col items-stretch md:max-w-[min(100%,304px)] xl:max-w-[min(100%,320px)]"
+                data-bot-id={bot.id}
+              >
                 <div className="ai-team-card-mascot-canvas grid h-[352px] w-full place-items-center md:h-[376px] xl:h-[400px]">
                   <img
                     src={bot.mascotSrc}

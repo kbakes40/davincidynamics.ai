@@ -11,7 +11,7 @@ export function AITeamLiveStrip() {
   const doubled = [...STATUSES, ...STATUSES];
   return (
     <div
-      className="ai-team-live-strip relative mx-auto mt-14 max-w-5xl overflow-hidden border-y border-white/[0.06] bg-black/40 px-4 py-2.5 backdrop-blur-sm"
+      className="ai-team-live-strip pointer-events-none relative mx-auto mt-14 max-w-5xl overflow-hidden border-y border-white/[0.06] bg-black/40 px-4 py-2.5 backdrop-blur-sm"
       aria-hidden
     >
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.55)_0%,transparent_12%,transparent_88%,rgba(0,0,0,0.55)_100%)]" />

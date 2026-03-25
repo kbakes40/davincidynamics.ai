@@ -153,8 +153,8 @@ export default function AITeamPage() {
           aria-hidden
         />
 
-        {/* Hero */}
-        <section className="relative overflow-hidden pb-6 pt-28 md:pb-8 md:pt-32">
+        {/* Hero shell: pointer-events-none so wheel isn’t trapped by overflow-hidden (non-scrollable scrollport). */}
+        <section className="pointer-events-none relative overflow-hidden pb-6 pt-28 md:pb-8 md:pt-32">
           {/* Cinematic hero field: parallax drift + stronger headline glow */}
           <div className="ai-team-hero-parallax pointer-events-none absolute -inset-[22%] -z-10">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_62%_48%_at_50%_30%,rgba(56,189,248,0.2),rgba(99,102,241,0.09)_42%,transparent_72%)]" />
@@ -164,7 +164,7 @@ export default function AITeamPage() {
 
           <div className="ai-team-headline-halo pointer-events-none absolute left-1/2 top-[26%] -z-[6] h-[min(480px,58vw)] w-[min(920px,96%)] max-w-[1100px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(34,211,238,0.26),rgba(99,102,241,0.14)_42%,transparent_100%)] blur-2xl md:blur-3xl" />
 
-          <div className="container relative z-10 mx-auto max-w-4xl px-4 text-center">
+          <div className="container pointer-events-auto relative z-10 mx-auto max-w-4xl px-4 text-center">
             <p className="font-heading text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200/65 md:text-[13px]">
               DaVinci Dynamics
             </p>

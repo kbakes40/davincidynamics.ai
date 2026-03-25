@@ -430,6 +430,12 @@
   transform-origin: center center;
 }
 
+/* Forge: wide arms — slightly less scale + bias framing to keep fingers inside the clip */
+.ai-team-os .ai-team-card-mascot-figure[data-bot-id="forge"] .ai-team-card-mascot-canvas img {
+  transform: scale(1.34);
+  object-position: center 48%;
+}
+
 /* Nameplate: trading / playing card title strip — exact bot.name, high legibility */
 .ai-team-os .ai-team-card .ai-team-card-mascot-name {
   width: 100%;
