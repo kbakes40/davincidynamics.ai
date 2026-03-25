@@ -384,13 +384,13 @@
   animation: ai-team-cta-nodes 6s ease-in-out infinite;
 }
 
-/* Nova mascot: pure transparency, no filters or glow (avoids halo on dark cards) */
-.ai-team-os .ai-team-nova-mascot-wrap {
+/* Premium mascots (Nova, Vinci, Leo, Atlas): pure transparency, no filters or glow (avoids halo on dark cards) */
+.ai-team-os .ai-team-premium-mascot-wrap {
   background: transparent !important;
   box-shadow: none !important;
 }
 
-.ai-team-os .ai-team-nova-mascot-wrap img {
+.ai-team-os .ai-team-premium-mascot-wrap img {
   display: block;
   margin-left: auto;
   margin-right: auto;

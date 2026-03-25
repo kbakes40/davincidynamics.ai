@@ -1,5 +1,5 @@
 import type { Bot } from "./bots-data";
-import { BOT_VISUAL_ACCENTS } from "./bots-data";
+import { BOT_VISUAL_ACCENTS, PREMIUM_MASCOT_BOT_IDS } from "./bots-data";
 import type { HighlightTier } from "./highlight-utils";
 import { cn } from "@/lib/utils";
 
@@ -45,8 +45,8 @@ export function AITeamCard({ bot, highlight, onSelect, onHover, onLeave }: AITea
       <div className="relative z-10 flex flex-1 flex-col gap-4">
         {bot.mascotSrc ? (
           <>
-            {bot.id === "nova" ? (
-              <div className="ai-team-nova-mascot-wrap -mx-1 flex w-full shrink-0 justify-center px-1 pb-1.5 pt-0.5 md:-mx-0">
+            {PREMIUM_MASCOT_BOT_IDS.has(bot.id) ? (
+              <div className="ai-team-premium-mascot-wrap -mx-1 flex w-full shrink-0 justify-center px-1 pb-1.5 pt-0.5 md:-mx-0">
                 <div className="flex h-[200px] w-full max-w-[218px] items-center justify-center md:h-[216px] md:max-w-[228px]">
                   <img
                     src={bot.mascotSrc}

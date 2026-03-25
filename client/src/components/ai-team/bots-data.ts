@@ -31,6 +31,9 @@ export const BOT_VISUAL_ACCENTS: Record<BotId, VisualAccent> = {
   orbit: "indigo",
 };
 
+/** Mascots using the shared premium frame + transparent PNG pipeline on /ai-team */
+export const PREMIUM_MASCOT_BOT_IDS = new Set<BotId>(["nova", "vinci", "leo", "atlas"]);
+
 export type FilterId = "all" | "growth" | "customer-facing" | "operations" | "engineering";
 
 export interface Bot {
@@ -61,7 +64,7 @@ export const BOTS: Bot[] = [
     systemFunction:
       "Generates demand, sharpens offers, and improves the quality of leads entering the system.",
     connectedWith: ["vinci"],
-    mascotSrc: "/ai-team/nova-icon.png?v=8",
+    mascotSrc: "/ai-team/nova-icon.png?v=10",
   },
   {
     id: "vinci",
@@ -74,6 +77,7 @@ export const BOTS: Bot[] = [
     systemFunction: "Captures, qualifies, and prepares incoming leads for the next step.",
     connectedWith: ["atlas", "leo"],
     modalCta: { label: "Open Vinci", href: "https://t.me/VinciDynamicsBot?start=home" },
+    mascotSrc: "/ai-team/vinci-icon.png?v=1",
   },
   {
     id: "leo",
@@ -87,6 +91,7 @@ export const BOTS: Bot[] = [
     systemFunction: "Receives lead context and supports personal follow-up and closing.",
     connectedWith: ["vinci", "atlas"],
     modalCta: { label: "Open Leo", href: "https://t.me/Leo_Handoff_bot" },
+    mascotSrc: "/ai-team/leo-icon.png?v=1",
   },
   {
     id: "atlas",
@@ -98,6 +103,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Keeps pipeline truth visible so nothing slips between systems or people.",
     systemFunction: "Tracks internal movement across leads, tasks, and workflow status.",
     connectedWith: ["vinci", "leo", "forge", "relay"],
+    mascotSrc: "/ai-team/atlas-icon.png?v=1",
   },
   {
     id: "aegis",

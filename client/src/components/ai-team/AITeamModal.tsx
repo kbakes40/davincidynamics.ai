@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { Bot, BotId } from "./bots-data";
-import { BOT_BY_ID, BOT_VISUAL_ACCENTS } from "./bots-data";
+import { BOT_BY_ID, BOT_VISUAL_ACCENTS, PREMIUM_MASCOT_BOT_IDS } from "./bots-data";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 
@@ -90,9 +90,9 @@ export function AITeamModal({ bot, open, onClose }: AITeamModalProps) {
           </div>
         </div>
 
-        {bot.mascotSrc && bot.id === "nova" ? (
+        {bot.mascotSrc && PREMIUM_MASCOT_BOT_IDS.has(bot.id) ? (
           <div className="border-b border-white/[0.06] bg-transparent px-6 py-4 sm:px-8">
-            <div className="ai-team-nova-mascot-wrap flex w-full justify-center">
+            <div className="ai-team-premium-mascot-wrap flex w-full justify-center">
               <div className="flex h-[236px] w-full max-w-[280px] items-center justify-center sm:h-[252px]">
                 <img
                   src={bot.mascotSrc}
