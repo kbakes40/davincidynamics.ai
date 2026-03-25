@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "../server/_core/loadEnv";
 import { validateAppEnvironment } from "../config/env";
 import { createApp } from "../server/_core/createApp";
 import { logDatabaseTargetAtStartup } from "../server/db";

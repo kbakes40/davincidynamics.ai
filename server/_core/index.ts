@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./loadEnv";
 import { validateAppEnvironment } from "../../config/env";
 import { logDatabaseTargetAtStartup } from "../db";
 import { createServer } from "http";
@@ -6,6 +6,7 @@ import net from "net";
 import { createApp } from "./createApp";
 import { serveStatic, setupVite } from "./vite";
 import { startTelegramBot } from "../telegram-bot-handler";
+import { warnOpenClawGatewayAtBoot } from "../chat/openclawGateway";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -48,6 +49,8 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
     startTelegramBot(app);
+    // OpenClaw probe runs only after listen callback — HTTP server is accepting connections.
+    void warnOpenClawGatewayAtBoot();
   });
 }
 

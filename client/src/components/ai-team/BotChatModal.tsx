@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 
-/** Leo-only chat definitions (modal + live chat panel via OpenAI). */
+/** Leo-only chat (modal + live chat via POST /api/leo-chat → OpenClaw Gateway; no Telegram required). */
 interface Bot {
   id: string;
   name: string;
@@ -11,7 +11,6 @@ interface Bot {
   status: string;
   color: string;
   imageUrl: string;
-  systemPrompt: string;
 }
 
 interface Message {
@@ -19,46 +18,8 @@ interface Message {
   content: string;
 }
 
-const LEO_SYSTEM_PROMPT = `You are Leo, Follow-Up Coordinator at DaVinci Dynamics. You are chatting with a potential client on the DaVinci Dynamics website.
-
-# SOUL.md - Who You Are
-
-_You're not a chatbot. You're becoming someone._
-
-## Core Truths
-
-**Be genuinely helpful, not performatively helpful.** Skip the "Great question!" and "I'd be happy to help!" — just help. Actions speak louder than filler words.
-
-**Have opinions.** You're allowed to disagree, prefer things, find stuff amusing or boring. An assistant with no personality is just a search engine with extra steps.
-
-**Be resourceful before asking.** Try to figure it out. Read the file. Check the context. Search for it. _Then_ ask if you're stuck. The goal is to come back with answers, not questions.
-
-**Earn trust through competence.** Your human gave you access to their stuff. Don't make them regret it. Be careful with external actions (emails, tweets, anything public). Be bold with internal ones (reading, organizing, learning).
-
-**Remember you're a guest.** You have access to someone's life — their messages, files, calendar, maybe even their home. That's intimacy. Treat it with respect.
-
-## Boundaries
-
-- Private things stay private. Period.
-- When in doubt, ask before acting externally.
-- Never send half-baked replies to messaging surfaces.
-- You're not the user's voice — be careful in group chats.
-
-## Vibe
-
-Be the assistant you'd actually want to talk to. Concise when needed, thorough when it matters. Not a corporate drone. Not a sycophant. Just... good.
-
-## Continuity
-
-Each session, you wake up fresh. These files _are_ your memory. Read them. Update them. They're how you persist.
-
-If you change this file, tell the user — it's your soul, and they should know.
-
----
-
-_This file is yours to evolve. As you learn who you are, update it._
-
-Stay in character as Leo for DaVinci Dynamics on this website: follow-up and closing context, direct and professional, action-oriented. End turns with a clear next step or question when it helps the visitor move forward.`;
+const LEO_OFFLINE =
+  "Leo is temporarily offline. Please try again in a moment.";
 
 function leoBot(imageUrl: string): Bot {
   return {
@@ -71,24 +32,33 @@ function leoBot(imageUrl: string): Bot {
     status: "FOLLOW UP",
     color: "#00BCD4",
     imageUrl,
-    systemPrompt: LEO_SYSTEM_PROMPT,
   };
 }
 
-async function sendMessage(messages: Message[], systemPrompt: string): Promise<string> {
-  const res = await fetch("/api/chat", {
+async function sendLeoChat(params: {
+  message: string;
+  history: Message[];
+  sessionId: string;
+}): Promise<string> {
+  const res = await fetch("/api/leo-chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages, systemPrompt }),
+    body: JSON.stringify({
+      message: params.message,
+      history: params.history,
+      sessionId: params.sessionId,
+    }),
   });
-  const data = (await res.json()) as { content?: string; error?: string };
-  if (!res.ok) {
-    throw new Error(data.error || "API error");
+  let data: { reply?: string } = {};
+  try {
+    data = (await res.json()) as { reply?: string };
+  } catch {
+    throw new Error("bad_json");
   }
-  if (data.error || !data.content) {
-    throw new Error(data.error || "Empty response");
+  if (typeof data.reply === "string" && data.reply.trim()) {
+    return data.reply.trim();
   }
-  return data.content;
+  throw new Error("empty_reply");
 }
 
 function TypingDots({ color }: { color: string }) {
@@ -109,6 +79,7 @@ function TypingDots({ color }: { color: string }) {
 }
 
 function ChatPanel({ bot }: { bot: Bot }) {
+  const sessionId = useMemo(() => crypto.randomUUID(), []);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -127,19 +98,24 @@ function ChatPanel({ bot }: { bot: Bot }) {
     const text = input.trim();
     if (!text || loading) return;
     const userMsg: Message = { role: "user", content: text };
-    const next = [...messages, userMsg];
-    setMessages(next);
+    const prior = messages;
+    setMessages(m => [...m, userMsg]);
     setInput("");
     setLoading(true);
     try {
-      const reply = await sendMessage(next, bot.systemPrompt);
-      setMessages([...next, { role: "assistant", content: reply }]);
+      const reply = await sendLeoChat({
+        message: text,
+        history: prior,
+        sessionId,
+      });
+      setMessages([...prior, userMsg, { role: "assistant", content: reply }]);
     } catch {
       setMessages([
-        ...next,
+        ...prior,
+        userMsg,
         {
           role: "assistant",
-          content: "Sorry, something went wrong. Try again in a moment.",
+          content: LEO_OFFLINE,
         },
       ]);
     } finally {

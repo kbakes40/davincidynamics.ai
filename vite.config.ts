@@ -170,6 +170,16 @@ export default defineConfig({
   },
   server: {
     host: true,
+    // Static marketing dev (`pnpm dev:ai-team`) has no Express on :5173; forward API to the real server.
+    proxy:
+      process.env.VITE_STATIC_MARKETING === "true"
+        ? {
+            "/api": {
+              target: process.env.VITE_DEV_API_ORIGIN ?? "http://127.0.0.1:3000",
+              changeOrigin: true,
+            },
+          }
+        : undefined,
     allowedHosts: [
       ".manuspre.computer",
       ".manus.computer",

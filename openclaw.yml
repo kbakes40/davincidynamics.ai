@@ -1,0 +1,13 @@
+# Minimal OpenClaw gateway overlay for this repo: enable POST /v1/chat/completions for Leo (HTTP fallback).
+# Default gateway port is usually 18789 — set OPENCLAW_BASE_URL to match your openclaw.json / launchd plist.
+#
+# Many OpenClaw builds do not implement GET /v1/models (that path may return Control UI HTML even when this is enabled).
+#
+# From repo root:
+#   openclaw gateway --config openclaw.yml
+# Or merge these keys into ~/.openclaw/openclaw.json.
+gateway:
+  http:
+    endpoints:
+      chatCompletions:
+        enabled: true
