@@ -17,6 +17,7 @@ import ConversationHistory from "./pages/ConversationHistory";
 import ShopifyAlternative from "./pages/ShopifyAlternative";
 import ProfitCrmDemo from "./pages/ProfitCrmDemo";
 import ProfitDashboard from "./pages/ProfitDashboard";
+import AITeamPage from "./pages/AITeamPage";
 import { BookingProvider } from "./contexts/BookingContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import GlassChatWidget from "./components/GlassChatWidget";
@@ -64,6 +65,8 @@ function Router() {
         <Route path={"/bot-analytics"} component={BotAnalytics} />
         <Route path={"/conversations"} component={ConversationHistory} />
         <Route path={"/spotify-callback"} component={SpotifyCallback} />
+        <Route path={"/ai-team"} component={AITeamPage} />
+        <Route path={"/ai-team/"} component={AITeamPage} />
         <Route path={"/404"} component={NotFound} />
         <Route component={NotFound} />
       </Switch>
