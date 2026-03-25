@@ -18,6 +18,7 @@ export function AITeamCard({ bot, highlight, onSelect, onHover, onLeave }: AITea
     <article
       role="button"
       tabIndex={0}
+      aria-label={bot.mascotSrc ? `${bot.name}. ${bot.role}.` : undefined}
       data-visual-accent={accent}
       className={cn(
         "ai-team-card group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border bg-[var(--ai-card-bg)] p-6 backdrop-blur-xl transition-all duration-300 ease-out outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50",
@@ -46,20 +47,24 @@ export function AITeamCard({ bot, highlight, onSelect, onHover, onLeave }: AITea
         {bot.mascotSrc ? (
           <>
             <div className="ai-team-premium-mascot-wrap -mx-1 flex w-full min-w-0 shrink-0 justify-center px-1 pb-1.5 pt-0.5 md:-mx-0">
-              <div className="grid h-[340px] w-full max-w-[min(100%,360px)] place-items-center md:h-[380px] md:max-w-[min(100%,400px)] xl:h-[400px] xl:max-w-[min(100%,420px)]">
-                <img
-                  src={bot.mascotSrc}
-                  alt={`${bot.name} mascot`}
-                  width={1376}
-                  height={768}
-                  loading="lazy"
-                  decoding="async"
-                  draggable={false}
-                  className="pointer-events-none max-h-full max-w-full object-contain object-center select-none"
-                />
-              </div>
+              <figure className="ai-team-card-mascot-figure ai-team-card-mascot-figure--playing m-0 flex w-full max-w-[min(100%,288px)] flex-col items-stretch md:max-w-[min(100%,304px)] xl:max-w-[min(100%,320px)]">
+                <div className="ai-team-card-mascot-canvas grid h-[352px] w-full place-items-center md:h-[376px] xl:h-[400px]">
+                  <img
+                    src={bot.mascotSrc}
+                    alt=""
+                    width={1376}
+                    height={768}
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                    className="pointer-events-none max-h-full max-w-full object-contain object-center select-none"
+                  />
+                </div>
+                <figcaption className="ai-team-card-mascot-name font-display text-center">
+                  {bot.name}
+                </figcaption>
+              </figure>
             </div>
-            <span className="sr-only">{bot.name}</span>
             <p className="ai-team-card-role pl-1.5 font-heading text-xs font-medium uppercase tracking-[0.12em] md:text-[0.72rem]">
               {bot.role}
             </p>

@@ -61,7 +61,7 @@ export const BOTS: Bot[] = [
     systemFunction:
       "Generates demand, sharpens offers, and improves the quality of leads entering the system.",
     connectedWith: ["vinci"],
-    mascotSrc: "/ai-team/nova-icon.png?v=10",
+    mascotSrc: "/ai-team/nova-icon.png?v=11",
   },
   {
     id: "vinci",
@@ -74,7 +74,7 @@ export const BOTS: Bot[] = [
     systemFunction: "Captures, qualifies, and prepares incoming leads for the next step.",
     connectedWith: ["atlas", "leo"],
     modalCta: { label: "Open Vinci", href: "https://t.me/VinciDynamicsBot?start=home" },
-    mascotSrc: "/ai-team/vinci-icon.png?v=1",
+    mascotSrc: "/ai-team/vinci-icon.png?v=2",
   },
   {
     id: "leo",
@@ -88,7 +88,7 @@ export const BOTS: Bot[] = [
     systemFunction: "Receives lead context and supports personal follow-up and closing.",
     connectedWith: ["vinci", "atlas"],
     modalCta: { label: "Open Leo", href: "https://t.me/Leo_Handoff_bot" },
-    mascotSrc: "/ai-team/leo-icon.png?v=1",
+    mascotSrc: "/ai-team/leo-icon.png?v=2",
   },
   {
     id: "atlas",
@@ -100,7 +100,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Keeps pipeline truth visible so nothing slips between systems or people.",
     systemFunction: "Tracks internal movement across leads, tasks, and workflow status.",
     connectedWith: ["vinci", "leo", "forge", "relay"],
-    mascotSrc: "/ai-team/atlas-icon.png?v=1",
+    mascotSrc: "/ai-team/atlas-icon.png?v=2",
   },
   {
     id: "aegis",
@@ -113,7 +113,7 @@ export const BOTS: Bot[] = [
     systemFunction:
       "Validates inputs, protects infrastructure, and enforces system integrity.",
     connectedWith: ["forge", "kernel", "orbit"],
-    mascotSrc: "/ai-team/aegis-icon.png?v=1",
+    mascotSrc: "/ai-team/aegis-icon.png?v=4",
   },
   {
     id: "forge",
@@ -125,7 +125,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Turns requirements into durable software paths the business can rely on.",
     systemFunction: "Builds tools, systems, and automation infrastructure.",
     connectedWith: ["atlas", "relay", "kernel", "vector", "patch"],
-    mascotSrc: "/ai-team/forge-icon.png?v=1",
+    mascotSrc: "/ai-team/forge-icon.png?v=2",
   },
   {
     id: "vector",
@@ -138,7 +138,7 @@ export const BOTS: Bot[] = [
       "Crafts interfaces that feel inevitable—precise motion, spacing, and hierarchy.",
     systemFunction: "Designs polished frontend experiences and interface systems.",
     connectedWith: ["forge", "patch"],
-    mascotSrc: "/ai-team/vector-icon.png?v=1",
+    mascotSrc: "/ai-team/vector-icon.png?v=2",
   },
   {
     id: "kernel",
@@ -150,7 +150,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Holds the truth for state, data contracts, and core services.",
     systemFunction: "Handles core logic, APIs, state, and database infrastructure.",
     connectedWith: ["forge", "relay", "orbit", "aegis"],
-    mascotSrc: "/ai-team/kernel-icon.png?v=1",
+    mascotSrc: "/ai-team/kernel-icon.png?v=2",
   },
   {
     id: "patch",
@@ -162,7 +162,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Stress-tests reality paths before customers ever feel the edge cases.",
     systemFunction: "Tests flows, catches issues, and keeps the experience stable.",
     connectedWith: ["forge", "vector"],
-    mascotSrc: "/ai-team/patch-icon.png?v=1",
+    mascotSrc: "/ai-team/patch-icon.png?v=2",
   },
   {
     id: "relay",
@@ -174,7 +174,7 @@ export const BOTS: Bot[] = [
     shortDescription: "The connective tissue between bots, APIs, and external systems.",
     systemFunction: "Connects bots, APIs, webhooks, and outside systems.",
     connectedWith: ["nova", "vinci", "atlas", "forge", "kernel", "orbit", "leo"],
-    mascotSrc: "/ai-team/relay-icon.png?v=1",
+    mascotSrc: "/ai-team/relay-icon.png?v=2",
   },
   {
     id: "orbit",
@@ -186,7 +186,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Production posture—uptime, releases, and operational readiness.",
     systemFunction: "Manages deployment, uptime, and production readiness.",
     connectedWith: ["relay", "kernel", "aegis"],
-    mascotSrc: "/ai-team/orbit-icon.png?v=1",
+    mascotSrc: "/ai-team/orbit-icon.png?v=2",
   },
 ];
 
