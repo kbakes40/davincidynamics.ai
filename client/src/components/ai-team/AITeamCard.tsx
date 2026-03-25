@@ -34,7 +34,7 @@ export function AITeamCard({ bot, highlight, onSelect, onHover, onLeave }: AITea
       <div
         role="button"
         tabIndex={0}
-        aria-label={bot.mascotSrc ? `${bot.name}. ${bot.role}.` : undefined}
+        aria-label={`${bot.name}. ${bot.role}.`}
         className="relative z-10 flex min-h-0 flex-1 cursor-pointer flex-col gap-4 p-6 outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 pointer-events-auto"
         onMouseEnter={() => onHover(bot.id)}
         onMouseLeave={onLeave}

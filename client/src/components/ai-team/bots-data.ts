@@ -1,5 +1,3 @@
-import forgeMascotUrl from "@/assets/ai-team/forge-mascot.png?url";
-
 export const BOT_IDS = [
   "nova",
   "vinci",
@@ -90,7 +88,6 @@ export const BOTS: Bot[] = [
     systemFunction: "Receives lead context and supports personal follow-up and closing.",
     connectedWith: ["vinci", "atlas"],
     modalCta: { label: "Open Leo", href: "https://t.me/Leo_Handoff_bot" },
-    mascotSrc: "/ai-team/leo-icon.png?v=2",
   },
   {
     id: "atlas",
@@ -127,7 +124,6 @@ export const BOTS: Bot[] = [
     shortDescription: "Turns requirements into durable software paths the business can rely on.",
     systemFunction: "Builds tools, systems, and automation infrastructure.",
     connectedWith: ["atlas", "relay", "kernel", "vector", "patch"],
-    mascotSrc: forgeMascotUrl,
   },
   {
     id: "vector",
