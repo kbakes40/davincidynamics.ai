@@ -3,7 +3,12 @@
  * Sprint 1: AI-powered conversations with memory
  */
 
-import { getDb } from './db';
+import {
+  getDb,
+  getDatabaseConnectivityCode,
+  invalidateDbCache,
+  isDatabaseConnectivityError,
+} from './db';
 import { botUsers, conversations, messages, leadEvents } from '../drizzle/schema';
 import type { NewBotUser, NewConversation, NewMessage, NewLeadEvent } from '../drizzle/schema';
 import { eq, desc, sql } from 'drizzle-orm';
@@ -364,6 +369,19 @@ export class BotAIHandler {
         vinciHandoffCompleted,
       };
     } catch (error) {
+      if (isDatabaseConnectivityError(error)) {
+        invalidateDbCache();
+        const code = getDatabaseConnectivityCode(error);
+        console.error(
+          `[Database] Connectivity error${code ? ` (${code})` : ""} — cannot reach MySQL. Check DATABASE_URL host/port/TLS and provider firewall (allowlist).`
+        );
+        return {
+          message:
+            "We're having trouble reaching our systems right now. Please try again in a few minutes.",
+          conversationId: -1,
+          isHandedOff: false,
+        };
+      }
       console.error("Error handling message:", error);
       return {
         message:

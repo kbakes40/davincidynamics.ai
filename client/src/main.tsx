@@ -9,6 +9,22 @@ import { getLoginUrl } from "./const";
 import { HelmetProvider } from "react-helmet-async";
 import "./index.css";
 
+/** Umami loads only when both vars are set — avoids literal %VITE_*% URLs in index.html breaking dev/prod. */
+function initUmamiIfConfigured(): void {
+  if (typeof document === "undefined") return;
+  const endpoint = import.meta.env.VITE_ANALYTICS_ENDPOINT?.trim();
+  const websiteId = import.meta.env.VITE_ANALYTICS_WEBSITE_ID?.trim();
+  if (!endpoint || !websiteId) return;
+  const base = endpoint.replace(/\/$/, "");
+  const script = document.createElement("script");
+  script.defer = true;
+  script.src = `${base}/umami`;
+  script.setAttribute("data-website-id", websiteId);
+  document.body.appendChild(script);
+}
+
+initUmamiIfConfigured();
+
 const queryClient = new QueryClient();
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {

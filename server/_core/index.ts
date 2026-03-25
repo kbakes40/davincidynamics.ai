@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { validateAppEnvironment } from "../../config/env";
+import { logDatabaseTargetAtStartup } from "../db";
 import { createServer } from "http";
 import net from "net";
 import { createApp } from "./createApp";
@@ -27,6 +28,7 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 
 async function startServer() {
   validateAppEnvironment();
+  logDatabaseTargetAtStartup();
   const app = createApp();
   const server = createServer(app);
 
