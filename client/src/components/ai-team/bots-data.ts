@@ -1,3 +1,5 @@
+import forgeMascotUrl from "@/assets/ai-team/forge-mascot.png?url";
+
 export const BOT_IDS = [
   "nova",
   "vinci",
@@ -44,7 +46,7 @@ export interface Bot {
   systemFunction: string;
   connectedWith: BotId[];
   modalCta?: { label: string; href: string };
-  /** Public URL under client/public (e.g. /ai-team/nova-icon.png) */
+  /** Public URL under client/public, or a Vite-resolved ?url import (content-hashed in production). */
   mascotSrc?: string;
 }
 
@@ -125,7 +127,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Turns requirements into durable software paths the business can rely on.",
     systemFunction: "Builds tools, systems, and automation infrastructure.",
     connectedWith: ["atlas", "relay", "kernel", "vector", "patch"],
-    mascotSrc: "/ai-team/forge-icon.png?v=6",
+    mascotSrc: forgeMascotUrl,
   },
   {
     id: "vector",
