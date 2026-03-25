@@ -1,5 +1,5 @@
 import type { Bot } from "./bots-data";
-import { BOT_VISUAL_ACCENTS, PREMIUM_MASCOT_BOT_IDS } from "./bots-data";
+import { BOT_VISUAL_ACCENTS } from "./bots-data";
 import type { HighlightTier } from "./highlight-utils";
 import { cn } from "@/lib/utils";
 
@@ -45,33 +45,20 @@ export function AITeamCard({ bot, highlight, onSelect, onHover, onLeave }: AITea
       <div className="relative z-10 flex flex-1 flex-col gap-4">
         {bot.mascotSrc ? (
           <>
-            {PREMIUM_MASCOT_BOT_IDS.has(bot.id) ? (
-              <div className="ai-team-premium-mascot-wrap -mx-1 flex w-full shrink-0 justify-center px-1 pb-1.5 pt-0.5 md:-mx-0">
-                <div className="flex h-[200px] w-full max-w-[218px] items-center justify-center md:h-[216px] md:max-w-[228px]">
-                  <img
-                    src={bot.mascotSrc}
-                    alt={`${bot.name} mascot`}
-                    width={1376}
-                    height={768}
-                    loading="lazy"
-                    decoding="async"
-                    draggable={false}
-                    className="pointer-events-none h-auto max-h-full w-auto max-w-full object-contain object-center select-none"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="flex justify-center py-1">
+            <div className="ai-team-premium-mascot-wrap -mx-1 flex w-full min-w-0 shrink-0 justify-center px-1 pb-1.5 pt-0.5 md:-mx-0">
+              <div className="grid h-[340px] w-full max-w-[min(100%,360px)] place-items-center md:h-[380px] md:max-w-[min(100%,400px)] xl:h-[400px] xl:max-w-[min(100%,420px)]">
                 <img
                   src={bot.mascotSrc}
                   alt={`${bot.name} mascot`}
-                  width={378}
-                  height={664}
-                  className="mx-auto h-auto max-h-52 w-auto max-w-full object-contain object-center"
+                  width={1376}
+                  height={768}
+                  loading="lazy"
                   decoding="async"
+                  draggable={false}
+                  className="pointer-events-none max-h-full max-w-full object-contain object-center select-none"
                 />
               </div>
-            )}
+            </div>
             <span className="sr-only">{bot.name}</span>
             <p className="ai-team-card-role pl-1.5 font-heading text-xs font-medium uppercase tracking-[0.12em] md:text-[0.72rem]">
               {bot.role}

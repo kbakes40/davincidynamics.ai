@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { Bot, BotId } from "./bots-data";
-import { BOT_BY_ID, BOT_VISUAL_ACCENTS, PREMIUM_MASCOT_BOT_IDS } from "./bots-data";
+import { BOT_BY_ID, BOT_VISUAL_ACCENTS } from "./bots-data";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 
@@ -90,10 +90,10 @@ export function AITeamModal({ bot, open, onClose }: AITeamModalProps) {
           </div>
         </div>
 
-        {bot.mascotSrc && PREMIUM_MASCOT_BOT_IDS.has(bot.id) ? (
+        {bot.mascotSrc ? (
           <div className="border-b border-white/[0.06] bg-transparent px-6 py-4 sm:px-8">
             <div className="ai-team-premium-mascot-wrap flex w-full justify-center">
-              <div className="flex h-[236px] w-full max-w-[280px] items-center justify-center sm:h-[252px]">
+              <div className="flex h-[320px] w-full max-w-[368px] items-center justify-center sm:h-[348px] sm:max-w-[400px]">
                 <img
                   src={bot.mascotSrc}
                   alt={`${bot.name} mascot`}
@@ -106,17 +106,6 @@ export function AITeamModal({ bot, open, onClose }: AITeamModalProps) {
                 />
               </div>
             </div>
-          </div>
-        ) : bot.mascotSrc ? (
-          <div className="border-b border-white/[0.06] bg-transparent px-6 py-4 sm:px-8">
-            <img
-              src={bot.mascotSrc}
-              alt={`${bot.name} mascot`}
-              width={1376}
-              height={768}
-              className="mx-auto h-auto max-h-60 w-auto max-w-full object-contain object-center"
-              decoding="async"
-            />
           </div>
         ) : null}
 

@@ -31,9 +31,6 @@ export const BOT_VISUAL_ACCENTS: Record<BotId, VisualAccent> = {
   orbit: "indigo",
 };
 
-/** Mascots using the shared premium frame + transparent PNG pipeline on /ai-team */
-export const PREMIUM_MASCOT_BOT_IDS = new Set<BotId>(["nova", "vinci", "leo", "atlas"]);
-
 export type FilterId = "all" | "growth" | "customer-facing" | "operations" | "engineering";
 
 export interface Bot {
@@ -116,6 +113,7 @@ export const BOTS: Bot[] = [
     systemFunction:
       "Validates inputs, protects infrastructure, and enforces system integrity.",
     connectedWith: ["forge", "kernel", "orbit"],
+    mascotSrc: "/ai-team/aegis-icon.png?v=1",
   },
   {
     id: "forge",
@@ -127,6 +125,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Turns requirements into durable software paths the business can rely on.",
     systemFunction: "Builds tools, systems, and automation infrastructure.",
     connectedWith: ["atlas", "relay", "kernel", "vector", "patch"],
+    mascotSrc: "/ai-team/forge-icon.png?v=1",
   },
   {
     id: "vector",
@@ -139,6 +138,7 @@ export const BOTS: Bot[] = [
       "Crafts interfaces that feel inevitable—precise motion, spacing, and hierarchy.",
     systemFunction: "Designs polished frontend experiences and interface systems.",
     connectedWith: ["forge", "patch"],
+    mascotSrc: "/ai-team/vector-icon.png?v=1",
   },
   {
     id: "kernel",
@@ -150,6 +150,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Holds the truth for state, data contracts, and core services.",
     systemFunction: "Handles core logic, APIs, state, and database infrastructure.",
     connectedWith: ["forge", "relay", "orbit", "aegis"],
+    mascotSrc: "/ai-team/kernel-icon.png?v=1",
   },
   {
     id: "patch",
@@ -161,6 +162,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Stress-tests reality paths before customers ever feel the edge cases.",
     systemFunction: "Tests flows, catches issues, and keeps the experience stable.",
     connectedWith: ["forge", "vector"],
+    mascotSrc: "/ai-team/patch-icon.png?v=1",
   },
   {
     id: "relay",
@@ -172,6 +174,7 @@ export const BOTS: Bot[] = [
     shortDescription: "The connective tissue between bots, APIs, and external systems.",
     systemFunction: "Connects bots, APIs, webhooks, and outside systems.",
     connectedWith: ["nova", "vinci", "atlas", "forge", "kernel", "orbit", "leo"],
+    mascotSrc: "/ai-team/relay-icon.png?v=1",
   },
   {
     id: "orbit",
@@ -183,6 +186,7 @@ export const BOTS: Bot[] = [
     shortDescription: "Production posture—uptime, releases, and operational readiness.",
     systemFunction: "Manages deployment, uptime, and production readiness.",
     connectedWith: ["relay", "kernel", "aegis"],
+    mascotSrc: "/ai-team/orbit-icon.png?v=1",
   },
 ];
 

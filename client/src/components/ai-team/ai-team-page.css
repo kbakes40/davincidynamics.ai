@@ -384,7 +384,7 @@
   animation: ai-team-cta-nodes 6s ease-in-out infinite;
 }
 
-/* Premium mascots (Nova, Vinci, Leo, Atlas): pure transparency, no filters or glow (avoids halo on dark cards) */
+/* Team mascots: pure transparency, no filters or glow (avoids halo on dark cards) */
 .ai-team-os .ai-team-premium-mascot-wrap {
   background: transparent !important;
   box-shadow: none !important;
