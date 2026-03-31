@@ -126,6 +126,20 @@ export interface LeadSearchResultRow {
   sourceRecordId?: string | null;
 }
 
+export type LeadSearchNichePreset =
+  | "auto"
+  | "restaurants"
+  | "smoke_shops"
+  | "barber_shops"
+  | "salons"
+  | "dentists"
+  | "roofers"
+  | "hvac"
+  | "plumbers"
+  | "auto_repair"
+  | "gyms"
+  | "law_firms";
+
 export interface LeadSearchPreviewResponse {
   ok: true;
   provider: LeadSearchProvider;

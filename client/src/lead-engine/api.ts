@@ -4,6 +4,8 @@ import type {
   JobDetailResponse,
   JobsListResponse,
   LeadDetailResponse,
+  LeadSearchImportSelectedResponse,
+  LeadSearchPreviewResponse,
   LeadsListResponse,
   OutreachQueueResponse,
   PipelineStage,
@@ -118,6 +120,42 @@ export async function createManualLeadApi(payload: Record<string, unknown>): Pro
 
 export async function importCsvLeadApi(payload: { csvText: string; fileName?: string; source?: string }): Promise<{ ok: boolean; batchId?: string }> {
   const res = await fetch("/api/leads/import/csv", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(res);
+}
+
+export async function previewGooglePlacesLeads(payload: {
+  targetZip: string;
+  radiusMiles: number;
+  city?: string;
+  state?: string;
+  category?: string;
+  keyword?: string;
+  websiteStatus?: string;
+  nichePreset?: string;
+  maxResults?: number;
+}): Promise<LeadSearchPreviewResponse> {
+  const res = await fetch("/api/leads/search/google-places/preview", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(res);
+}
+
+export async function importSelectedGooglePlacesLeads(payload: {
+  placeIds: string[];
+  targetZip: string;
+  radiusMiles: number;
+  city?: string;
+  state?: string;
+  category?: string;
+  keyword?: string;
+}): Promise<LeadSearchImportSelectedResponse> {
+  const res = await fetch("/api/leads/import/google-places/selected", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

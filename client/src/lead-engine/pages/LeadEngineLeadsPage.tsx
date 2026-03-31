@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import type { Lead, LeadWorkflowStatus, PipelineStage, VerificationStatus } from "@shared/lead-engine-types";
+import type { Lead, LeadSearchNichePreset, LeadWorkflowStatus, PipelineStage, VerificationStatus } from "@shared/lead-engine-types";
 import { PIPELINE_STAGE_LABELS } from "@shared/lead-engine-types";
 import { LeadFilters, type SavedViewId } from "../components/LeadFilters";
 import { LeadTable, type LeadSortKey } from "../components/LeadTable";
@@ -17,14 +17,15 @@ import {
 } from "../components/lead-engine-primitives";
 import { LeadScoreBadge, VerificationBadge } from "../components/lead-engine-badges";
 import { LeadReasonChips } from "../components/LeadReasonChips";
-import { createManualLeadApi, fetchLeads, importCsvLeadApi, postLeadsExportCsv } from "../api";
+import { createManualLeadApi, fetchLeads, importCsvLeadApi, importSelectedGooglePlacesLeads, postLeadsExportCsv, previewGooglePlacesLeads } from "../api";
 import { downloadBlob } from "../exportLeadsCsv";
 import { filterAndSortLeads } from "@shared/lead-engine-leads-query";
 import { LeadEngineShell } from "../LeadEngineShell";
 import { cn } from "@/lib/utils";
 import { leMuted, leSurface } from "../surface";
 import { toast } from "sonner";
-import { Download, Plus, Upload } from "lucide-react";
+import { Download, Plus, Search, Upload } from "lucide-react";
+import type { LeadSearchResultRow, WebsiteStatus } from "@shared/lead-engine-types";
 
 const DEFAULT_MANUAL_FORM = {
   businessName: "",
@@ -73,6 +74,21 @@ export default function LeadEngineLeadsPage() {
   const [csvText, setCsvText] = useState("");
   const [savingManual, setSavingManual] = useState(false);
   const [savingCsv, setSavingCsv] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [importingSearch, setImportingSearch] = useState(false);
+  const [searchForm, setSearchForm] = useState({
+    targetZip: "",
+    radiusMiles: "10",
+    city: "",
+    state: "",
+    category: "",
+    keyword: "",
+    nichePreset: "auto" as LeadSearchNichePreset,
+    websiteStatus: "" as "" | WebsiteStatus,
+  });
+  const [searchResults, setSearchResults] = useState<LeadSearchResultRow[]>([]);
+  const [searchSelected, setSearchSelected] = useState<Set<string>>(new Set());
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -190,6 +206,100 @@ export default function LeadEngineLeadsPage() {
     }
   }
 
+  async function runSearch() {
+    const targetZip = searchForm.targetZip.trim();
+    const radiusMiles = Number.parseFloat(searchForm.radiusMiles || "0");
+    if (!targetZip) {
+      toast.error("Target ZIP is required");
+      return;
+    }
+    if (!Number.isFinite(radiusMiles) || radiusMiles <= 0) {
+      toast.error("Radius must be a positive number");
+      return;
+    }
+    setSearching(true);
+    try {
+      const r = await previewGooglePlacesLeads({
+        targetZip,
+        radiusMiles,
+        city: searchForm.city || undefined,
+        state: searchForm.state || undefined,
+        category: searchForm.category || undefined,
+        keyword: searchForm.keyword || undefined,
+        websiteStatus: searchForm.websiteStatus || undefined,
+        nichePreset: searchForm.nichePreset,
+        maxResults: 40,
+      });
+      if (!r.providerReady) {
+        toast.message("Provider not configured", {
+          description: r.message ?? "GOOGLE_PLACES_API_KEY is missing. Use CSV/manual import.",
+        });
+      }
+      setSearchResults(r.results);
+      const selectable = r.results.filter(x => x.importStatus === "new").map(x => x.key);
+      setSearchSelected(new Set(selectable));
+    } catch (e) {
+      toast.error("Search failed", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  function toggleSearchRow(key: string, on: boolean) {
+    setSearchSelected(prev => {
+      const n = new Set(prev);
+      if (on) n.add(key);
+      else n.delete(key);
+      return n;
+    });
+  }
+
+  function toggleSearchAll(on: boolean) {
+    if (!on) {
+      setSearchSelected(new Set());
+      return;
+    }
+    setSearchSelected(new Set(searchResults.filter(r => r.importStatus === "new").map(r => r.key)));
+  }
+
+  async function importSelectedSearch() {
+    const targetZip = searchForm.targetZip.trim();
+    const radiusMiles = Number.parseFloat(searchForm.radiusMiles || "0");
+    const placeIds = searchResults
+      .filter(r => r.provider === "google_places" && r.importStatus === "new" && searchSelected.has(r.key))
+      .map(r => r.sourceRecordId || r.key)
+      .filter((x): x is string => typeof x === "string" && x.length > 0);
+
+    if (!placeIds.length) {
+      toast.message("No new leads selected");
+      return;
+    }
+
+    setImportingSearch(true);
+    try {
+      const r = await importSelectedGooglePlacesLeads({
+        placeIds,
+        targetZip,
+        radiusMiles,
+        city: searchForm.city || undefined,
+        state: searchForm.state || undefined,
+        category: searchForm.category || undefined,
+        keyword: searchForm.keyword || undefined,
+      });
+      toast.success("Imported leads", {
+        description: `Inserted ${r.inserted}, updated ${r.updated}, duplicates ${r.duplicates}, failed ${r.failed}`,
+      });
+      setSearchOpen(false);
+      setSearchResults([]);
+      setSearchSelected(new Set());
+      await load();
+    } catch (e) {
+      toast.error("Import failed", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setImportingSearch(false);
+    }
+  }
+
   function toggleSort(k: LeadSortKey) {
     if (sortKey === k) {
       setSortDir(d => (d === "desc" ? "asc" : "desc"));
@@ -264,17 +374,29 @@ export default function LeadEngineLeadsPage() {
               <p className="text-sm text-muted-foreground font-heading">
                 Provider-backed search is optional. If Google Places or another source is not configured, use manual entry or CSV import.
               </p>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                disabled={exporting}
-                className="border-white/12 font-heading gap-2"
-                onClick={() => void exportCsv()}
-              >
-                <Download className="h-4 w-4 shrink-0" aria-hidden />
-                {exporting ? "Exporting…" : "Export CSV"}
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="border-white/12 font-heading gap-2"
+                  onClick={() => setSearchOpen(true)}
+                >
+                  <Search className="h-4 w-4 shrink-0" aria-hidden />
+                  Search New Leads
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={exporting}
+                  className="border-white/12 font-heading gap-2"
+                  onClick={() => void exportCsv()}
+                >
+                  <Download className="h-4 w-4 shrink-0" aria-hidden />
+                  {exporting ? "Exporting…" : "Export CSV"}
+                </Button>
+              </div>
             </div>
           </div>
         </SectionCard>
@@ -407,6 +529,138 @@ export default function LeadEngineLeadsPage() {
               </div>
             </div>
           ) : null}
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={searchOpen} onOpenChange={setSearchOpen}>
+        <SheetContent className="bg-card border-white/10 w-full sm:max-w-4xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="font-display text-left">Search New Leads</SheetTitle>
+          </SheetHeader>
+          <div className="mt-6 space-y-4">
+            <div className="grid sm:grid-cols-3 gap-3">
+              <Input placeholder="Target ZIP" value={searchForm.targetZip} onChange={e => setSearchForm(v => ({ ...v, targetZip: e.target.value }))} />
+              <Input placeholder="Radius miles" value={searchForm.radiusMiles} onChange={e => setSearchForm(v => ({ ...v, radiusMiles: e.target.value }))} />
+              <select
+                value={searchForm.websiteStatus}
+                onChange={e => setSearchForm(v => ({ ...v, websiteStatus: e.target.value as any }))}
+                className="h-10 rounded-lg border border-white/12 bg-background/50 px-3 text-sm font-heading text-foreground"
+              >
+                <option value="">Website status: any</option>
+                <option value="no_website">no_website</option>
+                <option value="weak_website">weak_website</option>
+                <option value="has_website">has_website</option>
+                <option value="unknown">unknown</option>
+              </select>
+              <select
+                value={searchForm.nichePreset}
+                onChange={e => setSearchForm(v => ({ ...v, nichePreset: e.target.value as LeadSearchNichePreset }))}
+                className="h-10 rounded-lg border border-white/12 bg-background/50 px-3 text-sm font-heading text-foreground"
+              >
+                <option value="auto">Preset: auto</option>
+                <option value="smoke_shops">Smoke shops</option>
+                <option value="restaurants">Restaurants</option>
+                <option value="barber_shops">Barber shops</option>
+                <option value="salons">Salons</option>
+                <option value="dentists">Dentists</option>
+                <option value="roofers">Roofers</option>
+                <option value="hvac">HVAC</option>
+                <option value="plumbers">Plumbers</option>
+                <option value="auto_repair">Auto repair</option>
+                <option value="gyms">Gyms</option>
+                <option value="law_firms">Law firms</option>
+              </select>
+              <Input placeholder="City (optional)" value={searchForm.city} onChange={e => setSearchForm(v => ({ ...v, city: e.target.value }))} />
+              <Input placeholder="State (optional)" value={searchForm.state} onChange={e => setSearchForm(v => ({ ...v, state: e.target.value }))} />
+              <Input placeholder="Category (optional)" value={searchForm.category} onChange={e => setSearchForm(v => ({ ...v, category: e.target.value }))} />
+              <Input placeholder="Keyword (optional)" value={searchForm.keyword} onChange={e => setSearchForm(v => ({ ...v, keyword: e.target.value }))} />
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className={cn(leMuted, "text-sm")}>
+                Uses Google Places when configured. If not configured, use the CSV import section on this page.
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" className="border-white/12 font-heading" disabled={searching} onClick={() => void runSearch()}>
+                  {searching ? "Searching…" : "Search"}
+                </Button>
+                <Button className="bg-accent text-background font-heading" disabled={importingSearch || searchSelected.size === 0} onClick={() => void importSelectedSearch()}>
+                  {importingSearch ? "Importing…" : `Import selected (${searchSelected.size})`}
+                </Button>
+              </div>
+            </div>
+
+            <div className="border-t border-white/8 pt-4">
+              {searchResults.length === 0 ? (
+                <p className={cn(leMuted, "text-sm")}>Run a search to preview results before importing.</p>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 text-sm font-heading">
+                      <input
+                        type="checkbox"
+                        checked={
+                          searchResults.filter(r => r.importStatus === "new").length > 0 &&
+                          searchSelected.size === searchResults.filter(r => r.importStatus === "new").length
+                        }
+                        onChange={e => toggleSearchAll(e.target.checked)}
+                      />
+                      Select all new
+                    </label>
+                    <span className={cn(leMuted, "text-sm")}>
+                      {searchResults.length} results · {searchResults.filter(r => r.importStatus === "already_imported").length} already imported
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto rounded-lg border border-white/10">
+                    <table className="min-w-[900px] w-full text-sm">
+                      <thead className="bg-background/40">
+                        <tr className="text-left font-heading">
+                          <th className="p-3 w-10"></th>
+                          <th className="p-3">Business</th>
+                          <th className="p-3">Category</th>
+                          <th className="p-3">City</th>
+                          <th className="p-3">Phone</th>
+                          <th className="p-3">Email</th>
+                          <th className="p-3">Website</th>
+                          <th className="p-3">Website status</th>
+                          <th className="p-3">Source</th>
+                          <th className="p-3">Import status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {searchResults.map(r => {
+                          const selectable = r.importStatus === "new";
+                          return (
+                            <tr key={r.key} className="border-t border-white/8">
+                              <td className="p-3">
+                                <input
+                                  type="checkbox"
+                                  disabled={!selectable}
+                                  checked={selectable && searchSelected.has(r.key)}
+                                  onChange={e => toggleSearchRow(r.key, e.target.checked)}
+                                />
+                              </td>
+                              <td className="p-3 font-heading text-foreground">{r.businessName}</td>
+                              <td className="p-3">{r.subCategory ? `${r.category} / ${r.subCategory}` : r.category}</td>
+                              <td className="p-3">{r.city}</td>
+                              <td className="p-3">{r.phone ?? "—"}</td>
+                              <td className="p-3">{r.email ?? "—"}</td>
+                              <td className="p-3">{r.website ?? "—"}</td>
+                              <td className="p-3">{r.websiteStatus}</td>
+                              <td className="p-3">{r.leadSource}</td>
+                              <td className="p-3">
+                                {r.importStatus === "already_imported" ? "Already Imported" : r.importStatus}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </SheetContent>
       </Sheet>
     </LeadEngineShell>

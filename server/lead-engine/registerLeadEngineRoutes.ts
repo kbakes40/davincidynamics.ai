@@ -10,6 +10,8 @@ import {
   cancelJobApi,
   checkWebsiteBatchLeadIds,
   checkWebsiteForLeadId,
+  importSelectedGooglePlaces,
+  previewGooglePlacesSearch,
   getAnalyticsOverviewApi,
   getDashboardOverviewApi,
   getJobApi,
@@ -279,6 +281,64 @@ export function registerLeadEngineRoutes(app: Express): void {
         return;
       }
       json(res, { error: "import_failed", message: msg }, 500);
+    }
+  });
+
+  app.post("/api/leads/search/google-places/preview", async (req: Request, res: Response) => {
+    const b = req.body ?? {};
+    const targetZip = typeof b.targetZip === "string" ? b.targetZip : "";
+    const radiusMiles =
+      typeof b.radiusMiles === "number" && Number.isFinite(b.radiusMiles) ? b.radiusMiles : Number(b.radiusMiles);
+    if (!targetZip.trim() || !Number.isFinite(radiusMiles)) {
+      json(res, { error: "missing_target", message: "Send { targetZip, radiusMiles }." }, 400);
+      return;
+    }
+    try {
+      const r = await previewGooglePlacesSearch({
+        targetZip,
+        radiusMiles,
+        city: typeof b.city === "string" ? b.city : undefined,
+        state: typeof b.state === "string" ? b.state : undefined,
+        category: typeof b.category === "string" ? b.category : undefined,
+        keyword: typeof b.keyword === "string" ? b.keyword : undefined,
+        websiteStatus: typeof b.websiteStatus === "string" ? (b.websiteStatus as any) : undefined,
+        nichePreset: typeof b.nichePreset === "string" ? (b.nichePreset as any) : undefined,
+        maxResults: typeof b.maxResults === "number" ? b.maxResults : undefined,
+      });
+      json(res, r);
+    } catch (e) {
+      console.error("[leads/search/google-places/preview]", e);
+      json(res, { error: "preview_failed", message: e instanceof Error ? e.message : String(e) }, 500);
+    }
+  });
+
+  app.post("/api/leads/import/google-places/selected", async (req: Request, res: Response) => {
+    const b = req.body ?? {};
+    const placeIds = Array.isArray(b.placeIds)
+      ? b.placeIds.filter((x: unknown): x is string => typeof x === "string" && x.trim().length > 0)
+      : [];
+    const targetZip = typeof b.targetZip === "string" ? b.targetZip : "";
+    const radiusMiles =
+      typeof b.radiusMiles === "number" && Number.isFinite(b.radiusMiles) ? b.radiusMiles : Number(b.radiusMiles);
+    if (!placeIds.length || !targetZip.trim() || !Number.isFinite(radiusMiles)) {
+      json(res, { error: "missing_input", message: "Send { placeIds, targetZip, radiusMiles }." }, 400);
+      return;
+    }
+    try {
+      const r = await importSelectedGooglePlaces({
+        placeIds,
+        targetZip,
+        radiusMiles,
+        category: typeof b.category === "string" ? b.category : undefined,
+        keyword: typeof b.keyword === "string" ? b.keyword : undefined,
+        city: typeof b.city === "string" ? b.city : undefined,
+        state: typeof b.state === "string" ? b.state : undefined,
+      });
+      json(res, { ok: true, provider: "google_places", ...r });
+    } catch (e) {
+      console.error("[leads/import/google-places/selected]", e);
+      const msg = e instanceof Error ? e.message : String(e);
+      json(res, { error: "import_failed", message: msg }, msg === "database_unavailable" ? 503 : 500);
     }
   });
 

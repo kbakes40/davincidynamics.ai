@@ -41,10 +41,20 @@ import { normalizeLeadFields } from "./normalizeLeadFields";
 import { batchToSearchJob } from "./leadEngineDashboardHelpers";
 import { computeLeadScore } from "./scoring";
 import { validateEmailWithProvider, type EmailValidationOutcome } from "./emailValidation";
-import { searchGooglePlaces, type GooglePlacesSearchInput } from "./googlePlaces";
+import { geocodeZipToLatLng, getGooglePlaceDetails, searchGooglePlaces, type GooglePlacesSearchInput } from "./googlePlaces";
 import { checkWebsite } from "./websiteEnrichment";
+import type { LeadSearchPreviewResponse, LeadSearchResultRow, WebsiteStatus } from "../../shared/lead-engine-types";
 
 type Db = NonNullable<Awaited<ReturnType<typeof getDb>>>;
+
+function classifyWebsiteStatusCandidate(website: string | null): WebsiteStatus {
+  const w = (website ?? "").trim().toLowerCase();
+  if (!w) return "no_website";
+  const weakHosts = ["facebook.com", "instagram.com", "linkedin.com", "google.com", "goo.gl"];
+  if (weakHosts.some(h => w.includes(h))) return "weak_website";
+  if (w.startsWith("http://") || w.startsWith("https://") || w.includes(".")) return "has_website";
+  return "unknown";
+}
 
 /** HTTP + export filters (subset applied in SQL; q still client text search). */
 export type LeadListFilterParams = {
@@ -1239,6 +1249,385 @@ export async function importGooglePlacesToLeadEngine(input: GooglePlacesSearchIn
         errorLog: JSON.stringify({
           messages: [e instanceof Error ? e.message : String(e)].slice(0, 50),
         }),
+        completedAt: new Date(),
+      })
+      .where(eq(leadEngineImportBatches.id, batchId));
+    throw e;
+  }
+}
+
+export async function previewGooglePlacesSearch(params: {
+  targetZip: string;
+  radiusMiles: number;
+  city?: string;
+  state?: string;
+  category?: string;
+  keyword?: string;
+  websiteStatus?: WebsiteStatus;
+  nichePreset?: "auto" | "restaurants" | "smoke_shops" | "barber_shops" | "salons" | "dentists" | "roofers" | "hvac" | "plumbers" | "auto_repair" | "gyms" | "law_firms";
+  maxResults?: number;
+}): Promise<LeadSearchPreviewResponse> {
+  const db = await requireLeadEngineDb();
+  if (!db) {
+    return {
+      ok: true,
+      provider: "google_places",
+      results: [],
+      totalFound: 0,
+      providerReady: false,
+      message: "database_unavailable",
+    };
+  }
+
+  const keyPresent = Boolean(process.env.GOOGLE_PLACES_API_KEY?.trim());
+  if (!keyPresent) {
+    return {
+      ok: true,
+      provider: "google_places",
+      results: [],
+      totalFound: 0,
+      providerReady: false,
+      message: "GOOGLE_PLACES_API_KEY not configured",
+    };
+  }
+
+  const targetZip = params.targetZip.trim();
+  const radiusMiles = Math.max(0.5, Math.min(50, params.radiusMiles || 10));
+  const maxResults = Math.min(60, Math.max(1, params.maxResults ?? 20));
+
+  const ll = await geocodeZipToLatLng(targetZip);
+  const input: GooglePlacesSearchInput = {
+    nichePreset: params.nichePreset ?? "auto",
+    zip: targetZip,
+    city: params.city?.trim() || undefined,
+    state: params.state?.trim() || undefined,
+    category: params.category?.trim() || undefined,
+    searchTerm: params.keyword?.trim() || undefined,
+    latitude: ll?.latitude,
+    longitude: ll?.longitude,
+    radiusMiles,
+    maxResults,
+  };
+
+  const placeRecords = await searchGooglePlaces(input);
+
+  const wantedStatus = params.websiteStatus;
+  const rows: LeadSearchResultRow[] = [];
+  for (const p of placeRecords) {
+    const websiteStatus = classifyWebsiteStatusCandidate(p.website);
+    if (wantedStatus && websiteStatus !== wantedStatus) continue;
+
+    const norm = normalizeLeadFields({
+      businessName: p.businessName,
+      phone: p.phone,
+      email: null,
+      website: p.website,
+    });
+
+    const dupId = await findDuplicateLeadId(db, {
+      sourceRecordId: p.placeId,
+      normalizedPhone: norm.normalizedPhone,
+      normalizedWebsite: norm.normalizedWebsite,
+      normalizedBusinessName: norm.normalizedBusinessName,
+      zip: p.zip,
+      latitude: p.latitude,
+      longitude: p.longitude,
+    });
+
+    rows.push({
+      key: p.placeId,
+      provider: "google_places",
+      importStatus: dupId ? "already_imported" : "new",
+      alreadyImportedLeadId: dupId,
+      businessName: p.businessName,
+      ownerName: null,
+      category: params.category?.trim() || p.category || "local_business",
+      subCategory: null,
+      address: p.addressLine || p.formattedAddress,
+      city: p.city,
+      state: p.state,
+      zip: p.zip,
+      phone: p.phone,
+      email: null,
+      website: p.website,
+      websiteStatus,
+      googleBusinessProfile: p.googleMapsUrl,
+      facebook: null,
+      instagram: null,
+      linkedin: null,
+      notes: [],
+      leadSource: "google_places",
+      priority: "medium",
+      status: "new",
+      radiusMiles,
+      targetZip,
+      sourceRecordId: p.placeId,
+    });
+  }
+
+  return {
+    ok: true,
+    provider: "google_places",
+    results: rows,
+    totalFound: placeRecords.length,
+    providerReady: true,
+  };
+}
+
+export async function importSelectedGooglePlaces(params: {
+  placeIds: string[];
+  targetZip: string;
+  radiusMiles: number;
+  category?: string;
+  keyword?: string;
+  city?: string;
+  state?: string;
+}): Promise<{
+  batchId: string;
+  inserted: number;
+  updated: number;
+  duplicates: number;
+  failed: number;
+}> {
+  const db = await requireLeadEngineDb();
+  if (!db) throw new Error("database_unavailable");
+
+  const batchId = nanoid();
+  const sourceLabel = "google_places";
+  await db.insert(leadEngineImportBatches).values({
+    id: batchId,
+    sourceName: sourceLabel,
+    fileName: `zip:${params.targetZip} radius:${params.radiusMiles}mi`,
+    status: "processing",
+    totalRows: params.placeIds.length,
+    startedAt: new Date(),
+  });
+
+  let inserted = 0;
+  let updated = 0;
+  let duplicates = 0;
+  let failed = 0;
+  const linkedIds: string[] = [];
+  const errors: string[] = [];
+
+  try {
+    for (let i = 0; i < params.placeIds.length; i++) {
+      const pid = params.placeIds[i]!;
+      try {
+        const place = await getGooglePlaceDetails(pid);
+        if (!place) {
+          failed++;
+          errors.push(`Place ${i + 1}: details unavailable`);
+          continue;
+        }
+
+        const norm = normalizeLeadFields({
+          businessName: place.businessName,
+          phone: place.phone || null,
+          email: null,
+          website: place.website || null,
+        });
+
+        const dupId = await findDuplicateLeadId(db, {
+          sourceRecordId: place.placeId,
+          normalizedPhone: norm.normalizedPhone,
+          normalizedWebsite: norm.normalizedWebsite,
+          normalizedBusinessName: norm.normalizedBusinessName,
+          zip: place.zip || null,
+          latitude: place.latitude,
+          longitude: place.longitude,
+        });
+
+        const now = new Date();
+        const rawJson = JSON.stringify(place.rawPlace);
+
+        if (dupId) {
+          duplicates++;
+          await db
+            .update(leadEngineLeads)
+            .set({
+              businessName: place.businessName,
+              category: params.category?.trim() || place.category || "local_business",
+              source: sourceLabel,
+              sourceJobId: batchId,
+              sourceRecordId: place.placeId,
+              googleMapsUrl: place.googleMapsUrl ?? null,
+              targetZip: params.targetZip,
+              radiusMiles: Math.round(params.radiusMiles),
+              normalizedBusinessName: norm.normalizedBusinessName,
+              normalizedPhone: norm.normalizedPhone,
+              normalizedWebsite: norm.normalizedWebsite,
+              updatedAt: now,
+            })
+            .where(eq(leadEngineLeads.id, dupId));
+
+          const { lat: latStr, lng: lngStr } = latLngStrings(place.latitude, place.longitude);
+          const a = await db
+            .select()
+            .from(leadEngineAddresses)
+            .where(eq(leadEngineAddresses.leadId, dupId))
+            .limit(1);
+          if (a[0]) {
+            await db
+              .update(leadEngineAddresses)
+              .set({
+                address1: place.addressLine || place.formattedAddress || a[0].address1,
+                city: place.city || a[0].city,
+                state: place.state || a[0].state,
+                zip: place.zip || a[0].zip,
+                country: place.country || a[0].country,
+                ...(latStr && lngStr ? { latitude: latStr, longitude: lngStr } : {}),
+                serviceRadiusMiles: Math.round(params.radiusMiles),
+              })
+              .where(eq(leadEngineAddresses.id, a[0].id));
+          }
+
+          await upsertContact(db, dupId, "phone", norm.phoneDisplay, true, sourceLabel);
+          await upsertContact(db, dupId, "website", norm.websiteDisplay, true, sourceLabel);
+
+          await db.insert(leadEngineSources).values({
+            id: nanoid(),
+            leadId: dupId,
+            sourceName: sourceLabel,
+            sourceType: "google_places",
+            importBatchId: batchId,
+            rawPayloadJson: rawJson,
+          });
+
+          const leadAfter = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, dupId)).limit(1);
+          const enr = await db
+            .select()
+            .from(leadEngineEnrichment)
+            .where(eq(leadEngineEnrichment.leadId, dupId))
+            .limit(1);
+          if (leadAfter[0]) await persistScore(db, dupId, leadAfter[0], enr[0] ?? null);
+          updated++;
+          if (!linkedIds.includes(dupId)) linkedIds.push(dupId);
+          continue;
+        }
+
+        const leadId = nanoid();
+        const { lat: latStr, lng: lngStr } = latLngStrings(place.latitude, place.longitude);
+
+        await db.insert(leadEngineLeads).values({
+          id: leadId,
+          businessName: place.businessName,
+          ownerName: null,
+          category: params.category?.trim() || place.category || "local_business",
+          subcategory: null,
+          source: sourceLabel,
+          sourceJobId: batchId,
+          sourceRecordId: place.placeId,
+          googleMapsUrl: place.googleMapsUrl ?? null,
+          targetZip: params.targetZip,
+          radiusMiles: Math.round(params.radiusMiles),
+          normalizedBusinessName: norm.normalizedBusinessName,
+          normalizedPhone: norm.normalizedPhone,
+          normalizedWebsite: norm.normalizedWebsite,
+          leadStatus: "new",
+          outreachStatus: "new",
+          pipelineStage: "new_lead",
+          verificationStatus: "unverified",
+          notesJson: JSON.stringify([]),
+          reasonCodesJson: JSON.stringify([]),
+          tagsJson: JSON.stringify([]),
+          createdAt: now,
+          updatedAt: now,
+        });
+
+        await db.insert(leadEngineAddresses).values({
+          id: nanoid(),
+          leadId,
+          address1: place.addressLine || place.formattedAddress || null,
+          city: place.city || "",
+          state: place.state || "",
+          zip: place.zip || null,
+          country: place.country || "US",
+          latitude: latStr,
+          longitude: lngStr,
+          serviceRadiusMiles: Math.round(params.radiusMiles),
+        });
+
+        if (norm.phoneDisplay) {
+          await db.insert(leadEngineContactPoints).values({
+            id: nanoid(),
+            leadId,
+            type: "phone",
+            value: norm.phoneDisplay,
+            isPrimary: 1,
+            source: sourceLabel,
+          });
+        }
+        if (norm.websiteDisplay) {
+          await db.insert(leadEngineContactPoints).values({
+            id: nanoid(),
+            leadId,
+            type: "website",
+            value: norm.websiteDisplay,
+            isPrimary: 1,
+            source: sourceLabel,
+          });
+        }
+
+        const hasSite = !!norm.normalizedWebsite;
+        await db.insert(leadEngineEnrichment).values({
+          id: nanoid(),
+          leadId,
+          websiteStatus: hasSite ? "unknown" : "none",
+          hasWebsite: hasSite ? 1 : 0,
+          enrichedAt: now,
+        });
+
+        await db.insert(leadEngineSources).values({
+          id: nanoid(),
+          leadId,
+          sourceName: sourceLabel,
+          sourceType: "google_places",
+          importBatchId: batchId,
+          rawPayloadJson: rawJson,
+        });
+
+        const leadRow = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, leadId)).limit(1);
+        const enrRow = await db
+          .select()
+          .from(leadEngineEnrichment)
+          .where(eq(leadEngineEnrichment.leadId, leadId))
+          .limit(1);
+        if (leadRow[0]) await persistScore(db, leadId, leadRow[0], enrRow[0] ?? null);
+
+        inserted++;
+        linkedIds.push(leadId);
+      } catch (e) {
+        failed++;
+        errors.push(`Place ${i + 1}: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    }
+
+    if (linkedIds.length > 0) {
+      await checkWebsiteBatchLeadIds(linkedIds, 4);
+    }
+
+    await db
+      .update(leadEngineImportBatches)
+      .set({
+        status: failed === params.placeIds.length && inserted === 0 && updated === 0 ? "failed" : "completed",
+        insertedRows: inserted,
+        updatedRows: updated,
+        duplicateRows: duplicates,
+        failedRows: failed,
+        errorLog: errors.length ? JSON.stringify({ messages: errors.slice(0, 200) }) : null,
+        linkedLeadIdsJson: JSON.stringify(linkedIds),
+        completedAt: new Date(),
+      })
+      .where(eq(leadEngineImportBatches.id, batchId));
+
+    return { batchId, inserted, updated, duplicates, failed };
+  } catch (e) {
+    await db
+      .update(leadEngineImportBatches)
+      .set({
+        status: "failed",
+        errorLog: JSON.stringify({ messages: [e instanceof Error ? e.message : String(e)].slice(0, 50) }),
         completedAt: new Date(),
       })
       .where(eq(leadEngineImportBatches.id, batchId));
