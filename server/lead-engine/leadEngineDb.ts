@@ -1,8 +1,10 @@
 import { drizzle } from "drizzle-orm/node-postgres";
+import { sql } from "drizzle-orm";
 import { Pool } from "pg";
 
 let _pool: Pool | null = null;
 let _leadEngineDb: ReturnType<typeof drizzle> | null = null;
+let _leadEngineDbMeta: LeadEngineDbMeta | null = null;
 
 const CONNECTIVITY_ERROR_CODES = new Set([
   "ETIMEDOUT",
@@ -70,6 +72,7 @@ export function invalidateLeadEngineDbCache(): void {
     });
   _pool = null;
   _leadEngineDb = null;
+  _leadEngineDbMeta = null;
 }
 
 function isPostgresUrl(url: string): boolean {
@@ -77,30 +80,109 @@ function isPostgresUrl(url: string): boolean {
   return u.startsWith("postgres://") || u.startsWith("postgresql://");
 }
 
-/**
- * Lead Engine uses PostgreSQL (Supabase). Connection string priority:
- * 1. `LEAD_ENGINE_DATABASE_URL` if set (Postgres only)
- * 2. else `DATABASE_URL` if it looks like Postgres
- */
-export async function getLeadEngineDb() {
+function looksLikeMySqlUrl(url: string): boolean {
+  const u = url.toLowerCase();
+  return u.startsWith("mysql://") || u.startsWith("mysql2://");
+}
+
+export type LeadEngineDbMeta = {
+  available: boolean;
+  source: "lead_engine_database_url" | "database_url" | "none";
+  reason?: "missing_url" | "invalid_database_url" | "invalid_lead_engine_database_url" | "database_unavailable" | "missing_table";
+  tableReady?: boolean;
+  chosenUrlKind?: "postgres" | "mysql" | "other" | "none";
+};
+
+function selectLeadEngineDatabaseUrl(): { url: string | null; meta: LeadEngineDbMeta } {
   const explicit = process.env.LEAD_ENGINE_DATABASE_URL?.trim();
   const fallback = process.env.DATABASE_URL?.trim();
-  const url = explicit && isPostgresUrl(explicit) ? explicit : fallback && isPostgresUrl(fallback) ? fallback : null;
-  if (!url) {
-    if (explicit && !isPostgresUrl(explicit)) {
-      console.warn("[LeadEngine] LEAD_ENGINE_DATABASE_URL must be a postgres:// or postgresql:// URL.");
+
+  if (explicit) {
+    if (!isPostgresUrl(explicit)) {
+      return {
+        url: null,
+        meta: {
+          available: false,
+          source: "lead_engine_database_url",
+          reason: "invalid_lead_engine_database_url",
+          chosenUrlKind: looksLikeMySqlUrl(explicit) ? "mysql" : "other",
+        },
+      };
     }
+    return {
+      url: explicit,
+      meta: { available: true, source: "lead_engine_database_url", chosenUrlKind: "postgres" },
+    };
+  }
+
+  if (fallback) {
+    if (!isPostgresUrl(fallback)) {
+      return {
+        url: null,
+        meta: {
+          available: false,
+          source: "database_url",
+          reason: "invalid_database_url",
+          chosenUrlKind: looksLikeMySqlUrl(fallback) ? "mysql" : "other",
+        },
+      };
+    }
+    return {
+      url: fallback,
+      meta: { available: true, source: "database_url", chosenUrlKind: "postgres" },
+    };
+  }
+
+  return {
+    url: null,
+    meta: { available: false, source: "none", reason: "missing_url", chosenUrlKind: "none" },
+  };
+}
+
+async function verifyLeadEngineTables(db: ReturnType<typeof drizzle>): Promise<boolean> {
+  const result = await db.execute(sql`select to_regclass('public.lead_engine_leads') as lead_engine_leads`);
+  const row = Array.isArray(result) ? result[0] : (result as { rows?: unknown[] }).rows?.[0];
+  const value = row && typeof row === "object" ? (row as Record<string, unknown>).lead_engine_leads : null;
+  return Boolean(value);
+}
+
+export function getLeadEngineDbMeta(): LeadEngineDbMeta {
+  if (_leadEngineDbMeta) return _leadEngineDbMeta;
+  return selectLeadEngineDatabaseUrl().meta;
+}
+
+/**
+ * Lead Engine uses PostgreSQL (Supabase). Connection string priority:
+ * 1. `LEAD_ENGINE_DATABASE_URL` if set (must be Postgres)
+ * 2. else `DATABASE_URL` only if it is also Postgres
+ */
+export async function getLeadEngineDb() {
+  const selected = selectLeadEngineDatabaseUrl();
+  _leadEngineDbMeta = selected.meta;
+  if (!selected.url) {
+    console.warn("[LeadEngine][db] unavailable", _leadEngineDbMeta);
     return null;
   }
 
   if (!_pool) {
     try {
-      _pool = new Pool({ connectionString: url, max: 10 });
+      console.info("[LeadEngine][db] connecting", { source: selected.meta.source, kind: selected.meta.chosenUrlKind });
+      _pool = new Pool({ connectionString: selected.url, max: 10 });
       _leadEngineDb = drizzle({ client: _pool });
+      const tableReady = await verifyLeadEngineTables(_leadEngineDb);
+      _leadEngineDbMeta = { ...selected.meta, available: tableReady, tableReady, reason: tableReady ? undefined : "missing_table" };
+      if (!tableReady) {
+        console.warn("[LeadEngine][db] missing required table lead_engine_leads");
+        await _pool.end().catch(() => undefined);
+        _pool = null;
+        _leadEngineDb = null;
+        return null;
+      }
     } catch (error) {
-      console.warn("[LeadEngine] Failed to create pool:", error);
+      console.warn("[LeadEngine][db] Failed to create/verify pool:", error);
       _pool = null;
       _leadEngineDb = null;
+      _leadEngineDbMeta = { ...selected.meta, available: false, reason: "database_unavailable" };
     }
   }
   return _leadEngineDb;

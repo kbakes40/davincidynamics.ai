@@ -238,6 +238,10 @@ export default function LeadEngineLeadsPage() {
         toast.message("Provider not configured", {
           description: r.message ?? "GOOGLE_PLACES_API_KEY is missing. Use CSV/manual import.",
         });
+      } else if (r.message) {
+        toast.message("Preview available", {
+          description: r.message,
+        });
       }
       setSearchResults(r.results);
       const selectable = r.results
@@ -313,7 +317,17 @@ export default function LeadEngineLeadsPage() {
       setSearchSelected(new Set());
       await load();
     } catch (e) {
-      toast.error("Import failed", { description: e instanceof Error ? e.message : String(e) });
+      const msg = e instanceof Error ? e.message : String(e);
+      toast.error(
+        msg.includes("missing_migration_or_table")
+          ? "Import unavailable"
+          : msg.includes("invalid_database_url")
+            ? "Invalid database URL"
+            : msg.includes("database_unavailable")
+              ? "Database unavailable"
+              : "Import failed",
+        { description: msg }
+      );
     } finally {
       setImportingSearch(false);
     }

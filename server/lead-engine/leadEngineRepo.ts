@@ -31,6 +31,7 @@ import { PIPELINE_COLUMNS, PIPELINE_STAGE_LABELS } from "../../shared/lead-engin
 import {
   getLeadEngineDatabaseConnectivityCode,
   getLeadEngineDb,
+  getLeadEngineDbMeta,
   invalidateLeadEngineDbCache,
   isLeadEngineDatabaseConnectivityError,
 } from "./leadEngineDb";
@@ -244,6 +245,10 @@ export async function checkWebsiteBatchLeadIds(leadIds: string[], concurrency = 
 
 export async function requireLeadEngineDb(): Promise<Db | null> {
   return getLeadEngineDb();
+}
+
+export function getLeadEngineDbStatus() {
+  return getLeadEngineDbMeta();
 }
 
 /** Avoid crashing the dev server when MySQL is misconfigured or unreachable (ETIMEDOUT, etc.). */
@@ -1218,6 +1223,14 @@ export async function importGooglePlacesToLeadEngine(input: GooglePlacesSearchIn
       await checkWebsiteBatchLeadIds(linkedIds, 4);
     }
 
+    console.info("[LeadEngine][import-selected] completed", {
+      inserted,
+      updated,
+      duplicates,
+      failed,
+      linked: linkedIds.length,
+    });
+
     await db
       .update(leadEngineImportBatches)
       .set({
@@ -1272,19 +1285,21 @@ export async function previewGooglePlacesSearch(params: {
 }): Promise<LeadSearchPreviewResponse> {
   const keyPresent = Boolean(process.env.GOOGLE_PLACES_API_KEY?.trim());
   if (!keyPresent) {
+    console.warn("[LeadEngine][preview] provider not configured");
     return {
       ok: true,
       provider: "google_places",
       results: [],
       totalFound: 0,
       providerReady: false,
-      message: "GOOGLE_PLACES_API_KEY not configured",
+      message: "provider_not_configured: GOOGLE_PLACES_API_KEY not configured",
     };
   }
 
   // DB is optional for preview: if unreachable, we can still show Google Places results;
   // we just won't be able to label "already imported".
   const db = await requireLeadEngineDb();
+  const dbStatus = getLeadEngineDbStatus();
 
   const targetZip = params.targetZip.trim();
   const radiusMiles = Math.max(0.5, Math.min(50, params.radiusMiles || 10));
@@ -1317,7 +1332,12 @@ export async function previewGooglePlacesSearch(params: {
   const leadIdBySourceRecordId = new Map<string, string>();
   let previewMessage: string | undefined;
   if (!db) {
-    previewMessage = "database_unavailable";
+    previewMessage = dbStatus.reason === "missing_table"
+      ? "preview_available_import_unavailable: missing lead_engine_leads table or migration not applied"
+      : dbStatus.reason === "invalid_database_url" || dbStatus.reason === "invalid_lead_engine_database_url"
+        ? "preview_available_import_unavailable: invalid database url"
+        : "preview_available_import_unavailable: database unavailable";
+    console.warn("[LeadEngine][preview] no db for duplicate detection", dbStatus);
   } else {
     try {
       const existingSourceIds = await db
@@ -1330,7 +1350,8 @@ export async function previewGooglePlacesSearch(params: {
       }
     } catch (e) {
       // Preview should still succeed even if the DB is timing out/misconfigured.
-      previewMessage = "database_unavailable";
+      previewMessage = "preview_available_import_unavailable: database unavailable";
+      console.warn("[LeadEngine][preview] duplicate preload failed", e);
     }
   }
 
@@ -1373,6 +1394,15 @@ export async function previewGooglePlacesSearch(params: {
     });
   }
 
+  console.info("[LeadEngine][preview] completed", {
+    totalFound: placeRecords.length,
+    returned: rows.length,
+    providerReady: true,
+    dbSource: dbStatus.source,
+    dbAvailable: dbStatus.available,
+    dbReason: dbStatus.reason,
+  });
+
   return {
     ok: true,
     provider: "google_places",
@@ -1399,7 +1429,14 @@ export async function importSelectedGooglePlaces(params: {
   failed: number;
 }> {
   const db = await requireLeadEngineDb();
-  if (!db) throw new Error("database_unavailable");
+  if (!db) {
+    const status = getLeadEngineDbStatus();
+    console.warn("[LeadEngine][import-selected] db unavailable", status);
+    if (status.reason === "missing_table") throw new Error("missing_migration_or_table: lead_engine_leads");
+    if (status.reason === "invalid_database_url" || status.reason === "invalid_lead_engine_database_url") throw new Error("invalid_database_url");
+    throw new Error("database_unavailable");
+  }
+  console.info("[LeadEngine][import-selected] starting", { count: params.placeIds.length, dbSource: getLeadEngineDbStatus().source });
 
   const batchId = nanoid();
   const sourceLabel = "google_places";
@@ -1616,6 +1653,14 @@ export async function importSelectedGooglePlaces(params: {
       await checkWebsiteBatchLeadIds(linkedIds, 4);
     }
 
+    console.info("[LeadEngine][import-selected] completed", {
+      inserted,
+      updated,
+      duplicates,
+      failed,
+      linked: linkedIds.length,
+    });
+
     await db
       .update(leadEngineImportBatches)
       .set({
@@ -1632,6 +1677,7 @@ export async function importSelectedGooglePlaces(params: {
 
     return { batchId, inserted, updated, duplicates, failed };
   } catch (e) {
+    console.error("[LeadEngine][import-selected] failed", e);
     await db
       .update(leadEngineImportBatches)
       .set({

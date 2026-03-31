@@ -12,6 +12,7 @@ import {
   checkWebsiteForLeadId,
   importSelectedGooglePlaces,
   previewGooglePlacesSearch,
+  getLeadEngineDbStatus,
   getAnalyticsOverviewApi,
   getDashboardOverviewApi,
   getJobApi,
@@ -273,7 +274,11 @@ export function registerLeadEngineRoutes(app: Express): void {
       const msg = e instanceof Error ? e.message : String(e);
       console.error("[leads/import/google-places]", e);
       if (msg === "database_unavailable") {
-        json(res, { error: "database_unavailable" }, 503);
+        json(res, { error: "database_unavailable", message: "Lead engine Postgres is unavailable" }, 503);
+        return;
+      }
+      if (msg === "invalid_database_url") {
+        json(res, { error: "invalid_database_url", message: "Lead engine database URL must be Postgres" }, 503);
         return;
       }
       if (msg.includes("GOOGLE_PLACES_API_KEY")) {
@@ -294,6 +299,7 @@ export function registerLeadEngineRoutes(app: Express): void {
       return;
     }
     try {
+      console.info("[LeadEngine][route][preview] request", { targetZip, radiusMiles });
       const r = await previewGooglePlacesSearch({
         targetZip,
         radiusMiles,
@@ -312,6 +318,11 @@ export function registerLeadEngineRoutes(app: Express): void {
     }
   });
 
+  app.get("/api/leads/health", async (_req: Request, res: Response) => {
+    await requireLeadEngineDb();
+    json(res, { ok: true, db: getLeadEngineDbStatus(), providerConfigured: Boolean(process.env.GOOGLE_PLACES_API_KEY?.trim()) });
+  });
+
   app.post("/api/leads/import/google-places/selected", async (req: Request, res: Response) => {
     const b = req.body ?? {};
     const placeIds = Array.isArray(b.placeIds)
@@ -325,6 +336,7 @@ export function registerLeadEngineRoutes(app: Express): void {
       return;
     }
     try {
+      console.info("[LeadEngine][route][import-selected] request", { count: placeIds.length, targetZip, radiusMiles });
       const r = await importSelectedGooglePlaces({
         placeIds,
         targetZip,
@@ -338,7 +350,19 @@ export function registerLeadEngineRoutes(app: Express): void {
     } catch (e) {
       console.error("[leads/import/google-places/selected]", e);
       const msg = e instanceof Error ? e.message : String(e);
-      json(res, { error: "import_failed", message: msg }, msg === "database_unavailable" ? 503 : 500);
+      if (msg === "database_unavailable") {
+        json(res, { error: "database_unavailable", message: "Lead engine Postgres is unavailable" }, 503);
+        return;
+      }
+      if (msg === "invalid_database_url") {
+        json(res, { error: "invalid_database_url", message: "Lead engine prefers LEAD_ENGINE_DATABASE_URL or a Postgres DATABASE_URL" }, 503);
+        return;
+      }
+      if (msg.startsWith("missing_migration_or_table")) {
+        json(res, { error: "missing_migration_or_table", message: "lead_engine_leads table missing. Apply 0016_lead_engine_postgres_supabase.sql." }, 503);
+        return;
+      }
+      json(res, { error: "import_failed", message: msg }, 500);
     }
   });
 
