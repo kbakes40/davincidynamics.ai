@@ -77,13 +77,19 @@ export interface Lead {
   category: string;
   city: string;
   state: string;
+  /** Street / mailing line — optional until wired to enrichment / CRM. */
+  address?: string | null;
+  zip?: string | null;
   phone: string | null;
+  email?: string | null;
   website: string | null;
   verificationStatus: VerificationStatus;
   leadScore: number;
   pipelineStage: PipelineStage;
   source: string;
   sourceJobId: string | null;
+  /** First seen / ingest time; falls back to lastSeenAt in exports if absent. */
+  createdAt?: string | null;
   lastSeenAt: string;
   assignedOwner: string | null;
   reasonCodes: string[];

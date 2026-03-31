@@ -4,11 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { Lead, PipelineStage, VerificationStatus } from "@shared/lead-engine-types";
 import { PIPELINE_STAGE_LABELS } from "@shared/lead-engine-types";
-import {
-  LeadFilters,
-  applySavedView,
-  type SavedViewId,
-} from "../components/LeadFilters";
+import { LeadFilters, type SavedViewId } from "../components/LeadFilters";
 import { LeadTable, type LeadSortKey } from "../components/LeadTable";
 import {
   EmptyState,
@@ -20,10 +16,13 @@ import {
 import { LeadScoreBadge, VerificationBadge } from "../components/lead-engine-badges";
 import { LeadReasonChips } from "../components/LeadReasonChips";
 import { fetchLeads } from "../api";
+import { buildLeadsCsv, downloadTextFile, localDateYyyyMmDd } from "../exportLeadsCsv";
+import { filterAndSortLeads } from "../leadsQuery";
 import { LeadEngineShell } from "../LeadEngineShell";
 import { cn } from "@/lib/utils";
 import { leMuted, leSurface } from "../surface";
 import { toast } from "sonner";
+import { Download } from "lucide-react";
 
 export default function LeadEngineLeadsPage() {
   const [raw, setRaw] = useState<Lead[]>([]);
@@ -37,6 +36,7 @@ export default function LeadEngineLeadsPage() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [preview, setPreview] = useState<Lead | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -53,44 +53,43 @@ export default function LeadEngineLeadsPage() {
     void load();
   }, [load]);
 
-  const viewPrefs = applySavedView(savedView);
+  const leads = useMemo(
+    () =>
+      filterAndSortLeads(raw, {
+        q,
+        stageFilter,
+        verificationFilter,
+        savedView,
+        sortKey,
+        sortDir,
+      }),
+    [raw, q, stageFilter, verificationFilter, savedView, sortKey, sortDir]
+  );
 
-  const leads = useMemo(() => {
-    let rows = [...raw];
-    const qv = q.trim().toLowerCase();
-    if (qv) {
-      rows = rows.filter(
-        l =>
-          l.businessName.toLowerCase().includes(qv) ||
-          l.city.toLowerCase().includes(qv) ||
-          l.category.toLowerCase().includes(qv)
-      );
+  async function exportCsv() {
+    setExporting(true);
+    try {
+      await new Promise<void>(resolve => queueMicrotask(resolve));
+      const rows = filterAndSortLeads(raw, {
+        q,
+        stageFilter,
+        verificationFilter,
+        savedView,
+        sortKey,
+        sortDir,
+      });
+      const csv = buildLeadsCsv(rows);
+      const name = `lead-engine-export-${localDateYyyyMmDd()}.csv`;
+      downloadTextFile(name, csv);
+      toast.success(`Exported ${rows.length} lead${rows.length === 1 ? "" : "s"}`, {
+        description: name,
+      });
+    } catch (e) {
+      toast.error("Export failed", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setExporting(false);
     }
-    if (stageFilter) {
-      rows = rows.filter(l => l.pipelineStage === stageFilter);
-    } else if (viewPrefs.stage) {
-      rows = rows.filter(l => l.pipelineStage === viewPrefs.stage);
-    }
-    if (verificationFilter) {
-      rows = rows.filter(l => l.verificationStatus === verificationFilter);
-    } else if (viewPrefs.verification) {
-      rows = rows.filter(l => l.verificationStatus === viewPrefs.verification);
-    }
-    if (viewPrefs.minScore != null) {
-      rows = rows.filter(l => l.leadScore >= viewPrefs.minScore!);
-    }
-
-    rows.sort((a, b) => {
-      let cmp = 0;
-      if (sortKey === "score") cmp = a.leadScore - b.leadScore;
-      else if (sortKey === "city") cmp = `${a.city}${a.state}`.localeCompare(`${b.city}${b.state}`);
-      else if (sortKey === "stage") cmp = a.pipelineStage.localeCompare(b.pipelineStage);
-      else if (sortKey === "verification") cmp = a.verificationStatus.localeCompare(b.verificationStatus);
-      else cmp = new Date(a.lastSeenAt).getTime() - new Date(b.lastSeenAt).getTime();
-      return sortDir === "desc" ? -cmp : cmp;
-    });
-    return rows;
-  }, [raw, q, stageFilter, verificationFilter, savedView, sortKey, sortDir, viewPrefs]);
+  }
 
   function toggleSort(k: LeadSortKey) {
     if (sortKey === k) {
@@ -132,6 +131,17 @@ export default function LeadEngineLeadsPage() {
       subtitle="Scoring, verification, and stage discipline"
       headerActions={
         <div className="flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={exporting}
+            className="border-white/12 font-heading gap-2"
+            onClick={() => void exportCsv()}
+          >
+            <Download className="h-4 w-4 shrink-0" aria-hidden />
+            {exporting ? "Exporting…" : "Export CSV"}
+          </Button>
           <RefreshControl loading={loading} lastUpdated={last} onRefresh={() => void load()} />
         </div>
       }
