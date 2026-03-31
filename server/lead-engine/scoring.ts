@@ -66,18 +66,32 @@ export function computeLeadScore(
 
   const hasSite =
     isTruthyInt(enrichment?.hasWebsite) || !!(lead.normalizedWebsite && lead.normalizedWebsite.length > 0);
-  const siteStatus = enrichment?.websiteStatus ?? "unknown";
+  const siteStatus = (enrichment?.websiteStatus ?? "unknown").toLowerCase();
 
-  if (!hasSite) {
-    events.push({ ruleKey: "no_website", change: 35, reason: "No website on record" });
-    score += 35;
-  } else if (siteStatus === "dead" || siteStatus === "broken") {
-    events.push({ ruleKey: "broken_website", change: 30, reason: "Website dead or broken" });
+  const brokenStatuses = new Set(["broken", "timeout", "dead"]);
+  const healthyStatuses = new Set(["live", "redirected"]);
+
+  if (brokenStatuses.has(siteStatus)) {
+    events.push({ ruleKey: "broken_website", change: 30, reason: "Website unreachable or error state" });
     score += 30;
+  } else {
+    const noWeb =
+      siteStatus === "missing" ||
+      siteStatus === "invalid_url" ||
+      siteStatus === "none" ||
+      (!hasSite && siteStatus !== "live" && siteStatus !== "redirected");
+    const skipNoWebPendingEnrich = siteStatus === "unknown" && hasSite;
+    if (noWeb && !skipNoWebPendingEnrich) {
+      events.push({ ruleKey: "no_website", change: 35, reason: "No usable website URL" });
+      score += 35;
+    }
   }
 
+  /** Quality heuristics only when we successfully fetched the site (live or redirect). */
+  const siteOkForQuality = hasSite && healthyStatuses.has(siteStatus);
+
   if (
-    hasSite &&
+    siteOkForQuality &&
     enrichment?.mobileFriendly != null &&
     !isTruthyInt(enrichment.mobileFriendly)
   ) {
@@ -87,7 +101,7 @@ export function computeLeadScore(
 
   const hasBooking = isTruthyInt(enrichment?.hasBookingFlow);
   const hasForm = isTruthyInt(enrichment?.hasContactForm);
-  if (hasSite && !hasBooking && !hasForm) {
+  if (siteOkForQuality && !hasBooking && !hasForm) {
     events.push({
       ruleKey: "missing_cta",
       change: 15,
@@ -98,7 +112,7 @@ export function computeLeadScore(
 
   const hasChat = isTruthyInt(enrichment?.hasChatWidget);
   const hasPixel = isTruthyInt(enrichment?.hasMetaPixel);
-  if (hasSite && !hasChat && !hasPixel) {
+  if (siteOkForQuality && !hasChat && !hasPixel) {
     events.push({ ruleKey: "no_automation_signals", change: 10, reason: "No chat or Meta Pixel detected" });
     score += 10;
   }

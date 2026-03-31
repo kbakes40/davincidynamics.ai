@@ -71,6 +71,8 @@ export interface PipelineTransition {
   note: string | null;
 }
 
+export type LeadEnginePriorityLevel = "low" | "medium" | "high" | "urgent";
+
 export interface Lead {
   id: string;
   businessName: string;
@@ -92,6 +94,11 @@ export interface Lead {
   createdAt?: string | null;
   lastSeenAt: string;
   assignedOwner: string | null;
+  /** From lead_engine_leads.priority — used for filters and reporting. */
+  priority?: LeadEnginePriorityLevel;
+  /** From lead_engine_enrichment.website_status after checks. */
+  websiteStatus?: string;
+  googleMapsUrl?: string | null;
   reasonCodes: string[];
   enrichment: LeadEnrichment | null;
   notes: string[];
@@ -187,4 +194,6 @@ export interface AnalyticsOverviewResponse {
   pipelineConversion: { stage: PipelineStage; label: string; count: number; pctOfTotal: number }[];
   topMarkets: { label: string; avgScore: number; leads: number }[];
   sourceQuality: { source: string; avgScore: number; count: number }[];
+  /** From `lead_engine_enrichment.website_status` (+ unknown when no row). */
+  websiteStatusBreakdown: { status: string; count: number }[];
 }

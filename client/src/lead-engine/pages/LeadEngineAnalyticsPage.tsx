@@ -100,7 +100,7 @@ export default function LeadEngineAnalyticsPage() {
         <MetricCard label="Cities" value={data.volumeByCity.length} hint="Distinct metros" />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
         <SectionCard title="Lead volume by city">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -138,6 +138,39 @@ export default function LeadEngineAnalyticsPage() {
                   }}
                 />
                 <Bar dataKey="count" fill="oklch(0.5 0.1 210 / 0.65)" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Website status (enrichment)" description="From automated site checks.">
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={[...(data.websiteStatusBreakdown ?? [])].slice(0, 12)}
+                margin={{ top: 8, right: 8, left: 0, bottom: 32 }}
+              >
+                <CartesianGrid stroke="oklch(0.25 0 0 / 20%)" vertical={false} />
+                <XAxis
+                  dataKey="status"
+                  tick={{ ...tick, fontSize: 10 }}
+                  tickLine={false}
+                  axisLine={false}
+                  interval={0}
+                  angle={-18}
+                  textAnchor="end"
+                  height={52}
+                />
+                <YAxis tick={tick} tickLine={false} axisLine={false} width={28} />
+                <Tooltip
+                  contentStyle={{
+                    background: "oklch(0.12 0 0)",
+                    border: "1px solid oklch(0.25 0 0 / 40%)",
+                    borderRadius: 12,
+                    fontSize: 12,
+                  }}
+                />
+                <Bar dataKey="count" fill="oklch(0.52 0.11 200 / 0.72)" radius={[4, 4, 0, 0]} name="Leads" />
               </BarChart>
             </ResponsiveContainer>
           </div>

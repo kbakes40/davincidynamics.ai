@@ -11,6 +11,13 @@ export type LeadsQueryParams = {
   savedView: SavedViewId;
   sortKey: LeadSortKey;
   sortDir: "asc" | "desc";
+  /** Optional server/export filters (Lead Engine v2). */
+  sourceFilter?: string;
+  websiteStatusFilter?: string;
+  priorityFilter?: string;
+  categoryFilter?: string;
+  cityFilter?: string;
+  stateFilter?: string;
 };
 
 export function applySavedView(
@@ -49,6 +56,31 @@ export function filterAndSortLeads(raw: Lead[], p: LeadsQueryParams): Lead[] {
   }
   if (viewPrefs.minScore != null) {
     rows = rows.filter(l => l.leadScore >= viewPrefs.minScore!);
+  }
+
+  if (p.sourceFilter?.trim()) {
+    const s = p.sourceFilter.trim().toLowerCase();
+    rows = rows.filter(l => l.source.toLowerCase() === s);
+  }
+  if (p.websiteStatusFilter?.trim()) {
+    const w = p.websiteStatusFilter.trim().toLowerCase();
+    rows = rows.filter(l => (l.websiteStatus ?? "").toLowerCase() === w);
+  }
+  if (p.priorityFilter?.trim()) {
+    const pr = p.priorityFilter.trim().toLowerCase();
+    rows = rows.filter(l => (l.priority ?? "").toLowerCase() === pr);
+  }
+  if (p.categoryFilter?.trim()) {
+    const c = p.categoryFilter.trim().toLowerCase();
+    rows = rows.filter(l => l.category.toLowerCase().includes(c));
+  }
+  if (p.cityFilter?.trim()) {
+    const c = p.cityFilter.trim().toLowerCase();
+    rows = rows.filter(l => l.city.toLowerCase().includes(c));
+  }
+  if (p.stateFilter?.trim()) {
+    const s = p.stateFilter.trim().toLowerCase();
+    rows = rows.filter(l => l.state.toLowerCase() === s);
   }
 
   rows.sort((a, b) => {

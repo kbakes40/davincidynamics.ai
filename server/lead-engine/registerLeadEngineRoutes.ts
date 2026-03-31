@@ -3,14 +3,17 @@ import { nanoid } from "nanoid";
 import type { PipelineStage } from "../../shared/lead-engine-types";
 import { leadEngineImportBatches, leadEngineLeads } from "../../drizzle/leadEngineSchema";
 import { registerLeadsExportRoute } from "./leadsExportRoute";
+import type { GooglePlacesSearchInput } from "./googlePlaces";
 import {
   assignAgentQueueStub,
   cancelJobApi,
-  enrichLeadStub,
+  checkWebsiteBatchLeadIds,
+  checkWebsiteForLeadId,
   getAnalyticsOverviewApi,
   getDashboardOverviewApi,
   getJobApi,
   getLeadDetailApi,
+  importGooglePlacesToLeadEngine,
   importLeadsFromCsv,
   listImportBatchesApi,
   listJobsApi,
@@ -21,7 +24,7 @@ import {
   runDedupeReportApi,
   scoreAllLeads,
   scoreLeadById,
-  validateLeadStub,
+  validateLeadEmailForLead,
 } from "./leadEngineRepo";
 
 function json(res: Response, body: unknown, status = 200) {
@@ -135,6 +138,51 @@ export function registerLeadEngineRoutes(app: Express): void {
     }
   });
 
+  /** Body: GooglePlacesSearchInput-style fields; uses `GOOGLE_PLACES_API_KEY` server-side only. */
+  app.post("/api/leads/import/google-places", async (req: Request, res: Response) => {
+    const db = await requireLeadEngineDb();
+    if (!db) {
+      json(res, { error: "database_unavailable" }, 503);
+      return;
+    }
+    const b = req.body ?? {};
+    const maxResults =
+      typeof b.maxResults === "number" && Number.isFinite(b.maxResults)
+        ? Math.min(200, Math.max(1, Math.floor(b.maxResults)))
+        : 20;
+    const radiusMiles =
+      typeof b.radiusMiles === "number" && Number.isFinite(b.radiusMiles)
+        ? Math.max(0.5, b.radiusMiles)
+        : 10;
+    const input: GooglePlacesSearchInput = {
+      searchTerm: typeof b.searchTerm === "string" ? b.searchTerm : undefined,
+      category: typeof b.category === "string" ? b.category : undefined,
+      zip: typeof b.zip === "string" ? b.zip : undefined,
+      city: typeof b.city === "string" ? b.city : undefined,
+      state: typeof b.state === "string" ? b.state : undefined,
+      latitude: typeof b.latitude === "number" && Number.isFinite(b.latitude) ? b.latitude : undefined,
+      longitude: typeof b.longitude === "number" && Number.isFinite(b.longitude) ? b.longitude : undefined,
+      radiusMiles,
+      maxResults,
+    };
+    try {
+      const result = await importGooglePlacesToLeadEngine(input);
+      json(res, { ok: true, ...result });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[leads/import/google-places]", e);
+      if (msg === "database_unavailable") {
+        json(res, { error: "database_unavailable" }, 503);
+        return;
+      }
+      if (msg.includes("GOOGLE_PLACES_API_KEY")) {
+        json(res, { error: "places_not_configured", message: msg }, 503);
+        return;
+      }
+      json(res, { error: "import_failed", message: msg }, 500);
+    }
+  });
+
   app.get("/api/leads", async (req: Request, res: Response) => {
     const q = typeof req.query.q === "string" ? req.query.q : undefined;
     const stage = parseStage(typeof req.query.stage === "string" ? req.query.stage : undefined);
@@ -180,12 +228,34 @@ export function registerLeadEngineRoutes(app: Express): void {
   });
 
   app.post("/api/leads/:id/review-website", async (req: Request, res: Response) => {
-    const ok = await enrichLeadStub(req.params.id);
-    if (!ok) {
+    const r = await checkWebsiteForLeadId(req.params.id);
+    if (!r.ok) {
       json(res, { error: "not_found" }, 404);
       return;
     }
-    json(res, { ok: true, message: "Website review stub stored on enrichment row.", leadId: req.params.id });
+    json(res, { ok: true, leadId: req.params.id, status: r.status });
+  });
+
+  app.post("/api/leads/check-website/:id", async (req: Request, res: Response) => {
+    const r = await checkWebsiteForLeadId(req.params.id);
+    if (!r.ok) {
+      json(res, { error: "not_found" }, 404);
+      return;
+    }
+    json(res, { ok: true, leadId: req.params.id, status: r.status });
+  });
+
+  app.post("/api/leads/check-website/batch", async (req: Request, res: Response) => {
+    const raw = (req.body ?? {}) as { leadIds?: unknown };
+    const leadIds = Array.isArray(raw.leadIds)
+      ? raw.leadIds.filter((x): x is string => typeof x === "string" && x.length > 0)
+      : [];
+    if (!leadIds.length) {
+      json(res, { error: "missing_leadIds", message: "Send JSON { leadIds: string[] }." }, 400);
+      return;
+    }
+    const batch = await checkWebsiteBatchLeadIds(leadIds, 4);
+    json(res, { ok: true, processed: batch.ok, failed: batch.failed, total: leadIds.length });
   });
 
   app.post("/api/leads/:id/merge", async (req: Request, res: Response) => {
@@ -198,12 +268,12 @@ export function registerLeadEngineRoutes(app: Express): void {
   });
 
   app.post("/api/leads/:id/enrich", async (req: Request, res: Response) => {
-    const ok = await enrichLeadStub(req.params.id);
-    if (!ok) {
+    const r = await checkWebsiteForLeadId(req.params.id);
+    if (!r.ok) {
       json(res, { error: "not_found" }, 404);
       return;
     }
-    json(res, { ok: true, leadId: req.params.id });
+    json(res, { ok: true, leadId: req.params.id, status: r.status });
   });
 
   app.post("/api/leads/enrich/batch", async (_req: Request, res: Response) => {
@@ -213,11 +283,9 @@ export function registerLeadEngineRoutes(app: Express): void {
       return;
     }
     const rows = await db.select({ id: leadEngineLeads.id }).from(leadEngineLeads);
-    let ok = 0;
-    for (const r of rows) {
-      if (await enrichLeadStub(r.id)) ok++;
-    }
-    json(res, { ok: true, enriched: ok });
+    const ids = rows.map(r => r.id);
+    const batch = await checkWebsiteBatchLeadIds(ids, 4);
+    json(res, { ok: true, processed: batch.ok, failed: batch.failed, total: ids.length });
   });
 
   app.post("/api/leads/score/:id", async (req: Request, res: Response) => {
@@ -238,12 +306,12 @@ export function registerLeadEngineRoutes(app: Express): void {
   });
 
   app.post("/api/leads/:id/validate", async (req: Request, res: Response) => {
-    const ok = await validateLeadStub(req.params.id);
-    if (!ok) {
+    const r = await validateLeadEmailForLead(req.params.id);
+    if (!r.ok) {
       json(res, { error: "not_found" }, 404);
       return;
     }
-    json(res, { ok: true, leadId: req.params.id });
+    json(res, r);
   });
 
   app.post("/api/leads/queue/assign", async (req: Request, res: Response) => {

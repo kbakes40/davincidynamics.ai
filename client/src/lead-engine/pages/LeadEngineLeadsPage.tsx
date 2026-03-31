@@ -32,6 +32,12 @@ export default function LeadEngineLeadsPage() {
   const [savedView, setSavedView] = useState<SavedViewId>("all");
   const [stageFilter, setStageFilter] = useState<PipelineStage | "">("");
   const [verificationFilter, setVerificationFilter] = useState<VerificationStatus | "">("");
+  const [sourceFilter, setSourceFilter] = useState("");
+  const [websiteStatusFilter, setWebsiteStatusFilter] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState("");
   const [sortKey, setSortKey] = useState<LeadSortKey>("score");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -59,11 +65,31 @@ export default function LeadEngineLeadsPage() {
         q,
         stageFilter,
         verificationFilter,
+        sourceFilter,
+        websiteStatusFilter,
+        priorityFilter,
+        categoryFilter,
+        cityFilter,
+        stateFilter,
         savedView,
         sortKey,
         sortDir,
       }),
-    [raw, q, stageFilter, verificationFilter, savedView, sortKey, sortDir]
+    [
+      raw,
+      q,
+      stageFilter,
+      verificationFilter,
+      sourceFilter,
+      websiteStatusFilter,
+      priorityFilter,
+      categoryFilter,
+      cityFilter,
+      stateFilter,
+      savedView,
+      sortKey,
+      sortDir,
+    ]
   );
 
   async function exportCsv() {
@@ -74,6 +100,12 @@ export default function LeadEngineLeadsPage() {
         q,
         stageFilter,
         verificationFilter,
+        sourceFilter,
+        websiteStatusFilter,
+        priorityFilter,
+        categoryFilter,
+        cityFilter,
+        stateFilter,
         savedView,
         sortKey,
         sortDir,
@@ -184,6 +216,18 @@ export default function LeadEngineLeadsPage() {
             onStageFilter={setStageFilter}
             verificationFilter={verificationFilter}
             onVerificationFilter={setVerificationFilter}
+            sourceFilter={sourceFilter}
+            onSourceFilter={setSourceFilter}
+            websiteStatusFilter={websiteStatusFilter}
+            onWebsiteStatusFilter={setWebsiteStatusFilter}
+            priorityFilter={priorityFilter}
+            onPriorityFilter={setPriorityFilter}
+            categoryFilter={categoryFilter}
+            onCategoryFilter={setCategoryFilter}
+            cityFilter={cityFilter}
+            onCityFilter={setCityFilter}
+            stateFilter={stateFilter}
+            onStateFilter={setStateFilter}
           />
         </div>
       </SectionCard>

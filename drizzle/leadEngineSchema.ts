@@ -90,6 +90,7 @@ export const leadEngineLeads = mysqlTable(
       .default("unverified"),
     assignedOwner: varchar("assigned_owner", { length: 64 }),
     sourceJobId: varchar("source_job_id", { length: 64 }),
+    googleMapsUrl: varchar("google_maps_url", { length: 1024 }),
     normalizedBusinessName: varchar("normalized_business_name", { length: 512 }).notNull().default(""),
     normalizedPhone: varchar("normalized_phone", { length: 64 }),
     normalizedWebsite: varchar("normalized_website", { length: 512 }),
@@ -103,6 +104,9 @@ export const leadEngineLeads = mysqlTable(
     index("idx_lead_engine_norm_name").on(t.normalizedBusinessName),
     index("idx_lead_engine_pipeline").on(t.pipelineStage),
     index("idx_lead_engine_score").on(t.score),
+    index("idx_lead_engine_source_record_id").on(t.sourceRecordId),
+    index("idx_lead_engine_priority").on(t.priority),
+    index("idx_lead_engine_source").on(t.source),
   ]
 );
 
@@ -171,11 +175,12 @@ export const leadEngineEnrichment = mysqlTable("lead_engine_enrichment", {
   crmDetected: varchar("crm_detected", { length: 128 }),
   emailProvider: varchar("email_provider", { length: 128 }),
   techStackJson: text("tech_stack_json"),
+  finalUrl: text("final_url"),
   summary: text("summary"),
   socialPresence: text("social_presence"),
   estimatedMonthlyOrders: varchar("estimated_monthly_orders", { length: 64 }),
   enrichedAt: timestamp("enriched_at").defaultNow().notNull(),
-});
+}, t => [index("idx_lead_engine_enrichment_status").on(t.websiteStatus)]);
 
 export const leadEngineScoringEvents = mysqlTable(
   "lead_engine_scoring_events",

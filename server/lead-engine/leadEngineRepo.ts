@@ -40,8 +40,191 @@ import { buildLeadDetail, mapJoinToLead, type LeadJoinData } from "./mapDbToApiL
 import { normalizeLeadFields } from "./normalizeLeadFields";
 import { batchToSearchJob } from "./leadEngineDashboardHelpers";
 import { computeLeadScore } from "./scoring";
+import { validateEmailWithProvider, type EmailValidationOutcome } from "./emailValidation";
+import { searchGooglePlaces, type GooglePlacesSearchInput } from "./googlePlaces";
+import { checkWebsite } from "./websiteEnrichment";
 
 type Db = NonNullable<Awaited<ReturnType<typeof getDb>>>;
+
+/** HTTP + export filters (subset applied in SQL; q still client text search). */
+export type LeadListFilterParams = {
+  q?: string;
+  stage?: PipelineStage;
+  verification?: string;
+  source?: string;
+  priority?: string;
+  websiteStatus?: string;
+  category?: string;
+  city?: string;
+  state?: string;
+};
+
+async function queryLeadRowsFromDb(db: Db, filters: LeadListFilterParams): Promise<LeadEngineLeadRow[]> {
+  const conditions = [];
+  if (filters.stage) conditions.push(eq(leadEngineLeads.pipelineStage, filters.stage));
+  if (filters.verification) {
+    conditions.push(
+      eq(
+        leadEngineLeads.verificationStatus,
+        filters.verification as LeadEngineLeadRow["verificationStatus"]
+      )
+    );
+  }
+  if (filters.source?.trim()) conditions.push(eq(leadEngineLeads.source, filters.source.trim()));
+  if (filters.priority?.trim()) {
+    conditions.push(
+      eq(leadEngineLeads.priority, filters.priority.trim() as LeadEngineLeadRow["priority"])
+    );
+  }
+  if (filters.websiteStatus?.trim()) {
+    conditions.push(eq(leadEngineEnrichment.websiteStatus, filters.websiteStatus.trim()));
+  }
+  if (filters.category?.trim()) {
+    const p = `%${filters.category.trim().toLowerCase()}%`;
+    conditions.push(sql`LOWER(${leadEngineLeads.category}) LIKE ${p}`);
+  }
+  if (filters.city?.trim()) conditions.push(eq(leadEngineAddresses.city, filters.city.trim()));
+  if (filters.state?.trim()) conditions.push(eq(leadEngineAddresses.state, filters.state.trim()));
+
+  const rows = await db
+    .select({ lead: leadEngineLeads })
+    .from(leadEngineLeads)
+    .leftJoin(leadEngineEnrichment, eq(leadEngineEnrichment.leadId, leadEngineLeads.id))
+    .leftJoin(leadEngineAddresses, eq(leadEngineAddresses.leadId, leadEngineLeads.id))
+    .where(conditions.length ? and(...conditions) : undefined)
+    .orderBy(desc(leadEngineLeads.updatedAt));
+
+  const seen = new Set<string>();
+  const out: LeadEngineLeadRow[] = [];
+  for (const r of rows) {
+    if (seen.has(r.lead.id)) continue;
+    seen.add(r.lead.id);
+    out.push(r.lead);
+  }
+  return out;
+}
+
+async function ensureVinciQueueForScoredLead(db: Db, leadId: string): Promise<void> {
+  const rows = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, leadId)).limit(1);
+  const lead = rows[0];
+  if (!lead) return;
+  if (lead.leadStatus === "archived") return;
+  if (lead.priority !== "urgent" && lead.priority !== "high") return;
+  const existing = await db
+    .select()
+    .from(leadEngineAgentQueues)
+    .where(
+      and(eq(leadEngineAgentQueues.leadId, leadId), eq(leadEngineAgentQueues.queueStatus, "pending"))
+    )
+    .limit(1);
+  if (existing[0]) return;
+  await db.insert(leadEngineAgentQueues).values({
+    id: nanoid(),
+    leadId,
+    assignedAgent: "vinci",
+    queueStatus: "pending",
+    reason: `Auto-queue (${lead.priority} priority, score ${lead.score})`,
+    scheduledFor: new Date(),
+  });
+  await db.insert(leadEngineActivityLog).values({
+    id: nanoid(),
+    leadId,
+    type: "queue",
+    message: `Added to Vinci queue (${lead.priority} priority)`,
+    at: new Date(),
+    actor: "system",
+  });
+}
+
+async function checkWebsiteAndPersist(db: Db, leadId: string): Promise<{ ok: boolean; status?: string }> {
+  const lead = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, leadId)).limit(1);
+  if (!lead[0]) return { ok: false };
+
+  const websiteRow = await db
+    .select()
+    .from(leadEngineContactPoints)
+    .where(and(eq(leadEngineContactPoints.leadId, leadId), eq(leadEngineContactPoints.type, "website")))
+    .limit(1);
+  const url = websiteRow[0]?.value ?? null;
+
+  const result = await checkWebsite(url);
+  const now = new Date();
+  const techJson = JSON.stringify(result.techStack);
+
+  const hasWebsiteFlag =
+    result.status !== "missing" && result.status !== "invalid_url" ? 1 : 0;
+
+  const enrPayload = {
+    websiteStatus: result.status,
+    hasWebsite: hasWebsiteFlag,
+    sslEnabled: result.sslEnabled == null ? null : result.sslEnabled ? 1 : 0,
+    mobileFriendly: result.mobileFriendly == null ? null : result.mobileFriendly ? 1 : 0,
+    pageSpeedScore: null as number | null,
+    hasContactForm: result.hasContactForm == null ? null : result.hasContactForm ? 1 : 0,
+    hasBookingFlow: result.hasBookingFlow == null ? null : result.hasBookingFlow ? 1 : 0,
+    hasChatWidget: result.hasChatWidget == null ? null : result.hasChatWidget ? 1 : 0,
+    hasMetaPixel: result.hasMetaPixel == null ? null : result.hasMetaPixel ? 1 : 0,
+    hasGoogleAnalytics: result.hasGoogleAnalytics == null ? null : result.hasGoogleAnalytics ? 1 : 0,
+    ecommercePlatform: result.ecommercePlatform,
+    crmDetected: result.crmDetected,
+    emailProvider: null as string | null,
+    techStackJson: techJson,
+    finalUrl: result.finalUrl,
+    summary: result.summary,
+    enrichedAt: now,
+  };
+
+  const enrRow = await db
+    .select()
+    .from(leadEngineEnrichment)
+    .where(eq(leadEngineEnrichment.leadId, leadId))
+    .limit(1);
+
+  if (enrRow[0]) {
+    await db
+      .update(leadEngineEnrichment)
+      .set(enrPayload)
+      .where(eq(leadEngineEnrichment.id, enrRow[0].id));
+  } else {
+    await db.insert(leadEngineEnrichment).values({
+      id: nanoid(),
+      leadId,
+      ...enrPayload,
+    });
+  }
+
+  await db
+    .update(leadEngineLeads)
+    .set({ leadStatus: "enriched", updatedAt: now })
+    .where(eq(leadEngineLeads.id, leadId));
+
+  const leadAfter = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, leadId)).limit(1);
+  const er = await db.select().from(leadEngineEnrichment).where(eq(leadEngineEnrichment.leadId, leadId)).limit(1);
+  if (leadAfter[0]) {
+    await persistScore(db, leadId, leadAfter[0], er[0] ?? null);
+    await ensureVinciQueueForScoredLead(db, leadId);
+  }
+
+  return { ok: true, status: result.status };
+}
+
+export async function checkWebsiteForLeadId(leadId: string): Promise<{ ok: boolean; status?: string }> {
+  return withLeadEngineDb({ ok: false }, async db => checkWebsiteAndPersist(db, leadId));
+}
+
+export async function checkWebsiteBatchLeadIds(leadIds: string[], concurrency = 4): Promise<{ ok: number; failed: number }> {
+  let ok = 0;
+  let failed = 0;
+  for (let i = 0; i < leadIds.length; i += concurrency) {
+    const chunk = leadIds.slice(i, i + concurrency);
+    const results = await Promise.all(chunk.map(id => checkWebsiteForLeadId(id)));
+    for (const r of results) {
+      if (r.ok) ok++;
+      else failed++;
+    }
+  }
+  return { ok, failed };
+}
 
 export async function requireLeadEngineDb(): Promise<Db | null> {
   return getDb();
@@ -361,12 +544,24 @@ export async function getOutreachQueueApi(): Promise<OutreachQueueResponse> {
 export async function findDuplicateLeadId(
   db: Db,
   n: {
+    sourceRecordId?: string | null;
     normalizedPhone: string | null;
     normalizedWebsite: string | null;
     normalizedBusinessName: string;
     zip: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
   }
 ): Promise<string | null> {
+  const sid = n.sourceRecordId?.trim();
+  if (sid) {
+    const r = await db
+      .select({ id: leadEngineLeads.id })
+      .from(leadEngineLeads)
+      .where(eq(leadEngineLeads.sourceRecordId, sid))
+      .limit(1);
+    if (r[0]) return r[0].id;
+  }
   if (n.normalizedPhone) {
     const r = await db
       .select({ id: leadEngineLeads.id })
@@ -390,6 +585,32 @@ export async function findDuplicateLeadId(
       .innerJoin(leadEngineAddresses, eq(leadEngineAddresses.leadId, leadEngineLeads.id))
       .where(
         and(eq(leadEngineLeads.normalizedBusinessName, n.normalizedBusinessName), eq(leadEngineAddresses.zip, n.zip))
+      )
+      .limit(1);
+    if (r[0]) return r[0].id;
+  }
+  if (
+    n.normalizedBusinessName &&
+    n.latitude != null &&
+    n.longitude != null &&
+    Number.isFinite(n.latitude) &&
+    Number.isFinite(n.longitude)
+  ) {
+    /** ~111m — same normalized name + very close coordinates */
+    const lat = n.latitude;
+    const lng = n.longitude;
+    const r = await db
+      .select({ id: leadEngineLeads.id })
+      .from(leadEngineLeads)
+      .innerJoin(leadEngineAddresses, eq(leadEngineAddresses.leadId, leadEngineLeads.id))
+      .where(
+        and(
+          eq(leadEngineLeads.normalizedBusinessName, n.normalizedBusinessName),
+          sql`${leadEngineAddresses.latitude} is not null`,
+          sql`${leadEngineAddresses.longitude} is not null`,
+          sql`ABS(CAST(${leadEngineAddresses.latitude} AS DECIMAL(18,10)) - ${lat}) < 0.001`,
+          sql`ABS(CAST(${leadEngineAddresses.longitude} AS DECIMAL(18,10)) - ${lng}) < 0.001`
+        )
       )
       .limit(1);
     if (r[0]) return r[0].id;
@@ -711,7 +932,8 @@ async function upsertContact(
   leadId: string,
   type: "phone" | "email" | "website",
   value: string | null,
-  primary: boolean
+  primary: boolean,
+  contactSource = "csv"
 ) {
   if (!value) return;
   const existing = await db
@@ -731,69 +953,395 @@ async function upsertContact(
       type,
       value,
       isPrimary: primary ? 1 : 0,
-      source: "csv",
+      source: contactSource,
     });
   }
 }
 
-export async function enrichLeadStub(leadId: string): Promise<boolean> {
-  return withLeadEngineDb(false, async db => {
-    const lead = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, leadId)).limit(1);
-    if (!lead[0]) return false;
-    const enr = await db
-      .select()
-      .from(leadEngineEnrichment)
-      .where(eq(leadEngineEnrichment.leadId, leadId))
-      .limit(1);
-    const now = new Date();
-    if (enr[0]) {
-      await db
-        .update(leadEngineEnrichment)
-        .set({
-          summary: "Enrichment pending — wire Clay / BuiltWith / live checks in phase 2.",
-          enrichedAt: now,
-        })
-        .where(eq(leadEngineEnrichment.id, enr[0].id));
-    } else {
-      await db.insert(leadEngineEnrichment).values({
-        id: nanoid(),
-        leadId,
-        websiteStatus: "unknown",
-        hasWebsite: 0,
-        summary: "Enrichment pending — wire external providers in phase 2.",
-        enrichedAt: now,
-      });
-    }
-    await db
-      .update(leadEngineLeads)
-      .set({ leadStatus: "enriched", updatedAt: now })
-      .where(eq(leadEngineLeads.id, leadId));
-
-    const row = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, leadId)).limit(1);
-    const er = await db.select().from(leadEngineEnrichment).where(eq(leadEngineEnrichment.leadId, leadId)).limit(1);
-    if (row[0]) await persistScore(db, leadId, row[0], er[0] ?? null);
-    return true;
-  });
+function latLngStrings(lat: number | null, lng: number | null): { lat: string | null; lng: string | null } {
+  if (lat == null || lng == null || !Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return { lat: null, lng: null };
+  }
+  return { lat: String(lat), lng: String(lng) };
 }
 
-export async function validateLeadStub(leadId: string): Promise<boolean> {
-  return withLeadEngineDb(false, async db => {
+export async function importGooglePlacesToLeadEngine(input: GooglePlacesSearchInput): Promise<{
+  total_found: number;
+  inserted: number;
+  updated: number;
+  duplicates: number;
+  failed: number;
+  batch_id: string;
+}> {
+  const db = await requireLeadEngineDb();
+  if (!db) {
+    throw new Error("database_unavailable");
+  }
+
+  const placeRecords = await searchGooglePlaces(input);
+
+  const total_found = placeRecords.length;
+  const batchId = nanoid();
+  const sourceLabel = "google_places";
+
+  await db.insert(leadEngineImportBatches).values({
+    id: batchId,
+    sourceName: sourceLabel,
+    fileName: [input.searchTerm, input.city, input.state].filter(Boolean).join(" · ") || null,
+    status: "processing",
+    totalRows: total_found,
+    startedAt: new Date(),
+  });
+
+  let inserted = 0;
+  let updated = 0;
+  let duplicates = 0;
+  let failed = 0;
+  const errors: string[] = [];
+  const linkedIds: string[] = [];
+
+  const categoryOverride = input.category?.trim();
+
+  try {
+    for (let i = 0; i < placeRecords.length; i++) {
+      const place = placeRecords[i]!;
+      try {
+        if (!place.businessName?.trim() || place.businessName === "Unknown") {
+          failed++;
+          errors.push(`Place ${i + 1}: missing business name`);
+          continue;
+        }
+
+        const norm = normalizeLeadFields({
+          businessName: place.businessName,
+          phone: place.phone || null,
+          email: null,
+          website: place.website || null,
+        });
+
+        const category =
+          categoryOverride || place.category || "establishment";
+
+        const dupId = await findDuplicateLeadId(db, {
+          sourceRecordId: place.placeId,
+          normalizedPhone: norm.normalizedPhone,
+          normalizedWebsite: norm.normalizedWebsite,
+          normalizedBusinessName: norm.normalizedBusinessName,
+          zip: place.zip || null,
+          latitude: place.latitude,
+          longitude: place.longitude,
+        });
+
+        const now = new Date();
+        const rawJson = JSON.stringify(place.rawPlace);
+
+        if (dupId) {
+          duplicates++;
+          await db
+            .update(leadEngineLeads)
+            .set({
+              businessName: place.businessName,
+              category,
+              source: sourceLabel,
+              sourceJobId: batchId,
+              sourceRecordId: place.placeId,
+              googleMapsUrl: place.googleMapsUrl ?? null,
+              normalizedBusinessName: norm.normalizedBusinessName,
+              normalizedPhone: norm.normalizedPhone,
+              normalizedWebsite: norm.normalizedWebsite,
+              updatedAt: now,
+            })
+            .where(eq(leadEngineLeads.id, dupId));
+
+          const { lat: latStr, lng: lngStr } = latLngStrings(place.latitude, place.longitude);
+          const a = await db
+            .select()
+            .from(leadEngineAddresses)
+            .where(eq(leadEngineAddresses.leadId, dupId))
+            .limit(1);
+          if (a[0]) {
+            await db
+              .update(leadEngineAddresses)
+              .set({
+                address1: place.addressLine || place.formattedAddress || a[0].address1,
+                city: place.city || a[0].city,
+                state: place.state || a[0].state,
+                zip: place.zip || a[0].zip,
+                country: place.country || a[0].country,
+                ...(latStr && lngStr ? { latitude: latStr, longitude: lngStr } : {}),
+              })
+              .where(eq(leadEngineAddresses.id, a[0].id));
+          } else {
+            await db.insert(leadEngineAddresses).values({
+              id: nanoid(),
+              leadId: dupId,
+              address1: place.addressLine || place.formattedAddress || null,
+              city: place.city || "",
+              state: place.state || "",
+              zip: place.zip || null,
+              country: place.country || "US",
+              latitude: latStr,
+              longitude: lngStr,
+            });
+          }
+
+          await upsertContact(db, dupId, "phone", norm.phoneDisplay, true, sourceLabel);
+          await upsertContact(db, dupId, "website", norm.websiteDisplay, true, sourceLabel);
+
+          await db.insert(leadEngineSources).values({
+            id: nanoid(),
+            leadId: dupId,
+            sourceName: sourceLabel,
+            sourceType: "google_places",
+            importBatchId: batchId,
+            rawPayloadJson: rawJson,
+          });
+
+          const leadAfter = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, dupId)).limit(1);
+          const enr = await db
+            .select()
+            .from(leadEngineEnrichment)
+            .where(eq(leadEngineEnrichment.leadId, dupId))
+            .limit(1);
+          if (leadAfter[0]) await persistScore(db, dupId, leadAfter[0], enr[0] ?? null);
+
+          updated++;
+          if (!linkedIds.includes(dupId)) linkedIds.push(dupId);
+          continue;
+        }
+
+        const leadId = nanoid();
+        const { lat: latStr, lng: lngStr } = latLngStrings(place.latitude, place.longitude);
+
+        await db.insert(leadEngineLeads).values({
+          id: leadId,
+          businessName: place.businessName,
+          category,
+          source: sourceLabel,
+          sourceJobId: batchId,
+          sourceRecordId: place.placeId,
+          googleMapsUrl: place.googleMapsUrl ?? null,
+          normalizedBusinessName: norm.normalizedBusinessName,
+          normalizedPhone: norm.normalizedPhone,
+          normalizedWebsite: norm.normalizedWebsite,
+          leadStatus: "new",
+          outreachStatus: "not_contacted",
+          pipelineStage: "new_lead",
+          verificationStatus: "unverified",
+          notesJson: JSON.stringify([]),
+          reasonCodesJson: JSON.stringify([]),
+          tagsJson: JSON.stringify([]),
+          createdAt: now,
+          updatedAt: now,
+        });
+
+        await db.insert(leadEngineAddresses).values({
+          id: nanoid(),
+          leadId,
+          address1: place.addressLine || place.formattedAddress || null,
+          city: place.city || "",
+          state: place.state || "",
+          zip: place.zip || null,
+          country: place.country || "US",
+          latitude: latStr,
+          longitude: lngStr,
+        });
+
+        if (norm.phoneDisplay) {
+          await db.insert(leadEngineContactPoints).values({
+            id: nanoid(),
+            leadId,
+            type: "phone",
+            value: norm.phoneDisplay,
+            isPrimary: 1,
+            source: sourceLabel,
+          });
+        }
+        if (norm.websiteDisplay) {
+          await db.insert(leadEngineContactPoints).values({
+            id: nanoid(),
+            leadId,
+            type: "website",
+            value: norm.websiteDisplay,
+            isPrimary: 1,
+            source: sourceLabel,
+          });
+        }
+
+        const hasSite = !!norm.normalizedWebsite;
+        await db.insert(leadEngineEnrichment).values({
+          id: nanoid(),
+          leadId,
+          websiteStatus: hasSite ? "unknown" : "none",
+          hasWebsite: hasSite ? 1 : 0,
+          enrichedAt: now,
+        });
+
+        await db.insert(leadEngineSources).values({
+          id: nanoid(),
+          leadId,
+          sourceName: sourceLabel,
+          sourceType: "google_places",
+          importBatchId: batchId,
+          rawPayloadJson: rawJson,
+        });
+
+        const leadRow = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, leadId)).limit(1);
+        const enrRow = await db
+          .select()
+          .from(leadEngineEnrichment)
+          .where(eq(leadEngineEnrichment.leadId, leadId))
+          .limit(1);
+        if (leadRow[0]) await persistScore(db, leadId, leadRow[0], enrRow[0] ?? null);
+
+        await db.insert(leadEngineActivityLog).values({
+          id: nanoid(),
+          leadId,
+          type: "import",
+          message: `Imported via Google Places batch ${batchId}`,
+          at: now,
+          actor: "system",
+        });
+
+        inserted++;
+        linkedIds.push(leadId);
+      } catch (e) {
+        failed++;
+        errors.push(`Place ${i + 1}: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    }
+
+    if (linkedIds.length > 0) {
+      await checkWebsiteBatchLeadIds(linkedIds, 4);
+    }
+
+    await db
+      .update(leadEngineImportBatches)
+      .set({
+        status: failed === total_found && inserted === 0 && updated === 0 ? "failed" : "completed",
+        insertedRows: inserted,
+        updatedRows: updated,
+        duplicateRows: duplicates,
+        failedRows: failed,
+        errorLog: errors.length ? JSON.stringify({ messages: errors.slice(0, 200) }) : null,
+        linkedLeadIdsJson: JSON.stringify(linkedIds),
+        completedAt: new Date(),
+      })
+      .where(eq(leadEngineImportBatches.id, batchId));
+
+    return {
+      total_found,
+      inserted,
+      updated,
+      duplicates,
+      failed,
+      batch_id: batchId,
+    };
+  } catch (e) {
+    if (isDatabaseConnectivityError(e)) {
+      invalidateDbCache();
+      throw new Error("database_unavailable");
+    }
+    await db
+      .update(leadEngineImportBatches)
+      .set({
+        status: "failed",
+        errorLog: JSON.stringify({
+          messages: [e instanceof Error ? e.message : String(e)].slice(0, 50),
+        }),
+        completedAt: new Date(),
+      })
+      .where(eq(leadEngineImportBatches.id, batchId));
+    throw e;
+  }
+}
+
+export async function enrichLeadStub(leadId: string): Promise<boolean> {
+  const r = await checkWebsiteForLeadId(leadId);
+  return r.ok;
+}
+
+export type ValidateLeadEmailResult =
+  | { ok: false; error: "not_found" }
+  | {
+      ok: true;
+      leadId: string;
+      validation: EmailValidationOutcome;
+      verificationUpdated: boolean;
+    };
+
+export async function validateLeadEmailForLead(leadId: string): Promise<ValidateLeadEmailResult> {
+  return withLeadEngineDb<ValidateLeadEmailResult>({ ok: false, error: "not_found" }, async db => {
     const lead = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, leadId)).limit(1);
-    if (!lead[0]) return false;
+    if (!lead[0]) return { ok: false, error: "not_found" };
+
+    const emailRow = await db
+      .select()
+      .from(leadEngineContactPoints)
+      .where(and(eq(leadEngineContactPoints.leadId, leadId), eq(leadEngineContactPoints.type, "email")))
+      .limit(1);
+    const email = emailRow[0]?.value?.trim() ?? "";
+
+    if (!email) {
+      return {
+        ok: true,
+        leadId,
+        validation: { available: false, reason: "no_email_on_lead" },
+        verificationUpdated: false,
+      };
+    }
+
+    const validation = await validateEmailWithProvider(email);
+
+    if (!validation.available) {
+      await db.insert(leadEngineActivityLog).values({
+        id: nanoid(),
+        leadId,
+        type: "verification",
+        message: `Email validation unavailable: ${validation.reason}`,
+        at: new Date(),
+        actor: "system",
+      });
+      return { ok: true, leadId, validation, verificationUpdated: false };
+    }
+
     const now = new Date();
+    let verificationStatus = lead[0].verificationStatus;
+    let leadStatus = lead[0].leadStatus;
+
+    if (validation.result === "valid") {
+      verificationStatus = "verified";
+      leadStatus = "validated";
+    } else if (validation.result === "invalid") {
+      verificationStatus = "failed";
+    } else {
+      verificationStatus = "pending";
+    }
+
     await db
       .update(leadEngineLeads)
       .set({
-        verificationStatus: "verified",
-        leadStatus: "validated",
+        verificationStatus,
+        leadStatus,
         lastVerifiedAt: now,
         updatedAt: now,
       })
       .where(eq(leadEngineLeads.id, leadId));
+
     const row = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, leadId)).limit(1);
     const er = await db.select().from(leadEngineEnrichment).where(eq(leadEngineEnrichment.leadId, leadId)).limit(1);
     if (row[0]) await persistScore(db, leadId, row[0], er[0] ?? null);
-    return true;
+
+    await db.insert(leadEngineActivityLog).values({
+      id: nanoid(),
+      leadId,
+      type: "verification",
+      message: `Email validated (${validation.provider}): ${validation.result}`,
+      at: now,
+      actor: "system",
+    });
+
+    return { ok: true, leadId, validation, verificationUpdated: true };
   });
 }
 
@@ -1026,6 +1574,7 @@ function emptyAnalytics(): AnalyticsOverviewResponse {
     })),
     topMarkets: [],
     sourceQuality: [],
+    websiteStatusBreakdown: [],
   };
 }
 
@@ -1034,6 +1583,17 @@ export async function getAnalyticsOverviewApi(): Promise<AnalyticsOverviewRespon
   const leadList = await db.select().from(leadEngineLeads);
   const total = leadList.length;
   if (total === 0) return emptyAnalytics();
+
+  const enrichRows = await db.select().from(leadEngineEnrichment);
+  const webStatusByLead = new Map(enrichRows.map(e => [e.leadId, e.websiteStatus]));
+  const webMix = new Map<string, number>();
+  for (const l of leadList) {
+    const st = webStatusByLead.get(l.id) ?? "unknown";
+    webMix.set(st, (webMix.get(st) ?? 0) + 1);
+  }
+  const websiteStatusBreakdown = Array.from(webMix.entries())
+    .map(([status, count]) => ({ status, count }))
+    .sort((a, b) => b.count - a.count);
 
   const byCity = new Map<string, number>();
   const byNiche = new Map<string, number>();
@@ -1121,6 +1681,7 @@ export async function getAnalyticsOverviewApi(): Promise<AnalyticsOverviewRespon
     pipelineConversion,
     topMarkets,
     sourceQuality,
+    websiteStatusBreakdown,
   };
   });
 }
