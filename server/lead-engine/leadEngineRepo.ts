@@ -53,6 +53,7 @@ export type LeadListFilterParams = {
   verification?: string;
   source?: string;
   priority?: string;
+  status?: string;
   websiteStatus?: string;
   category?: string;
   city?: string;
@@ -74,6 +75,11 @@ async function queryLeadRowsFromDb(db: Db, filters: LeadListFilterParams): Promi
   if (filters.priority?.trim()) {
     conditions.push(
       eq(leadEngineLeads.priority, filters.priority.trim() as LeadEngineLeadRow["priority"])
+    );
+  }
+  if (filters.status?.trim()) {
+    conditions.push(
+      eq(leadEngineLeads.outreachStatus, filters.status.trim() as LeadEngineLeadRow["outreachStatus"])
     );
   }
   if (filters.websiteStatus?.trim()) {
@@ -289,6 +295,10 @@ async function loadJoinMap(db: Db, leadRows: LeadEngineLeadRow[]): Promise<Map<s
       phone: phoneByLead.get(lead.id) ?? null,
       email: emailByLead.get(lead.id) ?? null,
       website: siteByLead.get(lead.id) ?? null,
+      googleBusinessProfile: e?.googleBusinessProfile ?? null,
+      facebook: e?.facebook ?? null,
+      instagram: e?.instagram ?? null,
+      linkedin: e?.linkedin ?? null,
       city: a?.city ?? "",
       state: a?.state ?? "",
       zip: a?.zip ?? null,
@@ -316,29 +326,9 @@ export async function getAllLeadsForExport(): Promise<ReturnType<typeof mapJoinT
   });
 }
 
-export async function listLeadsApi(filters: {
-  q?: string;
-  stage?: PipelineStage;
-  verification?: string;
-}): Promise<LeadsListResponse> {
+export async function listLeadsApi(filters: LeadListFilterParams): Promise<LeadsListResponse> {
   return withLeadEngineDb({ leads: [], total: 0 }, async db => {
-    const conditions = [];
-    if (filters.stage) conditions.push(eq(leadEngineLeads.pipelineStage, filters.stage));
-    if (filters.verification) {
-      conditions.push(
-        eq(
-          leadEngineLeads.verificationStatus,
-          filters.verification as LeadEngineLeadRow["verificationStatus"]
-        )
-      );
-    }
-
-    let leadRows = await db
-      .select()
-      .from(leadEngineLeads)
-      .where(conditions.length ? and(...conditions) : undefined)
-      .orderBy(desc(leadEngineLeads.updatedAt));
-
+    const leadRows = await queryLeadRowsFromDb(db, filters);
     const jm = await loadJoinMap(db, leadRows);
     let leads = leadRows.map(r => mapJoinToLead(jm.get(r.id)!));
 
@@ -810,7 +800,7 @@ export async function importLeadsFromCsv(
         normalizedPhone: norm.normalizedPhone,
         normalizedWebsite: norm.normalizedWebsite,
         leadStatus: "new",
-        outreachStatus: "not_contacted",
+        outreachStatus: "new",
         pipelineStage: "new_lead",
         verificationStatus: "unverified",
         notesJson: JSON.stringify([]),
@@ -864,7 +854,7 @@ export async function importLeadsFromCsv(
       await db.insert(leadEngineEnrichment).values({
         id: nanoid(),
         leadId,
-        websiteStatus: hasSite ? "unknown" : "none",
+        websiteStatus: hasSite ? "has_website" : "no_website",
         hasWebsite: hasSite ? 1 : 0,
         enrichedAt: now,
       });
@@ -1125,7 +1115,7 @@ export async function importGooglePlacesToLeadEngine(input: GooglePlacesSearchIn
           normalizedPhone: norm.normalizedPhone,
           normalizedWebsite: norm.normalizedWebsite,
           leadStatus: "new",
-          outreachStatus: "not_contacted",
+          outreachStatus: "new",
           pipelineStage: "new_lead",
           verificationStatus: "unverified",
           notesJson: JSON.stringify([]),
@@ -1172,7 +1162,7 @@ export async function importGooglePlacesToLeadEngine(input: GooglePlacesSearchIn
         await db.insert(leadEngineEnrichment).values({
           id: nanoid(),
           leadId,
-          websiteStatus: hasSite ? "unknown" : "none",
+          websiteStatus: hasSite ? "has_website" : "no_website",
           hasWebsite: hasSite ? 1 : 0,
           enrichedAt: now,
         });

@@ -10,6 +10,13 @@ import { leMuted } from "../surface";
 
 export type { LeadSortKey };
 
+function websiteTone(status?: string) {
+  if (status === "no_website") return "text-amber-300";
+  if (status === "weak_website") return "text-orange-300";
+  if (status === "has_website") return "text-emerald-300";
+  return "text-muted-foreground";
+}
+
 export function LeadTable({
   leads,
   sortKey,
@@ -51,23 +58,20 @@ export function LeadTable({
           <TableHeader>
             <TableRow className="border-white/[0.08] hover:bg-transparent">
               <TableHead className="w-10 sticky left-0 bg-card/95 backdrop-blur-sm z-10">
-                <Checkbox
-                  checked={allSelected}
-                  onCheckedChange={c => onToggleAll(c === true)}
-                  aria-label="Select all"
-                />
+                <Checkbox checked={allSelected} onCheckedChange={c => onToggleAll(c === true)} aria-label="Select all" />
               </TableHead>
-              <TableHead className="sticky left-8 bg-card/95 backdrop-blur-sm z-10 min-w-[180px]">
-                {headerBtn("lastSeen", "Business")}
+              <TableHead className="sticky left-8 bg-card/95 backdrop-blur-sm z-10 min-w-[200px]">
+                {headerBtn("newest", "Business")}
               </TableHead>
               <TableHead>{headerBtn("verification", "Verify")}</TableHead>
               <TableHead>{headerBtn("score", "Score")}</TableHead>
-              <TableHead>{headerBtn("stage", "Stage")}</TableHead>
+              <TableHead>{headerBtn("priority", "Priority")}</TableHead>
+              <TableHead>{headerBtn("category", "Category")}</TableHead>
               <TableHead>{headerBtn("city", "Market")}</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="min-w-[100px]">Phone</TableHead>
               <TableHead className="min-w-[140px]">Website</TableHead>
               <TableHead>Source</TableHead>
-              <TableHead>Owner</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -86,7 +90,7 @@ export function LeadTable({
                 </TableCell>
                 <TableCell className="sticky left-8 bg-background/80 backdrop-blur-sm z-10 font-heading font-medium text-foreground">
                   <div>{lead.businessName}</div>
-                  <div className={cn(leMuted, "text-xs font-normal")}>{lead.category}</div>
+                  <div className={cn(leMuted, "text-xs font-normal")}>{lead.ownerName ?? lead.category}</div>
                 </TableCell>
                 <TableCell>
                   <VerificationBadge status={lead.verificationStatus} />
@@ -94,24 +98,30 @@ export function LeadTable({
                 <TableCell>
                   <LeadScoreBadge score={lead.leadScore} />
                 </TableCell>
+                <TableCell className="text-xs font-heading uppercase text-foreground whitespace-nowrap">
+                  {lead.priority ?? "low"}
+                </TableCell>
                 <TableCell className="text-sm text-muted-foreground font-heading whitespace-nowrap">
-                  {PIPELINE_STAGE_LABELS[lead.pipelineStage]}
+                  {lead.subCategory ? `${lead.category} / ${lead.subCategory}` : lead.category}
                 </TableCell>
                 <TableCell className="text-sm font-heading text-foreground whitespace-nowrap">
                   {lead.city}, {lead.state}
                 </TableCell>
-                <TableCell className="text-xs text-muted-foreground font-mono whitespace-nowrap">
-                  {lead.phone ?? "—"}
+                <TableCell className="text-xs text-muted-foreground font-heading whitespace-nowrap">
+                  {lead.status}
+                  <div className="text-[11px] mt-1">{PIPELINE_STAGE_LABELS[lead.pipelineStage]}</div>
                 </TableCell>
-                <TableCell className="text-xs text-accent/80 truncate max-w-[160px]">
-                  {lead.website ? (
-                    <span className="underline-offset-2 hover:underline">Live</span>
-                  ) : (
-                    "—"
-                  )}
+                <TableCell className="text-xs text-muted-foreground font-mono whitespace-nowrap">{lead.phone ?? "—"}</TableCell>
+                <TableCell className={cn("text-xs truncate max-w-[180px] font-heading", websiteTone(lead.websiteStatus))}>
+                  {lead.websiteStatus === "no_website"
+                    ? "No website"
+                    : lead.websiteStatus === "weak_website"
+                      ? "Weak website"
+                      : lead.website
+                        ? "Has website"
+                        : "Unknown"}
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">{lead.source}</TableCell>
-                <TableCell className="text-xs text-muted-foreground">{lead.assignedOwner ?? "—"}</TableCell>
               </TableRow>
             ))}
           </TableBody>

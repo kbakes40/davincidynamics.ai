@@ -1,7 +1,8 @@
 import type { Express, Request, Response } from "express";
 import { nanoid } from "nanoid";
-import type { PipelineStage } from "../../shared/lead-engine-types";
-import { leadEngineImportBatches, leadEngineLeads } from "../../drizzle/leadEngineSchema";
+import { eq } from "drizzle-orm";
+import type { LeadWorkflowStatus, PipelineStage } from "../../shared/lead-engine-types";
+import { leadEngineAddresses, leadEngineContactPoints, leadEngineEnrichment, leadEngineImportBatches, leadEngineLeads } from "../../drizzle/leadEngineSchema";
 import { registerLeadsExportRoute } from "./leadsExportRoute";
 import type { GooglePlacesSearchInput } from "./googlePlaces";
 import {
@@ -43,6 +44,23 @@ function parseStage(s: string | undefined): PipelineStage | undefined {
     "closed_lost",
   ];
   return allowed.includes(s as PipelineStage) ? (s as PipelineStage) : undefined;
+}
+
+function parseWorkflowStatus(s: unknown): LeadWorkflowStatus | undefined {
+  const allowed: LeadWorkflowStatus[] = [
+    "new",
+    "researched",
+    "drafted",
+    "ready_to_send",
+    "sent",
+    "replied",
+    "interested",
+    "not_interested",
+    "follow_up_needed",
+  ];
+  return typeof s === "string" && allowed.includes(s as LeadWorkflowStatus)
+    ? (s as LeadWorkflowStatus)
+    : undefined;
 }
 
 /**
@@ -106,7 +124,6 @@ export function registerLeadEngineRoutes(app: Express): void {
     json(res, await listImportBatchesApi());
   });
 
-  /** JSON body: `{ csvText, fileName?, source? }` (global `express.json` applies). */
   app.post("/api/leads/import/csv", async (req: Request, res: Response) => {
     const db = await requireLeadEngineDb();
     if (!db) {
@@ -120,10 +137,14 @@ export function registerLeadEngineRoutes(app: Express): void {
           ? req.body.csv
           : null;
     if (!csvText?.trim()) {
-      json(res, {
-        error: "missing_csv",
-        message: "Send JSON { csvText, fileName?, source? } with CSV contents.",
-      }, 400);
+      json(
+        res,
+        {
+          error: "missing_csv",
+          message: "Send JSON { csvText, fileName?, source? } with CSV contents.",
+        },
+        400
+      );
       return;
     }
     try {
@@ -138,7 +159,85 @@ export function registerLeadEngineRoutes(app: Express): void {
     }
   });
 
-  /** Body: GooglePlacesSearchInput-style fields; uses `GOOGLE_PLACES_API_KEY` server-side only. */
+  app.post("/api/leads/manual", async (req: Request, res: Response) => {
+    const db = await requireLeadEngineDb();
+    if (!db) {
+      json(res, { error: "database_unavailable" }, 503);
+      return;
+    }
+
+    const businessName = typeof req.body?.businessName === "string" ? req.body.businessName.trim() : "";
+    if (!businessName) {
+      json(res, { error: "missing_business_name" }, 400);
+      return;
+    }
+
+    const id = nanoid();
+    const now = new Date();
+    const source = typeof req.body?.source === "string" && req.body.source.trim() ? req.body.source.trim() : "manual";
+    const status = parseWorkflowStatus(req.body?.status) ?? "new";
+
+    await db.insert(leadEngineLeads).values({
+      id,
+      businessName,
+      ownerName: typeof req.body?.ownerName === "string" ? req.body.ownerName : null,
+      category: typeof req.body?.category === "string" ? req.body.category : "local_business",
+      subcategory: typeof req.body?.subCategory === "string" ? req.body.subCategory : null,
+      source,
+      targetZip: typeof req.body?.targetZip === "string" ? req.body.targetZip : null,
+      radiusMiles: typeof req.body?.radiusMiles === "number" ? Math.round(req.body.radiusMiles) : null,
+      outreachStatus: status,
+      notesJson: JSON.stringify(Array.isArray(req.body?.notes) ? req.body.notes : []),
+      outreachPrep: typeof req.body?.outreachPrep === "string" ? req.body.outreachPrep : null,
+      normalizedBusinessName: businessName.toLowerCase().trim(),
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    await db.insert(leadEngineAddresses).values({
+      id: nanoid(),
+      leadId: id,
+      address1: typeof req.body?.address === "string" ? req.body.address : null,
+      city: typeof req.body?.city === "string" ? req.body.city : "",
+      state: typeof req.body?.state === "string" ? req.body.state : "",
+      zip: typeof req.body?.zip === "string" ? req.body.zip : null,
+    });
+
+    const contacts = [
+      ["phone", req.body?.phone],
+      ["email", req.body?.email],
+      ["website", req.body?.website],
+    ] as const;
+    for (const [type, value] of contacts) {
+      if (typeof value === "string" && value.trim()) {
+        await db.insert(leadEngineContactPoints).values({
+          id: nanoid(),
+          leadId: id,
+          type,
+          value: value.trim(),
+          isPrimary: 1,
+          source,
+        });
+      }
+    }
+
+    await db.insert(leadEngineEnrichment).values({
+      id: nanoid(),
+      leadId: id,
+      websiteStatus: typeof req.body?.website === "string" && req.body.website.trim() ? "has_website" : "no_website",
+      hasWebsite: typeof req.body?.website === "string" && req.body.website.trim() ? 1 : 0,
+      googleBusinessProfile:
+        typeof req.body?.googleBusinessProfile === "string" ? req.body.googleBusinessProfile : null,
+      facebook: typeof req.body?.facebook === "string" ? req.body.facebook : null,
+      instagram: typeof req.body?.instagram === "string" ? req.body.instagram : null,
+      linkedin: typeof req.body?.linkedin === "string" ? req.body.linkedin : null,
+      enrichedAt: now,
+    });
+
+    const lead = await getLeadDetailApi(id);
+    json(res, { ok: true, lead: lead?.lead ?? null });
+  });
+
   app.post("/api/leads/import/google-places", async (req: Request, res: Response) => {
     const db = await requireLeadEngineDb();
     if (!db) {
@@ -186,9 +285,15 @@ export function registerLeadEngineRoutes(app: Express): void {
   app.get("/api/leads", async (req: Request, res: Response) => {
     const q = typeof req.query.q === "string" ? req.query.q : undefined;
     const stage = parseStage(typeof req.query.stage === "string" ? req.query.stage : undefined);
-    const verification =
-      typeof req.query.verification === "string" ? req.query.verification : undefined;
-    json(res, await listLeadsApi({ q, stage, verification }));
+    const verification = typeof req.query.verification === "string" ? req.query.verification : undefined;
+    const source = typeof req.query.source === "string" ? req.query.source : undefined;
+    const priority = typeof req.query.priority === "string" ? req.query.priority : undefined;
+    const status = typeof req.query.status === "string" ? req.query.status : undefined;
+    const websiteStatus = typeof req.query.websiteStatus === "string" ? req.query.websiteStatus : undefined;
+    const category = typeof req.query.category === "string" ? req.query.category : undefined;
+    const city = typeof req.query.city === "string" ? req.query.city : undefined;
+    const state = typeof req.query.state === "string" ? req.query.state : undefined;
+    json(res, await listLeadsApi({ q, stage, verification, source, priority, status, websiteStatus, category, city, state }));
   });
 
   app.get("/api/leads/:id", async (req: Request, res: Response) => {
@@ -198,6 +303,40 @@ export function registerLeadEngineRoutes(app: Express): void {
       return;
     }
     json(res, row);
+  });
+
+  app.patch("/api/leads/:id", async (req: Request, res: Response) => {
+    const db = await requireLeadEngineDb();
+    if (!db) {
+      json(res, { error: "database_unavailable" }, 503);
+      return;
+    }
+    const leadId = req.params.id;
+    const existing = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, leadId)).limit(1);
+    if (!existing[0]) {
+      json(res, { error: "not_found" }, 404);
+      return;
+    }
+
+    const status = parseWorkflowStatus(req.body?.status);
+    const notes = Array.isArray(req.body?.notes) ? req.body.notes.map((n: unknown) => String(n)) : undefined;
+    const outreachPrep = typeof req.body?.outreachPrep === "string" ? req.body.outreachPrep : undefined;
+    const followUpAt = typeof req.body?.followUpAt === "string" && req.body.followUpAt ? new Date(req.body.followUpAt) : null;
+
+    await db
+      .update(leadEngineLeads)
+      .set({
+        outreachStatus: status ?? existing[0].outreachStatus,
+        notesJson: notes ? JSON.stringify(notes) : existing[0].notesJson,
+        outreachPrep: outreachPrep ?? existing[0].outreachPrep,
+        followUpAt: followUpAt ?? existing[0].followUpAt,
+        contactedAt: status === "sent" && !existing[0].contactedAt ? new Date() : existing[0].contactedAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(leadEngineLeads.id, leadId));
+
+    const detail = await getLeadDetailApi(leadId);
+    json(res, { ok: true, lead: detail?.lead ?? null });
   });
 
   app.patch("/api/leads/:id/stage", async (req: Request, res: Response) => {
@@ -322,7 +461,11 @@ export function registerLeadEngineRoutes(app: Express): void {
       json(res, { error: "missing_leadId" }, 400);
       return;
     }
-    const ok = await assignAgentQueueStub(leadId, agent, typeof req.body?.reason === "string" ? req.body.reason : undefined);
+    const ok = await assignAgentQueueStub(
+      leadId,
+      agent,
+      typeof req.body?.reason === "string" ? req.body.reason : undefined
+    );
     if (!ok) {
       json(res, { error: "not_found" }, 404);
       return;

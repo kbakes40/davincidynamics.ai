@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { z } from "zod";
-import type { PipelineStage, VerificationStatus } from "../../shared/lead-engine-types";
+import type { LeadWorkflowStatus, PipelineStage, VerificationStatus } from "../../shared/lead-engine-types";
 import { buildLeadsCsv, leadEngineExportFilename } from "../../shared/lead-engine-csv";
 import { filterAndSortLeads, type SavedViewId } from "../../shared/lead-engine-leads-query";
 import { assertLeadEngineExportAuth } from "./leadEngineExportAuth";
@@ -17,7 +17,8 @@ const exportBodySchema = z.object({
   cityFilter: z.string().optional().default(""),
   stateFilter: z.string().optional().default(""),
   savedView: z.enum(["all", "outreach_window", "verify_queue", "high_score"]),
-  sortKey: z.enum(["score", "city", "stage", "verification", "lastSeen"]),
+  statusFilter: z.string().optional().default(""),
+  sortKey: z.enum(["newest", "city", "category", "priority", "score", "stage", "verification", "lastSeen"]),
   sortDir: z.enum(["asc", "desc"]),
 });
 
@@ -33,6 +34,17 @@ const PIPELINE: PipelineStage[] = [
 ];
 
 const VERIFICATION: VerificationStatus[] = ["unverified", "pending", "verified", "failed"];
+const WORKFLOW_STATUS: LeadWorkflowStatus[] = [
+  "new",
+  "researched",
+  "drafted",
+  "ready_to_send",
+  "sent",
+  "replied",
+  "interested",
+  "not_interested",
+  "follow_up_needed",
+];
 
 function parseStageFilter(s: string): PipelineStage | "" {
   if (!s) return "";
@@ -42,6 +54,11 @@ function parseStageFilter(s: string): PipelineStage | "" {
 function parseVerificationFilter(s: string): VerificationStatus | "" {
   if (!s) return "";
   return VERIFICATION.includes(s as VerificationStatus) ? (s as VerificationStatus) : ("" as const);
+}
+
+function parseStatusFilter(s: string): LeadWorkflowStatus | "" {
+  if (!s) return "";
+  return WORKFLOW_STATUS.includes(s as LeadWorkflowStatus) ? (s as LeadWorkflowStatus) : ("" as const);
 }
 
 /**
@@ -69,6 +86,7 @@ export function registerLeadsExportRoute(app: Express): void {
     const b = parsed.data;
     const stageFilter = parseStageFilter(b.stageFilter);
     const verificationFilter = parseVerificationFilter(b.verificationFilter);
+    const statusFilter = parseStatusFilter(b.statusFilter);
     if (b.stageFilter && !stageFilter) {
       res.status(400).json({ error: "invalid_stage" });
       return;
@@ -83,6 +101,7 @@ export function registerLeadsExportRoute(app: Express): void {
       stageFilter,
       verificationFilter,
       sourceFilter: b.sourceFilter,
+      statusFilter,
       websiteStatusFilter: b.websiteStatusFilter,
       priorityFilter: b.priorityFilter,
       categoryFilter: b.categoryFilter,

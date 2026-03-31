@@ -11,16 +11,15 @@ export const leadEngineLeadStatuses = [
 ] as const;
 
 export const leadEngineOutreachStatuses = [
-  "not_contacted",
-  "queued",
-  "contacted",
+  "new",
+  "researched",
+  "drafted",
+  "ready_to_send",
+  "sent",
   "replied",
-  "follow_up_needed",
   "interested",
-  "meeting_booked",
-  "won",
-  "lost",
-  "do_not_contact",
+  "not_interested",
+  "follow_up_needed",
 ] as const;
 
 export const leadEnginePriorities = ["low", "medium", "high", "urgent"] as const;
@@ -74,10 +73,15 @@ export const leadEngineLeads = mysqlTable(
     subcategory: varchar("subcategory", { length: 255 }),
     source: varchar("source", { length: 255 }).notNull().default("import"),
     sourceRecordId: varchar("source_record_id", { length: 255 }),
+    targetZip: varchar("target_zip", { length: 32 }),
+    radiusMiles: int("radius_miles"),
+    contactedAt: timestamp("contacted_at"),
+    followUpAt: timestamp("follow_up_at"),
+    outreachPrep: text("outreach_prep"),
     leadStatus: mysqlEnum("lead_status", leadEngineLeadStatuses).notNull().default("new"),
     outreachStatus: mysqlEnum("outreach_status", leadEngineOutreachStatuses)
       .notNull()
-      .default("not_contacted"),
+      .default("new"),
     priority: mysqlEnum("priority", leadEnginePriorities).notNull().default("low"),
     score: int("score").notNull().default(0),
     scoreReason: text("score_reason"),
@@ -162,6 +166,10 @@ export const leadEngineEnrichment = mysqlTable("lead_engine_enrichment", {
   id: varchar("id", { length: 32 }).primaryKey(),
   leadId: varchar("lead_id", { length: 32 }).notNull().unique(),
   websiteStatus: varchar("website_status", { length: 32 }).notNull().default("unknown"),
+  googleBusinessProfile: varchar("google_business_profile", { length: 1024 }),
+  facebook: varchar("facebook", { length: 1024 }),
+  instagram: varchar("instagram", { length: 1024 }),
+  linkedin: varchar("linkedin", { length: 1024 }),
   hasWebsite: int("has_website").notNull().default(0),
   sslEnabled: int("ssl_enabled"),
   mobileFriendly: int("mobile_friendly"),

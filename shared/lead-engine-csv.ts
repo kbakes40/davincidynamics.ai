@@ -3,22 +3,32 @@ import { PIPELINE_STAGE_LABELS } from "./lead-engine-types";
 
 /** Stable column order for Lead Engine CSV (matches product spec). */
 export const LEAD_ENGINE_CSV_HEADERS = [
-  "businessName",
-  "owner",
+  "business_name",
+  "owner_name",
   "category",
+  "sub_category",
+  "address",
   "city",
   "state",
   "zip",
-  "address",
   "phone",
   "email",
   "website",
-  "websiteStatus",
-  "socials",
+  "website_status",
+  "google_business_profile",
+  "facebook",
+  "instagram",
+  "linkedin",
   "notes",
+  "lead_source",
   "priority",
   "status",
-  "createdAt",
+  "radius_miles",
+  "target_zip",
+  "contacted_at",
+  "follow_up_at",
+  "created_at",
+  "updated_at",
 ] as const;
 
 function csvCell(v: string): string {
@@ -26,14 +36,12 @@ function csvCell(v: string): string {
   return v;
 }
 
-function leadPriorityLabel(score: number): string {
-  if (score >= 85) return "high";
-  if (score >= 70) return "medium";
-  return "low";
+function leadPriorityLabel(l: Lead): string {
+  return l.priority ?? (l.leadScore >= 85 ? "high" : l.leadScore >= 70 ? "medium" : "low");
 }
 
 function websiteStatus(l: Lead): string {
-  return l.website ? "Live" : "None / directory";
+  return l.websiteStatus ?? (l.website ? "has_website" : "unknown");
 }
 
 function socials(l: Lead): string {
@@ -54,21 +62,31 @@ function formatCreatedAtForCsv(l: Lead): string {
 function rowForLead(l: Lead): string[] {
   return [
     l.businessName,
-    l.assignedOwner ?? "",
+    l.ownerName ?? "",
     l.category,
+    l.subCategory ?? "",
+    l.address ?? "",
     l.city,
     l.state,
     l.zip ?? "",
-    l.address ?? "",
     l.phone ?? "",
     l.email ?? "",
     l.website ?? "",
     websiteStatus(l),
-    socials(l),
+    l.googleBusinessProfile ?? "",
+    l.facebook ?? "",
+    l.instagram ?? "",
+    l.linkedin ?? "",
     l.notes.join("; "),
-    leadPriorityLabel(l.leadScore),
-    PIPELINE_STAGE_LABELS[l.pipelineStage],
+    l.source,
+    leadPriorityLabel(l),
+    l.status,
+    l.radiusMiles == null ? "" : String(l.radiusMiles),
+    l.targetZip ?? "",
+    l.contactedAt ?? "",
+    l.followUpAt ?? "",
     formatCreatedAtForCsv(l),
+    l.lastSeenAt,
   ].map(s => csvCell(s));
 }
 

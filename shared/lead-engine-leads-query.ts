@@ -1,8 +1,8 @@
-import type { Lead, PipelineStage, VerificationStatus } from "./lead-engine-types";
+import type { Lead, LeadWorkflowStatus, PipelineStage, VerificationStatus } from "./lead-engine-types";
 
 export type SavedViewId = "all" | "outreach_window" | "verify_queue" | "high_score";
 
-export type LeadSortKey = "score" | "city" | "stage" | "verification" | "lastSeen";
+export type LeadSortKey = "newest" | "city" | "category" | "priority" | "score" | "stage" | "verification" | "lastSeen";
 
 export type LeadsQueryParams = {
   q: string;
@@ -13,6 +13,7 @@ export type LeadsQueryParams = {
   sortDir: "asc" | "desc";
   /** Optional server/export filters (Lead Engine v2). */
   sourceFilter?: string;
+  statusFilter?: LeadWorkflowStatus | "";
   websiteStatusFilter?: string;
   priorityFilter?: string;
   categoryFilter?: string;
@@ -70,6 +71,9 @@ export function filterAndSortLeads(raw: Lead[], p: LeadsQueryParams): Lead[] {
     const pr = p.priorityFilter.trim().toLowerCase();
     rows = rows.filter(l => (l.priority ?? "").toLowerCase() === pr);
   }
+  if (p.statusFilter) {
+    rows = rows.filter(l => l.status === p.statusFilter);
+  }
   if (p.categoryFilter?.trim()) {
     const c = p.categoryFilter.trim().toLowerCase();
     rows = rows.filter(l => l.category.toLowerCase().includes(c));
@@ -83,10 +87,20 @@ export function filterAndSortLeads(raw: Lead[], p: LeadsQueryParams): Lead[] {
     rows = rows.filter(l => l.state.toLowerCase() === s);
   }
 
+  const priorityWeight = (v?: string | null) => {
+    if (v === "urgent") return 4;
+    if (v === "high") return 3;
+    if (v === "medium") return 2;
+    return 1;
+  };
+
   rows.sort((a, b) => {
     let cmp = 0;
-    if (p.sortKey === "score") cmp = a.leadScore - b.leadScore;
+    if (p.sortKey === "newest") cmp = new Date(a.createdAt ?? a.lastSeenAt).getTime() - new Date(b.createdAt ?? b.lastSeenAt).getTime();
+    else if (p.sortKey === "score") cmp = a.leadScore - b.leadScore;
     else if (p.sortKey === "city") cmp = `${a.city}${a.state}`.localeCompare(`${b.city}${b.state}`);
+    else if (p.sortKey === "category") cmp = `${a.category}${a.subCategory ?? ""}`.localeCompare(`${b.category}${b.subCategory ?? ""}`);
+    else if (p.sortKey === "priority") cmp = priorityWeight(a.priority) - priorityWeight(b.priority);
     else if (p.sortKey === "stage") cmp = a.pipelineStage.localeCompare(b.pipelineStage);
     else if (p.sortKey === "verification") cmp = a.verificationStatus.localeCompare(b.verificationStatus);
     else cmp = new Date(a.lastSeenAt).getTime() - new Date(b.lastSeenAt).getTime();

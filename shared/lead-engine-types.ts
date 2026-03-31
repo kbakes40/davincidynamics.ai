@@ -50,6 +50,10 @@ export interface LeadEnrichment {
   techStack: string[];
   estimatedMonthlyOrders: string | null;
   socialPresence: string;
+  googleBusinessProfile?: string | null;
+  facebook?: string | null;
+  instagram?: string | null;
+  linkedin?: string | null;
 }
 
 export interface LeadActivityItem {
@@ -73,10 +77,81 @@ export interface PipelineTransition {
 
 export type LeadEnginePriorityLevel = "low" | "medium" | "high" | "urgent";
 
+export type LeadWorkflowStatus =
+  | "new"
+  | "researched"
+  | "drafted"
+  | "ready_to_send"
+  | "sent"
+  | "replied"
+  | "interested"
+  | "not_interested"
+  | "follow_up_needed";
+
+export type WebsiteStatus = "no_website" | "weak_website" | "has_website" | "unknown";
+
+export type LeadSearchProvider = "google_places" | "csv";
+
+export type LeadSearchImportStatus = "new" | "already_imported" | "imported" | "failed";
+
+export interface LeadSearchResultRow {
+  /** Stable key for selection in the review table (placeId, csv row id, etc.). */
+  key: string;
+  provider: LeadSearchProvider;
+  importStatus: LeadSearchImportStatus;
+  alreadyImportedLeadId?: string | null;
+  businessName: string;
+  ownerName?: string | null;
+  category: string;
+  subCategory?: string | null;
+  address?: string | null;
+  city: string;
+  state: string;
+  zip?: string | null;
+  phone: string | null;
+  email?: string | null;
+  website: string | null;
+  websiteStatus: WebsiteStatus;
+  googleBusinessProfile?: string | null;
+  facebook?: string | null;
+  instagram?: string | null;
+  linkedin?: string | null;
+  notes?: string[];
+  leadSource: string;
+  priority?: LeadEnginePriorityLevel;
+  status?: LeadWorkflowStatus;
+  radiusMiles?: number | null;
+  targetZip?: string | null;
+  /** Provider-specific unique id, if present (Google place id, etc.). */
+  sourceRecordId?: string | null;
+}
+
+export interface LeadSearchPreviewResponse {
+  ok: true;
+  provider: LeadSearchProvider;
+  results: LeadSearchResultRow[];
+  totalFound: number;
+  /** Indicates whether a live provider is configured. */
+  providerReady: boolean;
+  message?: string;
+}
+
+export interface LeadSearchImportSelectedResponse {
+  ok: true;
+  provider: LeadSearchProvider;
+  batchId: string;
+  inserted: number;
+  updated: number;
+  duplicates: number;
+  failed: number;
+}
+
 export interface Lead {
   id: string;
   businessName: string;
+  ownerName?: string | null;
   category: string;
+  subCategory?: string | null;
   city: string;
   state: string;
   /** Street / mailing line — optional until wired to enrichment / CRM. */
@@ -85,6 +160,10 @@ export interface Lead {
   phone: string | null;
   email?: string | null;
   website: string | null;
+  googleBusinessProfile?: string | null;
+  facebook?: string | null;
+  instagram?: string | null;
+  linkedin?: string | null;
   verificationStatus: VerificationStatus;
   leadScore: number;
   pipelineStage: PipelineStage;
@@ -96,9 +175,15 @@ export interface Lead {
   assignedOwner: string | null;
   /** From lead_engine_leads.priority — used for filters and reporting. */
   priority?: LeadEnginePriorityLevel;
+  status: LeadWorkflowStatus;
   /** From lead_engine_enrichment.website_status after checks. */
-  websiteStatus?: string;
+  websiteStatus?: WebsiteStatus;
   googleMapsUrl?: string | null;
+  targetZip?: string | null;
+  radiusMiles?: number | null;
+  contactedAt?: string | null;
+  followUpAt?: string | null;
+  outreachPrep?: string | null;
   reasonCodes: string[];
   enrichment: LeadEnrichment | null;
   notes: string[];
