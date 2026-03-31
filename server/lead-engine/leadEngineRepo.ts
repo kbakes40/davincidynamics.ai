@@ -558,7 +558,8 @@ export async function findDuplicateLeadId(
     const r = await db
       .select({ id: leadEngineLeads.id })
       .from(leadEngineLeads)
-      .where(eq(leadEngineLeads.sourceRecordId, sid))
+      // Use raw column reference to avoid driver-specific identifier quoting issues.
+      .where(sql`source_record_id = ${sid}`)
       .limit(1);
     if (r[0]) return r[0].id;
   }
@@ -566,7 +567,7 @@ export async function findDuplicateLeadId(
     const r = await db
       .select({ id: leadEngineLeads.id })
       .from(leadEngineLeads)
-      .where(eq(leadEngineLeads.normalizedPhone, n.normalizedPhone))
+      .where(sql`normalized_phone = ${n.normalizedPhone}`)
       .limit(1);
     if (r[0]) return r[0].id;
   }
@@ -574,7 +575,7 @@ export async function findDuplicateLeadId(
     const r = await db
       .select({ id: leadEngineLeads.id })
       .from(leadEngineLeads)
-      .where(eq(leadEngineLeads.normalizedWebsite, n.normalizedWebsite))
+      .where(sql`normalized_website = ${n.normalizedWebsite}`)
       .limit(1);
     if (r[0]) return r[0].id;
   }
@@ -584,7 +585,7 @@ export async function findDuplicateLeadId(
       .from(leadEngineLeads)
       .innerJoin(leadEngineAddresses, eq(leadEngineAddresses.leadId, leadEngineLeads.id))
       .where(
-        and(eq(leadEngineLeads.normalizedBusinessName, n.normalizedBusinessName), eq(leadEngineAddresses.zip, n.zip))
+        and(sql`normalized_business_name = ${n.normalizedBusinessName}`, eq(leadEngineAddresses.zip, n.zip))
       )
       .limit(1);
     if (r[0]) return r[0].id;
@@ -605,7 +606,7 @@ export async function findDuplicateLeadId(
       .innerJoin(leadEngineAddresses, eq(leadEngineAddresses.leadId, leadEngineLeads.id))
       .where(
         and(
-          eq(leadEngineLeads.normalizedBusinessName, n.normalizedBusinessName),
+          sql`normalized_business_name = ${n.normalizedBusinessName}`,
           sql`${leadEngineAddresses.latitude} is not null`,
           sql`${leadEngineAddresses.longitude} is not null`,
           sql`ABS(CAST(${leadEngineAddresses.latitude} AS DECIMAL(18,10)) - ${lat}) < 0.001`,
@@ -1311,28 +1312,31 @@ export async function previewGooglePlacesSearch(params: {
 
   const placeRecords = await searchGooglePlaces(input);
 
+  /**
+   * Avoid per-place duplicate queries during preview.
+   *
+   * Some MySQL environments/drivers can surface malformed identifier quoting for
+   * simple `WHERE table.column = ?` queries. Preview only needs to know if a
+   * Google Place ID has already been imported, so we can safely preload the
+   * `source_record_id → lead_id` map in one straight select and match in-memory.
+   */
+  const existingSourceIds = await db
+    .select({ id: leadEngineLeads.id, sourceRecordId: leadEngineLeads.sourceRecordId })
+    .from(leadEngineLeads);
+  const leadIdBySourceRecordId = new Map<string, string>();
+  for (const row of existingSourceIds) {
+    const sid = (row.sourceRecordId ?? "").trim();
+    if (!sid) continue;
+    if (!leadIdBySourceRecordId.has(sid)) leadIdBySourceRecordId.set(sid, row.id);
+  }
+
   const wantedStatus = params.websiteStatus;
   const rows: LeadSearchResultRow[] = [];
   for (const p of placeRecords) {
     const websiteStatus = classifyWebsiteStatusCandidate(p.website);
     if (wantedStatus && websiteStatus !== wantedStatus) continue;
 
-    const norm = normalizeLeadFields({
-      businessName: p.businessName,
-      phone: p.phone,
-      email: null,
-      website: p.website,
-    });
-
-    const dupId = await findDuplicateLeadId(db, {
-      sourceRecordId: p.placeId,
-      normalizedPhone: norm.normalizedPhone,
-      normalizedWebsite: norm.normalizedWebsite,
-      normalizedBusinessName: norm.normalizedBusinessName,
-      zip: p.zip,
-      latitude: p.latitude,
-      longitude: p.longitude,
-    });
+    const dupId = leadIdBySourceRecordId.get(p.placeId) ?? null;
 
     rows.push({
       key: p.placeId,
