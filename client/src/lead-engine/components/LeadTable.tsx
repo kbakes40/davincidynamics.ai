@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { LeadScoreBadge } from "./lead-engine-badges";
 import { VerificationBadge } from "./lead-engine-badges";
 import { leMuted } from "../surface";
+import { WebsiteLink } from "./WebsiteLink";
 
 export type { LeadSortKey };
 
@@ -112,14 +113,11 @@ export function LeadTable({
                   <div className="text-[11px] mt-1">{PIPELINE_STAGE_LABELS[lead.pipelineStage]}</div>
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground font-mono whitespace-nowrap">{lead.phone ?? "—"}</TableCell>
-                <TableCell className={cn("text-xs truncate max-w-[180px] font-heading", websiteTone(lead.websiteStatus))}>
-                  {lead.websiteStatus === "no_website"
-                    ? "No website"
-                    : lead.websiteStatus === "weak_website"
-                      ? "Weak website"
-                      : lead.website
-                        ? "Has website"
-                        : "Unknown"}
+                <TableCell className={cn("text-xs max-w-[180px] font-heading", websiteTone(lead.websiteStatus))}>
+                  <div className="flex flex-col min-w-0">
+                    <WebsiteLink value={lead.website} truncate fallback="No website" className="max-w-[180px]" />
+                    {lead.websiteStatus === "weak_website" ? <span className="text-[11px] text-orange-300 mt-1">Weak website</span> : null}
+                  </div>
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">{lead.source}</TableCell>
               </TableRow>

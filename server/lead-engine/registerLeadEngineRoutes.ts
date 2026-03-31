@@ -5,12 +5,19 @@ import type { LeadWorkflowStatus, PipelineStage } from "../../shared/lead-engine
 import { leadEngineAddresses, leadEngineContactPoints, leadEngineEnrichment, leadEngineImportBatches, leadEngineLeads } from "../../drizzle/leadEnginePgSchema";
 import { registerLeadsExportRoute } from "./leadsExportRoute";
 import type { GooglePlacesSearchInput } from "./googlePlaces";
+import { handoffLeadIdsToLeo } from "./leadEngineLeoHandoff";
 import {
   assignAgentQueueStub,
   cancelJobApi,
   checkWebsiteBatchLeadIds,
   checkWebsiteForLeadId,
   importSelectedGooglePlaces,
+  importSelectedGooglePlacesToPipeline,
+  addLeadIdsToPipelineApi,
+  createCampaignWithLeadIds,
+  listCampaignsApi,
+  getCampaignDetailApi,
+  updateCampaignLeadApi,
   previewGooglePlacesSearch,
   getLeadEngineDbStatus,
   getAnalyticsOverviewApi,
@@ -337,7 +344,7 @@ export function registerLeadEngineRoutes(app: Express): void {
     }
     try {
       console.info("[LeadEngine][route][import-selected] request", { count: placeIds.length, targetZip, radiusMiles });
-      const r = await importSelectedGooglePlaces({
+      const r = await importSelectedGooglePlacesToPipeline({
         placeIds,
         targetZip,
         radiusMiles,
@@ -363,6 +370,96 @@ export function registerLeadEngineRoutes(app: Express): void {
         return;
       }
       json(res, { error: "import_failed", message: msg }, 500);
+    }
+  });
+
+
+
+  app.get("/api/campaigns", async (_req: Request, res: Response) => {
+    json(res, await listCampaignsApi());
+  });
+
+  app.get("/api/campaigns/:id", async (req: Request, res: Response) => {
+    const row = await getCampaignDetailApi(req.params.id);
+    if (!row) {
+      json(res, { error: "not_found" }, 404);
+      return;
+    }
+    json(res, row);
+  });
+
+  app.post("/api/campaigns", async (req: Request, res: Response) => {
+    const leadIds = Array.isArray(req.body?.leadIds)
+      ? req.body.leadIds.filter((x: unknown): x is string => typeof x === "string" && x.trim().length > 0)
+      : [];
+    if (!leadIds.length || typeof req.body?.campaignName !== "string" || !req.body.campaignName.trim()) {
+      json(res, { error: "missing_input", message: "Send campaignName and leadIds." }, 400);
+      return;
+    }
+    try {
+      const result = await createCampaignWithLeadIds({
+        campaignName: req.body.campaignName.trim(),
+        campaignType: typeof req.body?.campaignType === "string" ? req.body.campaignType : "outbound",
+        category: typeof req.body?.category === "string" ? req.body.category : undefined,
+        targetAudience: typeof req.body?.targetAudience === "string" ? req.body.targetAudience : undefined,
+        channel: typeof req.body?.channel === "string" ? req.body.channel : "email",
+        objective: typeof req.body?.objective === "string" ? req.body.objective : undefined,
+        status: typeof req.body?.status === "string" ? req.body.status : "draft",
+        owner: typeof req.body?.owner === "string" ? req.body.owner : undefined,
+        notes: typeof req.body?.notes === "string" ? req.body.notes : undefined,
+        assignedTo: typeof req.body?.assignedTo === "string" ? req.body.assignedTo : undefined,
+        nextFollowUpAt: typeof req.body?.nextFollowUpAt === "string" ? req.body.nextFollowUpAt : undefined,
+        leadIds,
+      });
+      json(res, { ok: true, ...result });
+    } catch (e) {
+      json(res, { error: "campaign_create_failed", message: e instanceof Error ? e.message : String(e) }, 500);
+    }
+  });
+
+  app.patch("/api/campaign-leads/:id", async (req: Request, res: Response) => {
+    const updated = await updateCampaignLeadApi({
+      id: req.params.id,
+      outreachStatus: typeof req.body?.outreachStatus === "string" ? req.body.outreachStatus as any : undefined,
+      assignedTo: typeof req.body?.assignedTo === "string" ? req.body.assignedTo : undefined,
+      sequenceStep: typeof req.body?.sequenceStep === "number" ? req.body.sequenceStep : undefined,
+      lastContactedAt: typeof req.body?.lastContactedAt === "string" ? req.body.lastContactedAt : undefined,
+      nextFollowUpAt: typeof req.body?.nextFollowUpAt === "string" ? req.body.nextFollowUpAt : undefined,
+      notes: typeof req.body?.notes === "string" ? req.body.notes : undefined,
+    });
+    if (!updated) {
+      json(res, { error: "not_found" }, 404);
+      return;
+    }
+    json(res, { ok: true, lead: updated });
+  });
+
+  app.post("/api/leads/pipeline/add", async (req: Request, res: Response) => {
+    const leadIds = Array.isArray(req.body?.leadIds)
+      ? req.body.leadIds.filter((x: unknown): x is string => typeof x === "string" && x.trim().length > 0)
+      : [];
+    if (!leadIds.length) {
+      json(res, { error: "missing_leadIds", message: "Send { leadIds: string[] }." }, 400);
+      return;
+    }
+    const result = await addLeadIdsToPipelineApi(leadIds);
+    json(res, { ok: true, ...result });
+  });
+
+  app.post("/api/leads/assign/leo", async (req: Request, res: Response) => {
+    const leadIds = Array.isArray(req.body?.leadIds)
+      ? req.body.leadIds.filter((x: unknown): x is string => typeof x === "string" && x.trim().length > 0)
+      : [];
+    if (!leadIds.length) {
+      json(res, { error: "missing_leadIds", message: "Send { leadIds: string[] }." }, 400);
+      return;
+    }
+    try {
+      const result = await handoffLeadIdsToLeo(leadIds);
+      json(res, { ok: true, ...result });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      json(res, { error: "leo_handoff_failed", message: msg }, msg === "leo_handoff_not_configured" ? 503 : 500);
     }
   });
 

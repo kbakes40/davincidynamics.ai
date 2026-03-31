@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import type { Lead, LeadSearchNichePreset, LeadWorkflowStatus, PipelineStage, VerificationStatus } from "@shared/lead-engine-types";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import type { CampaignChannel, CampaignStatus, Lead, LeadSearchNichePreset, LeadWorkflowStatus, PipelineStage, VerificationStatus } from "@shared/lead-engine-types";
 import { PIPELINE_STAGE_LABELS } from "@shared/lead-engine-types";
 import { LeadFilters, type SavedViewId } from "../components/LeadFilters";
 import { LeadTable, type LeadSortKey } from "../components/LeadTable";
@@ -17,7 +18,7 @@ import {
 } from "../components/lead-engine-primitives";
 import { LeadScoreBadge, VerificationBadge } from "../components/lead-engine-badges";
 import { LeadReasonChips } from "../components/LeadReasonChips";
-import { createManualLeadApi, fetchLeads, importCsvLeadApi, importSelectedGooglePlacesLeads, postLeadsExportCsv, previewGooglePlacesLeads } from "../api";
+import { addLeadIdsToPipelineApi, assignLeadIdsToLeoApi, createCampaignApi, createManualLeadApi, fetchLeads, importCsvLeadApi, importSelectedGooglePlacesLeads, postLeadsExportCsv, previewGooglePlacesLeads } from "../api";
 import { downloadBlob } from "../exportLeadsCsv";
 import { filterAndSortLeads } from "@shared/lead-engine-leads-query";
 import { LeadEngineShell } from "../LeadEngineShell";
@@ -26,6 +27,7 @@ import { leMuted, leSurface } from "../surface";
 import { toast } from "sonner";
 import { Download, Plus, Search, Upload } from "lucide-react";
 import type { LeadSearchResultRow, WebsiteStatus } from "@shared/lead-engine-types";
+import { WebsiteLink } from "../components/WebsiteLink";
 
 function searchRowSelectKey(r: LeadSearchResultRow): string {
   return (r.key?.trim() || r.sourceRecordId?.trim() || "").trim();
@@ -81,6 +83,7 @@ export default function LeadEngineLeadsPage() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searching, setSearching] = useState(false);
   const [importingSearch, setImportingSearch] = useState(false);
+  const [pipeliningSearch, setPipeliningSearch] = useState(false);
   const [searchForm, setSearchForm] = useState({
     targetZip: "",
     radiusMiles: "10",
@@ -93,6 +96,11 @@ export default function LeadEngineLeadsPage() {
   });
   const [searchResults, setSearchResults] = useState<LeadSearchResultRow[]>([]);
   const [searchSelected, setSearchSelected] = useState<Set<string>>(new Set());
+  const [campaignOpen, setCampaignOpen] = useState(false);
+  const [campaignMode, setCampaignMode] = useState<"selected" | "import_and_create" | "table_selected">("selected");
+  const [creatingCampaign, setCreatingCampaign] = useState(false);
+  const [assigningLeo, setAssigningLeo] = useState(false);
+  const [campaignForm, setCampaignForm] = useState({ campaignName: "", campaignType: "outbound", category: "", targetAudience: "", channel: "email" as CampaignChannel, objective: "", status: "draft" as CampaignStatus, owner: "", notes: "", assignedTo: "unassigned", nextFollowUpAt: "" });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -333,6 +341,219 @@ export default function LeadEngineLeadsPage() {
     }
   }
 
+
+  async function addSelectedSearchToPipeline(mode: "selected" | "all_new") {
+    const eligibleRows = searchResults.filter(r => r.importStatus === "new" || r.importStatus === "imported_not_in_pipeline");
+    const rows = mode === "all_new"
+      ? eligibleRows
+      : eligibleRows.filter(r => searchSelected.has(searchRowSelectKey(r)));
+
+    if (!rows.length) {
+      toast.message("No eligible leads to add");
+      return;
+    }
+
+    const existingLeadIds = rows
+      .map(r => r.alreadyImportedLeadId)
+      .filter((x): x is string => typeof x === "string" && x.length > 0);
+    const placeIdsToImport = rows
+      .filter(r => !r.alreadyImportedLeadId && r.provider === "google_places")
+      .map(r => r.sourceRecordId || r.key)
+      .filter((x): x is string => typeof x === "string" && x.length > 0);
+
+    setPipeliningSearch(true);
+    try {
+      let importedSummary: { inserted: number; updated: number; duplicates: number; failed: number; pipelined: number } = { inserted: 0, updated: 0, duplicates: 0, failed: 0, pipelined: 0 };
+      if (placeIdsToImport.length) {
+        const imported = await importSelectedGooglePlacesLeads({
+          placeIds: placeIdsToImport,
+          targetZip: searchForm.targetZip.trim(),
+          radiusMiles: Number.parseFloat(searchForm.radiusMiles || "0"),
+          city: searchForm.city || undefined,
+          state: searchForm.state || undefined,
+          category: searchForm.category || undefined,
+          keyword: searchForm.keyword || undefined,
+        });
+        importedSummary = {
+          inserted: imported.inserted,
+          updated: imported.updated,
+          duplicates: imported.duplicates,
+          failed: imported.failed,
+          pipelined: imported.pipelined ?? 0,
+        };
+      }
+      let pipelineSummary = { updated: 0, skipped: 0 };
+      if (existingLeadIds.length) {
+        const added = await addLeadIdsToPipelineApi({ leadIds: existingLeadIds });
+        pipelineSummary = { updated: added.updated, skipped: added.skipped };
+      }
+
+      toast.success("Added to pipeline", {
+        description: `Imported ${importedSummary.inserted}, pipelined ${importedSummary.pipelined ?? 0 + pipelineSummary.updated}, skipped ${pipelineSummary.skipped}` ,
+      });
+      await load();
+      await runSearch();
+    } catch (e) {
+      toast.error("Add to pipeline failed", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setPipeliningSearch(false);
+    }
+  }
+
+
+  async function createCampaignFromSearch(mode: "selected" | "import_and_create" | "table_selected") {
+    if (mode === "table_selected") {
+      const tablePool = campaignForm.category.trim()
+        ? leads.filter(l => (l.subCategory ?? l.category).toLowerCase().includes(campaignForm.category.trim().toLowerCase()) || l.category.toLowerCase().includes(campaignForm.category.trim().toLowerCase()))
+        : [];
+      if (!campaignForm.campaignName.trim()) {
+        toast.error("Campaign name is required");
+        return;
+      }
+      const leadIds = Array.from(new Set([...(campaignForm.category.trim() ? tablePool.map(l => l.id) : []), ...Array.from(selected)]));
+      if (!leadIds.length) {
+        toast.message("No table leads selected");
+        return;
+      }
+      setCreatingCampaign(true);
+      try {
+        const created = await createCampaignApi({
+          campaignName: campaignForm.campaignName,
+          campaignType: campaignForm.campaignType,
+          category: campaignForm.category || undefined,
+          targetAudience: campaignForm.targetAudience || undefined,
+          channel: campaignForm.channel,
+          objective: campaignForm.objective || undefined,
+          status: campaignForm.status,
+          owner: campaignForm.owner || undefined,
+          notes: campaignForm.notes || undefined,
+          assignedTo: campaignForm.assignedTo,
+          nextFollowUpAt: campaignForm.nextFollowUpAt ? new Date(campaignForm.nextFollowUpAt).toISOString() : null,
+          leadIds,
+        });
+        toast.success("Campaign created", { description: `Attached ${created.attached} leads` });
+        setCampaignOpen(false);
+        await load();
+      } catch (e) {
+        toast.error("Campaign creation failed", { description: e instanceof Error ? e.message : String(e) });
+      } finally {
+        setCreatingCampaign(false);
+      }
+      return;
+    }
+
+    const eligibleRows = searchResults.filter(r => mode === "import_and_create" ? (r.importStatus === "new" || r.importStatus === "imported_not_in_pipeline") : searchSelected.has(searchRowSelectKey(r)));
+    if (!campaignForm.campaignName.trim()) {
+      toast.error("Campaign name is required");
+      return;
+    }
+    if (!eligibleRows.length) {
+      toast.message("No eligible leads selected");
+      return;
+    }
+
+    const existingLeadIds = eligibleRows.map(r => r.alreadyImportedLeadId).filter((x): x is string => typeof x === "string" && x.length > 0);
+    const placeIdsToImport = eligibleRows.filter(r => !r.alreadyImportedLeadId && r.provider === "google_places").map(r => r.sourceRecordId || r.key).filter((x): x is string => typeof x === "string" && x.length > 0);
+
+    setCreatingCampaign(true);
+    try {
+      let importedLeadIds: string[] = [];
+      if (placeIdsToImport.length) {
+        await importSelectedGooglePlacesLeads({
+          placeIds: placeIdsToImport,
+          targetZip: searchForm.targetZip.trim(),
+          radiusMiles: Number.parseFloat(searchForm.radiusMiles || "0"),
+          city: searchForm.city || undefined,
+          state: searchForm.state || undefined,
+          category: searchForm.category || undefined,
+          keyword: searchForm.keyword || undefined,
+        });
+        await load();
+        const refreshed = await previewGooglePlacesLeads({
+          targetZip: searchForm.targetZip.trim(),
+          radiusMiles: Number.parseFloat(searchForm.radiusMiles || "0"),
+          city: searchForm.city || undefined,
+          state: searchForm.state || undefined,
+          category: searchForm.category || undefined,
+          keyword: searchForm.keyword || undefined,
+          websiteStatus: searchForm.websiteStatus || undefined,
+          nichePreset: searchForm.nichePreset,
+          maxResults: 40,
+        });
+        setSearchResults(refreshed.results);
+        importedLeadIds = refreshed.results
+          .filter(r => placeIdsToImport.includes(r.sourceRecordId || r.key))
+          .map(r => r.alreadyImportedLeadId)
+          .filter((x): x is string => typeof x === "string" && x.length > 0);
+      }
+
+      const allLeadIds = Array.from(new Set([...existingLeadIds, ...importedLeadIds]));
+      if (allLeadIds.length) {
+        await addLeadIdsToPipelineApi({ leadIds: allLeadIds });
+      }
+      const created = await createCampaignApi({
+        campaignName: campaignForm.campaignName,
+        campaignType: campaignForm.campaignType,
+        category: campaignForm.category || undefined,
+        targetAudience: campaignForm.targetAudience || undefined,
+        channel: campaignForm.channel,
+        objective: campaignForm.objective || undefined,
+        status: campaignForm.status,
+        owner: campaignForm.owner || undefined,
+        notes: campaignForm.notes || undefined,
+        assignedTo: campaignForm.assignedTo,
+        nextFollowUpAt: campaignForm.nextFollowUpAt ? new Date(campaignForm.nextFollowUpAt).toISOString() : null,
+        leadIds: allLeadIds,
+      });
+      toast.success("Campaign created", { description: `Attached ${created.attached} leads` });
+      setCampaignOpen(false);
+      await load();
+      await runSearch();
+    } catch (e) {
+      toast.error("Campaign creation failed", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setCreatingCampaign(false);
+    }
+  }
+
+
+  async function assignSelectedToLeo() {
+    const leadIds = Array.from(selected);
+    if (!leadIds.length) {
+      toast.message("No leads selected");
+      return;
+    }
+    setAssigningLeo(true);
+    try {
+      const result = await assignLeadIdsToLeoApi({ leadIds });
+      toast.success("Assigned to Leo", { description: `Sent ${result.sent}, failed ${result.failed}` });
+      await load();
+    } catch (e) {
+      toast.error("Leo handoff failed", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setAssigningLeo(false);
+    }
+  }
+
+
+  async function verifySelectedToPipeline() {
+    const leadIds = Array.from(selected);
+    if (!leadIds.length) {
+      toast.message("No leads selected");
+      return;
+    }
+    setPipeliningSearch(true);
+    try {
+      const result = await addLeadIdsToPipelineApi({ leadIds });
+      toast.success("Verified and added to pipeline", { description: `Updated ${result.updated}, skipped ${result.skipped}` });
+      await load();
+    } catch (e) {
+      toast.error("Verify failed", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setPipeliningSearch(false);
+    }
+  }
+
   function toggleSort(k: LeadSortKey) {
     if (sortKey === k) {
       setSortDir(d => (d === "desc" ? "asc" : "desc"));
@@ -490,8 +711,9 @@ export default function LeadEngineLeadsPage() {
         <div className={cn(leSurface, "mt-6 mb-4 p-3 flex flex-wrap gap-2 items-center justify-between border-accent/15 bg-accent/[0.04]")}>
           <span className="text-sm font-heading text-foreground">{selected.size} selected</span>
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" variant="outline" className="border-white/12 font-heading" onClick={() => toast.message("Bulk verify queued (safe placeholder)")}>Verify</Button>
-            <Button size="sm" variant="outline" className="border-white/12 font-heading" onClick={() => toast.message("Bulk assign queued (safe placeholder)")}>Assign</Button>
+            <Button size="sm" variant="outline" className="border-white/12 font-heading" disabled={pipeliningSearch} onClick={() => void verifySelectedToPipeline()}>{pipeliningSearch ? "Verifying…" : "Verify"}</Button>
+            <Button size="sm" variant="outline" className="border-white/12 font-heading" onClick={() => { setCampaignMode("table_selected"); setCampaignOpen(true); }}>Create Campaign</Button>
+            <Button size="sm" variant="outline" className="border-white/12 font-heading" disabled={assigningLeo} onClick={() => void assignSelectedToLeo()}>{assigningLeo ? "Assigning…" : "Assign to Leo"}</Button>
           </div>
         </div>
       ) : null}
@@ -521,6 +743,37 @@ export default function LeadEngineLeadsPage() {
         )}
       </div>
 
+      <Dialog open={campaignOpen} onOpenChange={setCampaignOpen}>
+        <DialogContent className="bg-card border-white/10 w-full sm:max-w-xl">
+          <DialogHeader><DialogTitle className="font-display">{campaignMode === "selected" ? "Create Campaign from Selected Search Leads" : campaignMode === "table_selected" ? "Create Campaign from Selected Table Leads" : "Import and Create Campaign"}</DialogTitle></DialogHeader>
+          <div className="space-y-3 mt-4">
+            <Input placeholder="Campaign name" value={campaignForm.campaignName} onChange={e => setCampaignForm(v => ({ ...v, campaignName: e.target.value }))} />
+            <div className="grid sm:grid-cols-2 gap-3">
+              <Input placeholder="Campaign type" value={campaignForm.campaignType} onChange={e => setCampaignForm(v => ({ ...v, campaignType: e.target.value }))} />
+              <Input placeholder="Category" value={campaignForm.category} onChange={e => setCampaignForm(v => ({ ...v, category: e.target.value }))} />
+              <Input placeholder="Target audience" value={campaignForm.targetAudience} onChange={e => setCampaignForm(v => ({ ...v, targetAudience: e.target.value }))} />
+              <select value={campaignForm.channel} onChange={e => setCampaignForm(v => ({ ...v, channel: e.target.value as CampaignChannel }))} className="h-10 rounded-lg border border-white/12 bg-background/50 px-3 text-sm font-heading text-foreground">
+                <option value="email">email</option><option value="sms">sms</option><option value="call">call</option><option value="multi_touch">multi_touch</option>
+              </select>
+              <select value={campaignForm.status} onChange={e => setCampaignForm(v => ({ ...v, status: e.target.value as CampaignStatus }))} className="h-10 rounded-lg border border-white/12 bg-background/50 px-3 text-sm font-heading text-foreground">
+                <option value="draft">draft</option><option value="active">active</option><option value="paused">paused</option><option value="completed">completed</option>
+              </select>
+              <Input placeholder="Owner" value={campaignForm.owner} onChange={e => setCampaignForm(v => ({ ...v, owner: e.target.value }))} />
+              <select value={campaignForm.assignedTo} onChange={e => setCampaignForm(v => ({ ...v, assignedTo: e.target.value }))} className="h-10 rounded-lg border border-white/12 bg-background/50 px-3 text-sm font-heading text-foreground">
+                <option value="unassigned">Unassigned</option><option value="leo">Leo</option><option value="vinci">Vinci</option>
+              </select>
+            </div>
+            <Input type="datetime-local" value={campaignForm.nextFollowUpAt} onChange={e => setCampaignForm(v => ({ ...v, nextFollowUpAt: e.target.value }))} />
+            <Textarea placeholder="Objective" value={campaignForm.objective} onChange={e => setCampaignForm(v => ({ ...v, objective: e.target.value }))} rows={3} />
+            <Textarea placeholder="Notes" value={campaignForm.notes} onChange={e => setCampaignForm(v => ({ ...v, notes: e.target.value }))} rows={4} />
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" className="border-white/12" onClick={() => setCampaignOpen(false)}>Cancel</Button>
+              <Button className="bg-accent text-background font-heading" disabled={creatingCampaign} onClick={() => void createCampaignFromSearch(campaignMode)}>{creatingCampaign ? "Creating…" : "Create Campaign"}</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Sheet open={!!preview} onOpenChange={o => !o && setPreview(null)}>
         <SheetContent className="bg-card border-white/10 w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader>
@@ -541,6 +794,10 @@ export default function LeadEngineLeadsPage() {
                 <div>
                   <p className={leMuted}>Website status</p>
                   <p>{preview.websiteStatus ?? "unknown"}</p>
+                </div>
+                <div>
+                  <p className={leMuted}>Website</p>
+                  <WebsiteLink value={preview.website} truncate className="max-w-[180px] text-sm" />
                 </div>
                 <div>
                   <p className={leMuted}>Workflow status</p>
@@ -686,7 +943,7 @@ export default function LeadEngineLeadsPage() {
                               <td className="p-3">{r.city}</td>
                               <td className="p-3">{r.phone ?? "—"}</td>
                               <td className="p-3">{r.email ?? "—"}</td>
-                              <td className="p-3">{r.website ?? "—"}</td>
+                              <td className="p-3 max-w-[220px]"><WebsiteLink value={r.website} truncate className="max-w-[220px]" /></td>
                               <td className="p-3">{r.websiteStatus}</td>
                               <td className="p-3">{r.leadSource}</td>
                               <td className="p-3">

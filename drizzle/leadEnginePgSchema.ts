@@ -251,5 +251,47 @@ export const leadEngineActivityLog = pgTable(
   t => [index("idx_lead_engine_act_lead").on(t.leadId)]
 );
 
+export const leadEngineCampaigns = pgTable(
+  "lead_engine_campaigns",
+  {
+    id: varchar("id", { length: 32 }).primaryKey(),
+    campaignName: text("campaign_name").notNull(),
+    campaignType: varchar("campaign_type", { length: 64 }).notNull().default("outbound"),
+    category: varchar("category", { length: 128 }),
+    targetAudience: text("target_audience"),
+    channel: varchar("channel", { length: 32 }).notNull().default("email"),
+    objective: text("objective"),
+    status: varchar("status", { length: 32 }).notNull().default("draft"),
+    owner: varchar("owner", { length: 64 }),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  t => [index("idx_le_campaign_status").on(t.status), index("idx_le_campaign_channel").on(t.channel)]
+);
+
+export const leadEngineCampaignLeads = pgTable(
+  "lead_engine_campaign_leads",
+  {
+    id: varchar("id", { length: 32 }).primaryKey(),
+    campaignId: varchar("campaign_id", { length: 32 }).notNull(),
+    leadId: varchar("lead_id", { length: 32 }).notNull(),
+    pipelineId: varchar("pipeline_id", { length: 32 }),
+    stage: varchar("stage", { length: 32 }).notNull().default("new_lead"),
+    outreachStatus: varchar("outreach_status", { length: 32 }).notNull().default("not_started"),
+    assignedTo: varchar("assigned_to", { length: 64 }),
+    sequenceStep: integer("sequence_step").notNull().default(1),
+    lastContactedAt: timestamp("last_contacted_at", { withTimezone: true, mode: "date" }),
+    nextFollowUpAt: timestamp("next_follow_up_at", { withTimezone: true, mode: "date" }),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  t => [
+    index("idx_le_campaign_leads_campaign").on(t.campaignId),
+    index("idx_le_campaign_leads_lead").on(t.leadId),
+  ]
+);
+
 export type LeadEngineLeadRow = typeof leadEngineLeads.$inferSelect;
 export type LeadEngineEnrichmentRow = typeof leadEngineEnrichment.$inferSelect;

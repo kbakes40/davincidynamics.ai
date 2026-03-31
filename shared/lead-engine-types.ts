@@ -92,7 +92,11 @@ export type WebsiteStatus = "no_website" | "weak_website" | "has_website" | "unk
 
 export type LeadSearchProvider = "google_places" | "csv";
 
-export type LeadSearchImportStatus = "new" | "already_imported" | "imported" | "failed";
+export type LeadSearchImportStatus = "new" | "already_imported" | "already_in_pipeline" | "imported_not_in_pipeline" | "imported" | "failed";
+
+export type CampaignChannel = "email" | "sms" | "call" | "multi_touch";
+export type CampaignStatus = "draft" | "active" | "paused" | "completed";
+export type CampaignLeadOutreachStatus = "not_started" | "drafted" | "ready_to_send" | "sent" | "opened" | "replied" | "interested" | "not_interested" | "follow_up_needed";
 
 export interface LeadSearchResultRow {
   /** Stable key for selection in the review table (placeId, csv row id, etc.). */
@@ -124,6 +128,8 @@ export interface LeadSearchResultRow {
   targetZip?: string | null;
   /** Provider-specific unique id, if present (Google place id, etc.). */
   sourceRecordId?: string | null;
+  pipelineStage?: PipelineStage | null;
+  campaignStatus?: "none" | "in_campaign" | "campaign_ready";
 }
 
 export type LeadSearchNichePreset =
@@ -158,6 +164,47 @@ export interface LeadSearchImportSelectedResponse {
   updated: number;
   duplicates: number;
   failed: number;
+  pipelined?: number;
+}
+
+export interface LeadCampaign {
+  id: string;
+  campaignName: string;
+  campaignType: string;
+  category?: string | null;
+  targetAudience?: string | null;
+  channel: CampaignChannel;
+  objective?: string | null;
+  status: CampaignStatus;
+  owner?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeadCampaignLead {
+  id: string;
+  campaignId: string;
+  leadId: string;
+  pipelineId?: string | null;
+  stage: string;
+  outreachStatus: CampaignLeadOutreachStatus;
+  assignedTo?: string | null;
+  sequenceStep: number;
+  lastContactedAt?: string | null;
+  nextFollowUpAt?: string | null;
+  notes?: string | null;
+  businessName?: string | null;
+  ownerName?: string | null;
+  category?: string | null;
+  subCategory?: string | null;
+  city?: string | null;
+  state?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  website?: string | null;
+  websiteStatus?: WebsiteStatus | null;
 }
 
 export interface Lead {
@@ -240,6 +287,15 @@ export interface LeadDetailResponse {
 
 export interface OutreachQueueResponse {
   items: OutreachQueueItem[];
+}
+
+export interface CampaignListResponse {
+  campaigns: LeadCampaign[];
+}
+
+export interface CampaignDetailResponse {
+  campaign: LeadCampaign;
+  leads: LeadCampaignLead[];
 }
 
 export interface DashboardOverviewResponse {

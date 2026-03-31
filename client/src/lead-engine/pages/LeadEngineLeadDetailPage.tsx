@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { leMuted, leSurface } from "../surface";
 import { toast } from "sonner";
 import { ExternalLink, Save } from "lucide-react";
+import { WebsiteLink, normalizeWebsiteUrl } from "../components/WebsiteLink";
 
 const WORKFLOW_STATUSES: LeadWorkflowStatus[] = [
   "new",
@@ -167,9 +168,9 @@ export default function LeadEngineLeadDetailPage() {
           </div>
         </div>
         <div className="shrink-0 flex flex-col gap-2">
-          {lead.website ? (
+          {normalizeWebsiteUrl(lead.website) ? (
             <Button asChild variant="outline" size="sm" className="border-white/12 font-heading gap-2">
-              <a href={lead.website} target="_blank" rel="noreferrer">
+              <a href={normalizeWebsiteUrl(lead.website)!} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="size-3.5" />
                 Live site
               </a>
@@ -217,6 +218,10 @@ export default function LeadEngineLeadDetailPage() {
               <div>
                 <p className={leMuted}>Address</p>
                 <p className="text-foreground">{lead.address ?? "—"}</p>
+              </div>
+              <div>
+                <p className={leMuted}>Website</p>
+                <WebsiteLink value={lead.website} showExternalIcon className="text-sm" />
               </div>
               <div>
                 <p className={leMuted}>Category</p>

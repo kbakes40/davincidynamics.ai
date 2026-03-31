@@ -17,6 +17,7 @@ const nav = [
   { href: "/lead-engine/leads", label: "Leads", icon: Users },
   { href: "/lead-engine/pipeline", label: "Pipeline", icon: KanbanSquare },
   { href: "/lead-engine/outreach", label: "Outreach", icon: Megaphone },
+  { href: "/lead-engine/campaigns", label: "Campaigns", icon: Megaphone },
   { href: "/lead-engine/analytics", label: "Analytics", icon: BarChart3 },
 ] as const;
 

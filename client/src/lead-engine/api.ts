@@ -10,6 +10,10 @@ import type {
   OutreachQueueResponse,
   PipelineStage,
   LeadWorkflowStatus,
+  CampaignListResponse,
+  CampaignDetailResponse,
+  CampaignChannel,
+  CampaignStatus,
 } from "@shared/lead-engine-types";
 import type { LeadsQueryParams } from "@shared/lead-engine-leads-query";
 import { leadEngineExportFilename } from "@shared/lead-engine-csv";
@@ -231,4 +235,50 @@ export async function postLeadsExportCsv(
   const rowCount = rowHeader ? Number.parseInt(rowHeader, 10) : Number.NaN;
   const blob = await res.blob();
   return { blob, filename, rowCount: Number.isFinite(rowCount) ? rowCount : 0 };
+}
+
+export async function addLeadIdsToPipelineApi(payload: { leadIds: string[] }): Promise<{ ok: true; updated: number; skipped: number; leadIds: string[] }> {
+  const res = await fetch("/api/leads/pipeline/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(res);
+}
+
+export async function assignLeadIdsToLeoApi(payload: { leadIds: string[] }): Promise<{ ok: true; sent: number; failed: number }> {
+  const res = await fetch("/api/leads/assign/leo", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(res);
+}
+
+export async function createCampaignApi(payload: { campaignName: string; campaignType?: string; category?: string; targetAudience?: string; channel: CampaignChannel; objective?: string; status: CampaignStatus; owner?: string; notes?: string; assignedTo?: string; nextFollowUpAt?: string | null; leadIds: string[] }): Promise<{ ok: true; campaignId: string; attached: number; skipped: number }> {
+  const res = await fetch("/api/campaigns", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(res);
+}
+
+export async function fetchCampaigns(): Promise<CampaignListResponse> {
+  const res = await fetch("/api/campaigns");
+  return parseJson(res);
+}
+
+export async function fetchCampaign(id: string): Promise<CampaignDetailResponse> {
+  const res = await fetch(`/api/campaigns/${encodeURIComponent(id)}`);
+  return parseJson(res);
+}
+
+export async function patchCampaignLeadApi(id: string, payload: { outreachStatus?: string; assignedTo?: string; sequenceStep?: number; lastContactedAt?: string; nextFollowUpAt?: string; notes?: string }): Promise<{ ok: true; lead: unknown }> {
+  const res = await fetch(`/api/campaign-leads/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(res);
 }

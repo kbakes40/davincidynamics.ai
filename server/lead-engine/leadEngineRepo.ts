@@ -9,6 +9,8 @@ import {
   leadEngineImportBatches,
   leadEngineLeads,
   leadEnginePipelineEvents,
+  leadEngineCampaigns,
+  leadEngineCampaignLeads,
   leadEngineScoringEvents,
   leadEngineSources,
   type LeadEngineLeadRow,
@@ -26,6 +28,10 @@ import type {
   PipelineTransition,
   SearchJob,
   SearchTask,
+  CampaignListResponse,
+  CampaignDetailResponse,
+  LeadCampaign,
+  LeadCampaignLead,
 } from "../../shared/lead-engine-types";
 import { PIPELINE_COLUMNS, PIPELINE_STAGE_LABELS } from "../../shared/lead-engine-types";
 import {
@@ -1362,11 +1368,18 @@ export async function previewGooglePlacesSearch(params: {
     if (wantedStatus && websiteStatus !== wantedStatus) continue;
 
     const dupId = leadIdBySourceRecordId.get(p.placeId) ?? null;
+    let dupPipelineStage: PipelineStage | null = null;
+    let importStatus: "new" | "already_imported" | "already_in_pipeline" | "imported_not_in_pipeline" = "new";
+    if (dupId && db) {
+      const existing = await db.select({ pipelineStage: leadEngineLeads.pipelineStage }).from(leadEngineLeads).where(eq(leadEngineLeads.id, dupId)).limit(1);
+      dupPipelineStage = existing[0]?.pipelineStage ?? null;
+      importStatus = dupPipelineStage && dupPipelineStage !== "new_lead" ? "already_in_pipeline" : "imported_not_in_pipeline";
+    }
 
     rows.push({
       key: p.placeId,
       provider: "google_places",
-      importStatus: dupId ? "already_imported" : "new",
+      importStatus,
       alreadyImportedLeadId: dupId,
       businessName: p.businessName,
       ownerName: null,
@@ -1391,6 +1404,8 @@ export async function previewGooglePlacesSearch(params: {
       radiusMiles,
       targetZip,
       sourceRecordId: p.placeId,
+      pipelineStage: dupPipelineStage,
+      campaignStatus: dupId && db ? await campaignStatusForLeadId(db, dupId) : "none",
     });
   }
 
@@ -2117,5 +2132,260 @@ export async function getAnalyticsOverviewApi(): Promise<AnalyticsOverviewRespon
     sourceQuality,
     websiteStatusBreakdown,
   };
+  });
+}
+
+
+export async function addLeadIdsToPipelineApi(leadIds: string[]): Promise<{ updated: number; skipped: number; leadIds: string[] }> {
+  return withLeadEngineDb({ updated: 0, skipped: 0, leadIds: [] }, async db => {
+    let updated = 0;
+    let skipped = 0;
+    const touched: string[] = [];
+    for (const leadId of leadIds) {
+      const row = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, leadId)).limit(1);
+      const lead = row[0];
+      if (!lead) {
+        skipped++;
+        continue;
+      }
+      if (lead.pipelineStage !== "new_lead") {
+        skipped++;
+        continue;
+      }
+      await db.insert(leadEnginePipelineEvents).values({
+        id: nanoid(),
+        leadId,
+        fromStage: lead.pipelineStage,
+        toStage: "new_lead",
+        at: new Date(),
+        actor: "user",
+        note: "Added from search results",
+      });
+      await db.insert(leadEngineActivityLog).values({
+        id: nanoid(),
+        leadId,
+        type: "pipeline",
+        message: "Added to pipeline from search results",
+        at: new Date(),
+        actor: "User",
+      });
+      touched.push(leadId);
+      updated++;
+    }
+    return { updated, skipped, leadIds: touched };
+  });
+}
+
+export async function importSelectedGooglePlacesToPipeline(params: {
+  placeIds: string[];
+  targetZip: string;
+  radiusMiles: number;
+  category?: string;
+  keyword?: string;
+  city?: string;
+  state?: string;
+}): Promise<{ batchId: string; inserted: number; updated: number; duplicates: number; failed: number; pipelined: number }> {
+  const importResult = await importSelectedGooglePlaces(params);
+  const db = await requireLeadEngineDb();
+  if (!db) return { ...importResult, pipelined: 0 };
+
+  const matched = await db
+    .select({ id: leadEngineLeads.id, sourceRecordId: leadEngineLeads.sourceRecordId })
+    .from(leadEngineLeads)
+    .where(inArray(leadEngineLeads.sourceRecordId, params.placeIds));
+
+  const pipeline = await addLeadIdsToPipelineApi(matched.map(r => r.id));
+  return { ...importResult, pipelined: pipeline.updated };
+}
+
+
+async function campaignStatusForLeadId(db: Db, leadId: string): Promise<"none" | "in_campaign" | "campaign_ready"> {
+  const rows = await db.select().from(leadEngineCampaignLeads).where(eq(leadEngineCampaignLeads.leadId, leadId)).limit(5);
+  if (!rows.length) return "none";
+  return rows.some(r => r.outreachStatus === "ready_to_send") ? "campaign_ready" : "in_campaign";
+}
+
+export async function createCampaignWithLeadIds(params: {
+  campaignName: string;
+  campaignType: string;
+  category?: string;
+  targetAudience?: string;
+  channel: "email" | "sms" | "call" | "multi_touch";
+  objective?: string;
+  status: "draft" | "active" | "paused" | "completed";
+  owner?: string;
+  notes?: string;
+  leadIds: string[];
+  assignedTo?: "leo" | "vinci" | "unassigned";
+  nextFollowUpAt?: string | null;
+}): Promise<{ campaignId: string; attached: number; skipped: number }> {
+  const db = await requireLeadEngineDb();
+  if (!db) throw new Error("database_unavailable");
+  const now = new Date();
+  const campaignId = nanoid();
+  await db.insert(leadEngineCampaigns).values({
+    id: campaignId,
+    campaignName: params.campaignName,
+    campaignType: params.campaignType,
+    category: params.category ?? null,
+    targetAudience: params.targetAudience ?? null,
+    channel: params.channel,
+    objective: params.objective ?? null,
+    status: params.status,
+    owner: params.owner ?? null,
+    notes: params.notes ?? null,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  let attached = 0;
+  let skipped = 0;
+  for (const leadId of params.leadIds) {
+    const existing = await db
+      .select()
+      .from(leadEngineCampaignLeads)
+      .where(and(eq(leadEngineCampaignLeads.campaignId, campaignId), eq(leadEngineCampaignLeads.leadId, leadId)))
+      .limit(1);
+    if (existing[0]) {
+      skipped++;
+      continue;
+    }
+    const lead = await db.select().from(leadEngineLeads).where(eq(leadEngineLeads.id, leadId)).limit(1);
+    if (!lead[0]) {
+      skipped++;
+      continue;
+    }
+    await db.insert(leadEngineCampaignLeads).values({
+      id: nanoid(),
+      campaignId,
+      leadId,
+      pipelineId: leadId,
+      stage: lead[0].pipelineStage,
+      outreachStatus: "ready_to_send",
+      assignedTo: params.assignedTo && params.assignedTo !== "unassigned" ? params.assignedTo : null,
+      sequenceStep: 1,
+      nextFollowUpAt: params.nextFollowUpAt ? new Date(params.nextFollowUpAt) : null,
+      notes: params.notes ?? null,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await db.update(leadEngineLeads).set({ assignedOwner: params.assignedTo === "unassigned" ? null : params.assignedTo ?? lead[0].assignedOwner, updatedAt: now }).where(eq(leadEngineLeads.id, leadId));
+    attached++;
+  }
+  return { campaignId, attached, skipped };
+}
+
+export async function listCampaignsApi(): Promise<CampaignListResponse> {
+  return withLeadEngineDb({ campaigns: [] }, async db => {
+    const rows = await db.select().from(leadEngineCampaigns).orderBy(desc(leadEngineCampaigns.createdAt));
+    const campaigns: LeadCampaign[] = rows.map(r => ({
+      id: r.id,
+      campaignName: r.campaignName,
+      campaignType: r.campaignType,
+      category: r.category,
+      targetAudience: r.targetAudience,
+      channel: r.channel as LeadCampaign["channel"],
+      objective: r.objective,
+      status: r.status as LeadCampaign["status"],
+      owner: r.owner,
+      notes: r.notes,
+      createdAt: r.createdAt.toISOString(),
+      updatedAt: r.updatedAt.toISOString(),
+    }));
+    return { campaigns };
+  });
+}
+
+export async function getCampaignDetailApi(id: string): Promise<CampaignDetailResponse | null> {
+  return withLeadEngineDb(null, async db => {
+    const rows = await db.select().from(leadEngineCampaigns).where(eq(leadEngineCampaigns.id, id)).limit(1);
+    if (!rows[0]) return null;
+    const leads = await db.select().from(leadEngineCampaignLeads).where(eq(leadEngineCampaignLeads.campaignId, id));
+    const leadIds = leads.map(l => l.leadId);
+    const leadRows = leadIds.length ? await db.select().from(leadEngineLeads).where(inArray(leadEngineLeads.id, leadIds)) : [];
+    const jm = await loadJoinMap(db, leadRows);
+    const leadMap = new Map(leadRows.map(r => [r.id, mapJoinToLead(jm.get(r.id)!)]));
+    return {
+      campaign: {
+        id: rows[0].id,
+        campaignName: rows[0].campaignName,
+        campaignType: rows[0].campaignType,
+        category: rows[0].category,
+        targetAudience: rows[0].targetAudience,
+        channel: rows[0].channel as LeadCampaign["channel"],
+        objective: rows[0].objective,
+        status: rows[0].status as LeadCampaign["status"],
+        owner: rows[0].owner,
+        notes: rows[0].notes,
+        createdAt: rows[0].createdAt.toISOString(),
+        updatedAt: rows[0].updatedAt.toISOString(),
+      },
+      leads: leads.map(l => {
+        const lead = leadMap.get(l.leadId);
+        return {
+          id: l.id,
+          campaignId: l.campaignId,
+          leadId: l.leadId,
+          pipelineId: l.pipelineId,
+          stage: l.stage,
+          outreachStatus: l.outreachStatus as LeadCampaignLead["outreachStatus"],
+          assignedTo: l.assignedTo,
+          sequenceStep: l.sequenceStep,
+          lastContactedAt: l.lastContactedAt?.toISOString() ?? null,
+          nextFollowUpAt: l.nextFollowUpAt?.toISOString() ?? null,
+          notes: l.notes,
+          businessName: lead?.businessName ?? null,
+          ownerName: lead?.ownerName ?? null,
+          category: lead?.category ?? null,
+          subCategory: lead?.subCategory ?? null,
+          city: lead?.city ?? null,
+          state: lead?.state ?? null,
+          address: lead?.address ?? null,
+          phone: lead?.phone ?? null,
+          email: lead?.email ?? null,
+          website: lead?.website ?? null,
+          websiteStatus: lead?.websiteStatus ?? null,
+        };
+      }),
+    };
+  });
+}
+
+export async function updateCampaignLeadApi(params: {
+  id: string;
+  outreachStatus?: LeadCampaignLead["outreachStatus"];
+  assignedTo?: string | null;
+  sequenceStep?: number;
+  lastContactedAt?: string | null;
+  nextFollowUpAt?: string | null;
+  notes?: string | null;
+}): Promise<LeadCampaignLead | null> {
+  return withLeadEngineDb(null, async db => {
+    const row = await db.select().from(leadEngineCampaignLeads).where(eq(leadEngineCampaignLeads.id, params.id)).limit(1);
+    if (!row[0]) return null;
+    await db.update(leadEngineCampaignLeads).set({
+      outreachStatus: params.outreachStatus ?? row[0].outreachStatus,
+      assignedTo: params.assignedTo ?? row[0].assignedTo,
+      sequenceStep: params.sequenceStep ?? row[0].sequenceStep,
+      lastContactedAt: params.lastContactedAt ? new Date(params.lastContactedAt) : row[0].lastContactedAt,
+      nextFollowUpAt: params.nextFollowUpAt ? new Date(params.nextFollowUpAt) : row[0].nextFollowUpAt,
+      notes: params.notes ?? row[0].notes,
+      updatedAt: new Date(),
+    }).where(eq(leadEngineCampaignLeads.id, params.id));
+    const updated = await db.select().from(leadEngineCampaignLeads).where(eq(leadEngineCampaignLeads.id, params.id)).limit(1);
+    const l = updated[0]!;
+    return {
+      id: l.id,
+      campaignId: l.campaignId,
+      leadId: l.leadId,
+      pipelineId: l.pipelineId,
+      stage: l.stage,
+      outreachStatus: l.outreachStatus as LeadCampaignLead["outreachStatus"],
+      assignedTo: l.assignedTo,
+      sequenceStep: l.sequenceStep,
+      lastContactedAt: l.lastContactedAt?.toISOString() ?? null,
+      nextFollowUpAt: l.nextFollowUpAt?.toISOString() ?? null,
+      notes: l.notes,
+    };
   });
 }

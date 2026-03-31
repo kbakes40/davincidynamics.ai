@@ -26,6 +26,8 @@ import LeadEngineLeadDetailPage from "./lead-engine/pages/LeadEngineLeadDetailPa
 import LeadEnginePipelinePage from "./lead-engine/pages/LeadEnginePipelinePage";
 import LeadEngineOutreachPage from "./lead-engine/pages/LeadEngineOutreachPage";
 import LeadEngineAnalyticsPage from "./lead-engine/pages/LeadEngineAnalyticsPage";
+import LeadEngineCampaignsPage from "./lead-engine/pages/LeadEngineCampaignsPage";
+import LeadEngineCampaignDetailPage from "./lead-engine/pages/LeadEngineCampaignDetailPage";
 import { BookingProvider } from "./contexts/BookingContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import GlassChatWidget from "./components/GlassChatWidget";
@@ -85,6 +87,8 @@ function Router() {
         <Route path={"/lead-engine/leads"} component={LeadEngineLeadsPage} />
         <Route path={"/lead-engine/pipeline"} component={LeadEnginePipelinePage} />
         <Route path={"/lead-engine/outreach"} component={LeadEngineOutreachPage} />
+        <Route path={"/lead-engine/campaigns/:id"} component={LeadEngineCampaignDetailPage} />
+        <Route path={"/lead-engine/campaigns"} component={LeadEngineCampaignsPage} />
         <Route path={"/lead-engine/analytics"} component={LeadEngineAnalyticsPage} />
         <Route path={"/lead-engine/"} component={LeadEngineDashboardPage} />
         <Route path={"/lead-engine"} component={LeadEngineDashboardPage} />
