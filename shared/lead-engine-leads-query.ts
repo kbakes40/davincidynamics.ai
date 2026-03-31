@@ -1,6 +1,8 @@
-import type { Lead, PipelineStage, VerificationStatus } from "@shared/lead-engine-types";
-import { applySavedView, type SavedViewId } from "./components/LeadFilters";
-import type { LeadSortKey } from "./components/LeadTable";
+import type { Lead, PipelineStage, VerificationStatus } from "./lead-engine-types";
+
+export type SavedViewId = "all" | "outreach_window" | "verify_queue" | "high_score";
+
+export type LeadSortKey = "score" | "city" | "stage" | "verification" | "lastSeen";
 
 export type LeadsQueryParams = {
   q: string;
@@ -11,8 +13,17 @@ export type LeadsQueryParams = {
   sortDir: "asc" | "desc";
 };
 
+export function applySavedView(
+  id: SavedViewId
+): { stage?: PipelineStage; verification?: VerificationStatus; minScore?: number } {
+  if (id === "outreach_window") return { stage: "outreach_ready" };
+  if (id === "verify_queue") return { verification: "pending" };
+  if (id === "high_score") return { minScore: 80 };
+  return {};
+}
+
 /**
- * Same filter + sort logic as the Leads table (client-side over the loaded list).
+ * Single source of truth for Lead Engine table filtering + sort (client + server export).
  */
 export function filterAndSortLeads(raw: Lead[], p: LeadsQueryParams): Lead[] {
   const viewPrefs = applySavedView(p.savedView);

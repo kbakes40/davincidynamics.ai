@@ -462,6 +462,11 @@ export function cancelJob(id: string): SearchJob | null {
   return clone(job);
 }
 
+/** Full lead list for server-side export (same backing store as listLeads, no API filters). */
+export function getAllLeadsForExport(): Lead[] {
+  return clone(leads);
+}
+
 export function listLeads(filters: {
   q?: string;
   stage?: PipelineStage;

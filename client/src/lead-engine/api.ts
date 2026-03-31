@@ -8,6 +8,8 @@ import type {
   OutreachQueueResponse,
   PipelineStage,
 } from "@shared/lead-engine-types";
+import type { LeadsQueryParams } from "@shared/lead-engine-leads-query";
+import { leadEngineExportFilename } from "@shared/lead-engine-csv";
 
 async function parseJson<T>(res: Response): Promise<T> {
   const text = await res.text();
@@ -76,4 +78,62 @@ export async function patchLeadStageApi(
 export async function fetchOutreachQueue(): Promise<OutreachQueueResponse> {
   const res = await fetch("/api/outreach/queue");
   return parseJson<OutreachQueueResponse>(res);
+}
+
+/**
+ * Server-side CSV export: same filters/sort as the table, full backing dataset, session cookie sent.
+ */
+export async function postLeadsExportCsv(
+  params: LeadsQueryParams
+): Promise<{ blob: Blob; filename: string; rowCount: number }> {
+  const res = await fetch("/api/leads/export", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "text/csv, application/json",
+    },
+    body: JSON.stringify({
+      q: params.q,
+      stageFilter: params.stageFilter,
+      verificationFilter: params.verificationFilter,
+      savedView: params.savedView,
+      sortKey: params.sortKey,
+      sortDir: params.sortDir,
+    }),
+  });
+
+  const ct = res.headers.get("Content-Type") ?? "";
+
+  if (!res.ok) {
+    let msg = res.statusText;
+    if (ct.includes("application/json")) {
+      try {
+        const j = (await res.json()) as { message?: string; error?: string };
+        msg = j.message ?? j.error ?? msg;
+      } catch {
+        /* ignore */
+      }
+    } else {
+      try {
+        const t = await res.text();
+        if (t) msg = t.slice(0, 500);
+      } catch {
+        /* ignore */
+      }
+    }
+    throw new Error(msg || `Export failed (${res.status})`);
+  }
+
+  if (!ct.includes("text/csv") && !ct.includes("text/plain")) {
+    throw new Error("Unexpected response type from export");
+  }
+
+  const cd = res.headers.get("Content-Disposition");
+  const m = /filename="([^"]+)"/.exec(cd ?? "");
+  const filename = m?.[1] ?? leadEngineExportFilename();
+  const rowHeader = res.headers.get("X-Export-Row-Count");
+  const rowCount = rowHeader ? Number.parseInt(rowHeader, 10) : Number.NaN;
+  const blob = await res.blob();
+  return { blob, filename, rowCount: Number.isFinite(rowCount) ? rowCount : 0 };
 }

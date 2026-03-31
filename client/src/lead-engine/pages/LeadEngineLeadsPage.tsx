@@ -15,9 +15,9 @@ import {
 } from "../components/lead-engine-primitives";
 import { LeadScoreBadge, VerificationBadge } from "../components/lead-engine-badges";
 import { LeadReasonChips } from "../components/LeadReasonChips";
-import { fetchLeads } from "../api";
-import { buildLeadsCsv, downloadTextFile, localDateYyyyMmDd } from "../exportLeadsCsv";
-import { filterAndSortLeads } from "../leadsQuery";
+import { fetchLeads, postLeadsExportCsv } from "../api";
+import { downloadBlob } from "../exportLeadsCsv";
+import { filterAndSortLeads } from "@shared/lead-engine-leads-query";
 import { LeadEngineShell } from "../LeadEngineShell";
 import { cn } from "@/lib/utils";
 import { leMuted, leSurface } from "../surface";
@@ -70,22 +70,24 @@ export default function LeadEngineLeadsPage() {
     setExporting(true);
     try {
       await new Promise<void>(resolve => queueMicrotask(resolve));
-      const rows = filterAndSortLeads(raw, {
+      const params = {
         q,
         stageFilter,
         verificationFilter,
         savedView,
         sortKey,
         sortDir,
-      });
-      const csv = buildLeadsCsv(rows);
-      const name = `lead-engine-export-${localDateYyyyMmDd()}.csv`;
-      downloadTextFile(name, csv);
-      toast.success(`Exported ${rows.length} lead${rows.length === 1 ? "" : "s"}`, {
-        description: name,
+      };
+      const { blob, filename, rowCount } = await postLeadsExportCsv(params);
+      downloadBlob(filename, blob);
+      const count = rowCount > 0 ? rowCount : filterAndSortLeads(raw, params).length;
+      toast.success(`Exported ${count} lead${count === 1 ? "" : "s"}`, {
+        description: filename,
       });
     } catch (e) {
-      toast.error("Export failed", { description: e instanceof Error ? e.message : String(e) });
+      toast.error("Export failed", {
+        description: e instanceof Error ? e.message : String(e),
+      });
     } finally {
       setExporting(false);
     }
@@ -131,17 +133,6 @@ export default function LeadEngineLeadsPage() {
       subtitle="Scoring, verification, and stage discipline"
       headerActions={
         <div className="flex flex-wrap items-center gap-3">
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={exporting}
-            className="border-white/12 font-heading gap-2"
-            onClick={() => void exportCsv()}
-          >
-            <Download className="h-4 w-4 shrink-0" aria-hidden />
-            {exporting ? "Exporting…" : "Export CSV"}
-          </Button>
           <RefreshControl loading={loading} lastUpdated={last} onRefresh={() => void load()} />
         </div>
       }
@@ -197,7 +188,20 @@ export default function LeadEngineLeadsPage() {
         </div>
       </SectionCard>
 
-      <div className="mt-6">
+      <div className="mt-6 space-y-3">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={exporting}
+            className="border-white/12 font-heading gap-2"
+            onClick={() => void exportCsv()}
+          >
+            <Download className="h-4 w-4 shrink-0" aria-hidden />
+            {exporting ? "Exporting…" : "Export CSV"}
+          </Button>
+        </div>
         {leads.length === 0 ? (
           <EmptyState
             title="No leads match"

@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { PipelineStage, VerificationStatus } from "@shared/lead-engine-types";
 import { PIPELINE_STAGE_LABELS } from "@shared/lead-engine-types";
+import type { SavedViewId } from "@shared/lead-engine-leads-query";
 
-export type SavedViewId = "all" | "outreach_window" | "verify_queue" | "high_score";
+export type { SavedViewId };
 
 const views: { id: SavedViewId; label: string }[] = [
   { id: "all", label: "All leads" },
@@ -81,13 +82,4 @@ export function LeadFilters({
       </div>
     </div>
   );
-}
-
-export function applySavedView(
-  id: SavedViewId
-): { stage?: PipelineStage; verification?: VerificationStatus; minScore?: number } {
-  if (id === "outreach_window") return { stage: "outreach_ready" };
-  if (id === "verify_queue") return { verification: "pending" };
-  if (id === "high_score") return { minScore: 80 };
-  return {};
 }

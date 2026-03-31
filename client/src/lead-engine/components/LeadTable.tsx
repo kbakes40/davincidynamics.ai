@@ -2,12 +2,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Lead } from "@shared/lead-engine-types";
 import { PIPELINE_STAGE_LABELS } from "@shared/lead-engine-types";
+import type { LeadSortKey } from "@shared/lead-engine-leads-query";
 import { cn } from "@/lib/utils";
 import { LeadScoreBadge } from "./lead-engine-badges";
 import { VerificationBadge } from "./lead-engine-badges";
 import { leMuted } from "../surface";
 
-export type LeadSortKey = "score" | "city" | "stage" | "verification" | "lastSeen";
+export type { LeadSortKey };
 
 export function LeadTable({
   leads,

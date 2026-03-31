@@ -11,6 +11,7 @@ import {
   listLeads,
   patchLeadStage,
 } from "./mockStore";
+import { registerLeadsExportRoute } from "./leadsExportRoute";
 
 function json(res: Response, body: unknown, status = 200) {
   res.status(status).json(body);
@@ -34,6 +35,8 @@ function parseStage(s: string | undefined): PipelineStage | undefined {
  * Lead Engine REST API (mock-backed today; swap mockStore for DB later).
  */
 export function registerLeadEngineRoutes(app: Express): void {
+  registerLeadsExportRoute(app);
+
   app.get("/api/lead-engine/dashboard", (_req: Request, res: Response) => {
     json(res, getDashboardOverview());
   });
