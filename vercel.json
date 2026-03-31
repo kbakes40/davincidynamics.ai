@@ -8,8 +8,27 @@
       "maxDuration": 60
     }
   },
+  "headers": [
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
+    {
+      "source": "/lead-engine/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/lead-engine",
+      "destination": "/index.html"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
