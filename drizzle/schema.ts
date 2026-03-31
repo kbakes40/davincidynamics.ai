@@ -161,3 +161,5 @@ export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
 export type VinciHandoff = typeof vinciHandoffs.$inferSelect;
 export type NewVinciHandoff = typeof vinciHandoffs.$inferInsert;
+
+export * from "./leadEngineSchema";

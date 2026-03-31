@@ -4,7 +4,7 @@ import type { PipelineStage, VerificationStatus } from "../../shared/lead-engine
 import { buildLeadsCsv, leadEngineExportFilename } from "../../shared/lead-engine-csv";
 import { filterAndSortLeads, type SavedViewId } from "../../shared/lead-engine-leads-query";
 import { assertLeadEngineExportAuth } from "./leadEngineExportAuth";
-import { getAllLeadsForExport } from "./mockStore";
+import { getAllLeadsForExport } from "./leadEngineRepo";
 
 const exportBodySchema = z.object({
   q: z.string().optional().default(""),
@@ -82,7 +82,7 @@ export function registerLeadsExportRoute(app: Express): void {
     };
 
     try {
-      const raw = getAllLeadsForExport();
+      const raw = await getAllLeadsForExport();
       const rows = filterAndSortLeads(raw, params);
       const csv = buildLeadsCsv(rows);
       const filename = leadEngineExportFilename();
