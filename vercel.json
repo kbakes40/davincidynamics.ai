@@ -21,6 +21,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "/api/[[...slug]]"
+    },
+    {
       "source": "/lead-engine/:path*",
       "destination": "/index.html"
     },
