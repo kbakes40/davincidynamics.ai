@@ -39,7 +39,8 @@ function parseVerificationFilter(s: string): VerificationStatus | "" {
 }
 
 /**
- * POST /api/leads/export — authenticated CSV of leads matching table filters (full dataset).
+ * POST /api/leads/export — CSV of leads matching table filters (full dataset).
+ * Auth only when LEAD_ENGINE_EXPORT_REQUIRE_AUTH=true.
  */
 export function registerLeadsExportRoute(app: Express): void {
   app.post("/api/leads/export", async (req: Request, res: Response) => {
@@ -48,7 +49,7 @@ export function registerLeadsExportRoute(app: Express): void {
     } catch {
       res.status(401).json({
         error: "unauthorized",
-        message: "Sign in to export leads, or set LEAD_ENGINE_EXPORT_REQUIRE_AUTH=false for open export (not recommended in production).",
+        message: "Sign in to export leads (LEAD_ENGINE_EXPORT_REQUIRE_AUTH is enabled).",
       });
       return;
     }
