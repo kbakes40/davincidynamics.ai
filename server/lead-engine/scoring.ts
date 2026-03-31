@@ -1,8 +1,5 @@
-import type {
-  LeadEngineEnrichmentRow,
-  LeadEngineLeadRow,
-  LeadEnginePriority,
-} from "../../drizzle/leadEngineSchema";
+import type { LeadEngineEnrichmentRow, LeadEngineLeadRow } from "../../drizzle/leadEnginePgSchema";
+import type { LeadEnginePriority } from "../../drizzle/leadEngineConstants";
 
 export type ScoreResult = {
   score: number;

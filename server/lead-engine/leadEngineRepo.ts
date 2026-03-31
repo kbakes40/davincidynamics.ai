@@ -12,7 +12,7 @@ import {
   leadEngineScoringEvents,
   leadEngineSources,
   type LeadEngineLeadRow,
-} from "../../drizzle/leadEngineSchema";
+} from "../../drizzle/leadEnginePgSchema";
 import type {
   AnalyticsOverviewResponse,
   DashboardOverviewResponse,
@@ -29,11 +29,11 @@ import type {
 } from "../../shared/lead-engine-types";
 import { PIPELINE_COLUMNS, PIPELINE_STAGE_LABELS } from "../../shared/lead-engine-types";
 import {
-  getDatabaseConnectivityCode,
-  getDb,
-  invalidateDbCache,
-  isDatabaseConnectivityError,
-} from "../db";
+  getLeadEngineDatabaseConnectivityCode,
+  getLeadEngineDb,
+  invalidateLeadEngineDbCache,
+  isLeadEngineDatabaseConnectivityError,
+} from "./leadEngineDb";
 import { mapCsvRowToLeadInput } from "./columnMapping";
 import { parseCsv } from "./csvParse";
 import { buildLeadDetail, mapJoinToLead, type LeadJoinData } from "./mapDbToApiLead";
@@ -45,7 +45,7 @@ import { geocodeZipToLatLng, getGooglePlaceDetails, searchGooglePlaces, type Goo
 import { checkWebsite } from "./websiteEnrichment";
 import type { LeadSearchPreviewResponse, LeadSearchResultRow, WebsiteStatus } from "../../shared/lead-engine-types";
 
-type Db = NonNullable<Awaited<ReturnType<typeof getDb>>>;
+type Db = NonNullable<Awaited<ReturnType<typeof getLeadEngineDb>>>;
 
 function classifyWebsiteStatusCandidate(website: string | null): WebsiteStatus {
   const w = (website ?? "").trim().toLowerCase();
@@ -243,7 +243,7 @@ export async function checkWebsiteBatchLeadIds(leadIds: string[], concurrency = 
 }
 
 export async function requireLeadEngineDb(): Promise<Db | null> {
-  return getDb();
+  return getLeadEngineDb();
 }
 
 /** Avoid crashing the dev server when MySQL is misconfigured or unreachable (ETIMEDOUT, etc.). */
@@ -253,12 +253,12 @@ async function withLeadEngineDb<T>(fallback: T, run: (db: Db) => Promise<T>): Pr
   try {
     return await run(db);
   } catch (e) {
-    if (isDatabaseConnectivityError(e)) {
+    if (isLeadEngineDatabaseConnectivityError(e)) {
       console.warn(
         "[LeadEngine] Database unreachable:",
-        getDatabaseConnectivityCode(e) ?? (e instanceof Error ? e.message : "unknown")
+        getLeadEngineDatabaseConnectivityCode(e) ?? (e instanceof Error ? e.message : "unknown")
       );
-      invalidateDbCache();
+      invalidateLeadEngineDbCache();
       return fallback;
     }
     throw e;
@@ -558,8 +558,7 @@ export async function findDuplicateLeadId(
     const r = await db
       .select({ id: leadEngineLeads.id })
       .from(leadEngineLeads)
-      // Use raw column reference to avoid driver-specific identifier quoting issues.
-      .where(sql`source_record_id = ${sid}`)
+      .where(eq(leadEngineLeads.sourceRecordId, sid))
       .limit(1);
     if (r[0]) return r[0].id;
   }
@@ -567,7 +566,7 @@ export async function findDuplicateLeadId(
     const r = await db
       .select({ id: leadEngineLeads.id })
       .from(leadEngineLeads)
-      .where(sql`normalized_phone = ${n.normalizedPhone}`)
+      .where(eq(leadEngineLeads.normalizedPhone, n.normalizedPhone))
       .limit(1);
     if (r[0]) return r[0].id;
   }
@@ -575,7 +574,7 @@ export async function findDuplicateLeadId(
     const r = await db
       .select({ id: leadEngineLeads.id })
       .from(leadEngineLeads)
-      .where(sql`normalized_website = ${n.normalizedWebsite}`)
+      .where(eq(leadEngineLeads.normalizedWebsite, n.normalizedWebsite))
       .limit(1);
     if (r[0]) return r[0].id;
   }
@@ -585,7 +584,10 @@ export async function findDuplicateLeadId(
       .from(leadEngineLeads)
       .innerJoin(leadEngineAddresses, eq(leadEngineAddresses.leadId, leadEngineLeads.id))
       .where(
-        and(sql`normalized_business_name = ${n.normalizedBusinessName}`, eq(leadEngineAddresses.zip, n.zip))
+        and(
+          eq(leadEngineLeads.normalizedBusinessName, n.normalizedBusinessName),
+          eq(leadEngineAddresses.zip, n.zip)
+        )
       )
       .limit(1);
     if (r[0]) return r[0].id;
@@ -606,11 +608,11 @@ export async function findDuplicateLeadId(
       .innerJoin(leadEngineAddresses, eq(leadEngineAddresses.leadId, leadEngineLeads.id))
       .where(
         and(
-          sql`normalized_business_name = ${n.normalizedBusinessName}`,
+          eq(leadEngineLeads.normalizedBusinessName, n.normalizedBusinessName),
           sql`${leadEngineAddresses.latitude} is not null`,
           sql`${leadEngineAddresses.longitude} is not null`,
-          sql`ABS(CAST(${leadEngineAddresses.latitude} AS DECIMAL(18,10)) - ${lat}) < 0.001`,
-          sql`ABS(CAST(${leadEngineAddresses.longitude} AS DECIMAL(18,10)) - ${lng}) < 0.001`
+          sql`ABS(CAST(${leadEngineAddresses.latitude} AS numeric(18,10)) - CAST(${lat} AS numeric(18,10))) < 0.001`,
+          sql`ABS(CAST(${leadEngineAddresses.longitude} AS numeric(18,10)) - CAST(${lng} AS numeric(18,10))) < 0.001`
         )
       )
       .limit(1);
@@ -920,8 +922,8 @@ export async function importLeadsFromCsv(
 
   return { batchId, insertedRows, updatedRows, duplicateRows, failedRows, errors };
   } catch (e) {
-    if (isDatabaseConnectivityError(e)) {
-      invalidateDbCache();
+    if (isLeadEngineDatabaseConnectivityError(e)) {
+      invalidateLeadEngineDbCache();
       throw new Error("database_unavailable");
     }
     throw e;
@@ -1239,8 +1241,8 @@ export async function importGooglePlacesToLeadEngine(input: GooglePlacesSearchIn
       batch_id: batchId,
     };
   } catch (e) {
-    if (isDatabaseConnectivityError(e)) {
-      invalidateDbCache();
+    if (isLeadEngineDatabaseConnectivityError(e)) {
+      invalidateLeadEngineDbCache();
       throw new Error("database_unavailable");
     }
     await db
@@ -1268,18 +1270,6 @@ export async function previewGooglePlacesSearch(params: {
   nichePreset?: "auto" | "restaurants" | "smoke_shops" | "barber_shops" | "salons" | "dentists" | "roofers" | "hvac" | "plumbers" | "auto_repair" | "gyms" | "law_firms";
   maxResults?: number;
 }): Promise<LeadSearchPreviewResponse> {
-  const db = await requireLeadEngineDb();
-  if (!db) {
-    return {
-      ok: true,
-      provider: "google_places",
-      results: [],
-      totalFound: 0,
-      providerReady: false,
-      message: "database_unavailable",
-    };
-  }
-
   const keyPresent = Boolean(process.env.GOOGLE_PLACES_API_KEY?.trim());
   if (!keyPresent) {
     return {
@@ -1291,6 +1281,10 @@ export async function previewGooglePlacesSearch(params: {
       message: "GOOGLE_PLACES_API_KEY not configured",
     };
   }
+
+  // DB is optional for preview: if unreachable, we can still show Google Places results;
+  // we just won't be able to label "already imported".
+  const db = await requireLeadEngineDb();
 
   const targetZip = params.targetZip.trim();
   const radiusMiles = Math.max(0.5, Math.min(50, params.radiusMiles || 10));
@@ -1320,14 +1314,24 @@ export async function previewGooglePlacesSearch(params: {
    * Google Place ID has already been imported, so we can safely preload the
    * `source_record_id → lead_id` map in one straight select and match in-memory.
    */
-  const existingSourceIds = await db
-    .select({ id: leadEngineLeads.id, sourceRecordId: leadEngineLeads.sourceRecordId })
-    .from(leadEngineLeads);
   const leadIdBySourceRecordId = new Map<string, string>();
-  for (const row of existingSourceIds) {
-    const sid = (row.sourceRecordId ?? "").trim();
-    if (!sid) continue;
-    if (!leadIdBySourceRecordId.has(sid)) leadIdBySourceRecordId.set(sid, row.id);
+  let previewMessage: string | undefined;
+  if (!db) {
+    previewMessage = "database_unavailable";
+  } else {
+    try {
+      const existingSourceIds = await db
+        .select({ id: leadEngineLeads.id, sourceRecordId: leadEngineLeads.sourceRecordId })
+        .from(leadEngineLeads);
+      for (const row of existingSourceIds) {
+        const sid = (row.sourceRecordId ?? "").trim();
+        if (!sid) continue;
+        if (!leadIdBySourceRecordId.has(sid)) leadIdBySourceRecordId.set(sid, row.id);
+      }
+    } catch (e) {
+      // Preview should still succeed even if the DB is timing out/misconfigured.
+      previewMessage = "database_unavailable";
+    }
   }
 
   const wantedStatus = params.websiteStatus;
@@ -1375,6 +1379,7 @@ export async function previewGooglePlacesSearch(params: {
     results: rows,
     totalFound: placeRecords.length,
     providerReady: true,
+    ...(previewMessage ? { message: previewMessage } : {}),
   };
 }
 

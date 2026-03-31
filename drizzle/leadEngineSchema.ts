@@ -1,67 +1,26 @@
 import { decimal, int, mysqlEnum, mysqlTable, text, timestamp, varchar, index } from "drizzle-orm/mysql-core";
+import {
+  leadEngineAgentQueueStatuses,
+  leadEngineContactPointTypes,
+  leadEngineImportBatchStatuses,
+  leadEngineLeadStatuses,
+  leadEngineOutreachStatuses,
+  leadEnginePipelineStages,
+  leadEnginePriorities,
+  leadEngineVerificationStatuses,
+} from "./leadEngineConstants";
 
-/** Distinct from public `leads` (website form captures). */
-export const leadEngineLeadStatuses = [
-  "new",
-  "enriched",
-  "validated",
-  "qualified",
-  "unqualified",
-  "archived",
-] as const;
-
-export const leadEngineOutreachStatuses = [
-  "new",
-  "researched",
-  "drafted",
-  "ready_to_send",
-  "sent",
-  "replied",
-  "interested",
-  "not_interested",
-  "follow_up_needed",
-] as const;
-
-export const leadEnginePriorities = ["low", "medium", "high", "urgent"] as const;
-export type LeadEnginePriority = (typeof leadEnginePriorities)[number];
-
-export const leadEnginePipelineStages = [
-  "new_lead",
-  "verified",
-  "site_reviewed",
-  "outreach_ready",
-  "contacted",
-  "follow_up",
-  "closed_won",
-  "closed_lost",
-] as const;
-
-export const leadEngineVerificationStatuses = ["unverified", "pending", "verified", "failed"] as const;
-
-export const leadEngineImportBatchStatuses = [
-  "pending",
-  "processing",
-  "completed",
-  "failed",
-  "cancelled",
-] as const;
-
-export const leadEngineContactPointTypes = [
-  "phone",
-  "email",
-  "website",
-  "instagram",
-  "facebook",
-  "linkedin",
-  "other",
-] as const;
-
-export const leadEngineAgentQueueStatuses = [
-  "pending",
-  "active",
-  "completed",
-  "skipped",
-] as const;
+export type { LeadEnginePriority } from "./leadEngineConstants";
+export {
+  leadEngineAgentQueueStatuses,
+  leadEngineContactPointTypes,
+  leadEngineImportBatchStatuses,
+  leadEngineLeadStatuses,
+  leadEngineOutreachStatuses,
+  leadEnginePipelineStages,
+  leadEnginePriorities,
+  leadEngineVerificationStatuses,
+} from "./leadEngineConstants";
 
 export const leadEngineLeads = mysqlTable(
   "lead_engine_leads",
@@ -279,5 +238,4 @@ export const leadEngineActivityLog = mysqlTable(
   t => [index("idx_lead_engine_act_lead").on(t.leadId)]
 );
 
-export type LeadEngineLeadRow = typeof leadEngineLeads.$inferSelect;
-export type LeadEngineEnrichmentRow = typeof leadEngineEnrichment.$inferSelect;
+/** Runtime types for Lead Engine live in `leadEnginePgSchema.ts` (Supabase / Postgres). */

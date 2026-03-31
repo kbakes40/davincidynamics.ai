@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { nanoid } from "nanoid";
 import { eq } from "drizzle-orm";
 import type { LeadWorkflowStatus, PipelineStage } from "../../shared/lead-engine-types";
-import { leadEngineAddresses, leadEngineContactPoints, leadEngineEnrichment, leadEngineImportBatches, leadEngineLeads } from "../../drizzle/leadEngineSchema";
+import { leadEngineAddresses, leadEngineContactPoints, leadEngineEnrichment, leadEngineImportBatches, leadEngineLeads } from "../../drizzle/leadEnginePgSchema";
 import { registerLeadsExportRoute } from "./leadsExportRoute";
 import type { GooglePlacesSearchInput } from "./googlePlaces";
 import {

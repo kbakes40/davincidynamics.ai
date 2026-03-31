@@ -1,0 +1,19 @@
+services:
+  lead-engine-mysql:
+    image: mysql:8.4
+    container_name: lead-engine-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: lead_engine
+      MYSQL_USER: lead_engine
+      MYSQL_PASSWORD: lead_engine_password
+      MYSQL_ROOT_PASSWORD: root_password_change_me
+    ports:
+      - "3307:3306"
+    volumes:
+      - lead_engine_mysql_data:/var/lib/mysql
+      - ./scripts/lead-engine/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+
+volumes:
+  lead_engine_mysql_data:
+

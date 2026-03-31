@@ -162,4 +162,5 @@ export type NewLead = typeof leads.$inferInsert;
 export type VinciHandoff = typeof vinciHandoffs.$inferSelect;
 export type NewVinciHandoff = typeof vinciHandoffs.$inferInsert;
 
-export * from "./leadEngineSchema";
+/** Lead Engine is PostgreSQL (Supabase); table definitions are not re-exported here (use `leadEnginePgSchema` in server). */
+export type { LeadEngineEnrichmentRow, LeadEngineLeadRow } from "./leadEnginePgSchema";

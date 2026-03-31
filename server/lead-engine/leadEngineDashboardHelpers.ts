@@ -1,5 +1,5 @@
 import type { InferSelectModel } from "drizzle-orm";
-import { leadEngineImportBatches } from "../../drizzle/leadEngineSchema";
+import { leadEngineImportBatches } from "../../drizzle/leadEnginePgSchema";
 import type { SearchJob } from "../../shared/lead-engine-types";
 
 export type LeadEngineImportBatchRow = InferSelectModel<typeof leadEngineImportBatches>;

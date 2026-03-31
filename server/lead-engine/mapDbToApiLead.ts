@@ -5,7 +5,7 @@ import type {
   LeadDetailResponse,
   PipelineTransition,
 } from "../../shared/lead-engine-types";
-import type { LeadEngineLeadRow } from "../../drizzle/leadEngineSchema";
+import type { LeadEngineLeadRow } from "../../drizzle/leadEnginePgSchema";
 
 function parseJsonArray(raw: string | null | undefined): string[] {
   if (!raw) return [];

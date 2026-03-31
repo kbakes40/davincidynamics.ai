@@ -27,6 +27,10 @@ import { toast } from "sonner";
 import { Download, Plus, Search, Upload } from "lucide-react";
 import type { LeadSearchResultRow, WebsiteStatus } from "@shared/lead-engine-types";
 
+function searchRowSelectKey(r: LeadSearchResultRow): string {
+  return (r.key?.trim() || r.sourceRecordId?.trim() || "").trim();
+}
+
 const DEFAULT_MANUAL_FORM = {
   businessName: "",
   ownerName: "",
@@ -236,7 +240,10 @@ export default function LeadEngineLeadsPage() {
         });
       }
       setSearchResults(r.results);
-      const selectable = r.results.filter(x => x.importStatus === "new").map(x => x.key);
+      const selectable = r.results
+        .filter(x => x.importStatus === "new")
+        .map(searchRowSelectKey)
+        .filter((k): k is string => k.length > 0);
       setSearchSelected(new Set(selectable));
     } catch (e) {
       toast.error("Search failed", { description: e instanceof Error ? e.message : String(e) });
@@ -259,14 +266,26 @@ export default function LeadEngineLeadsPage() {
       setSearchSelected(new Set());
       return;
     }
-    setSearchSelected(new Set(searchResults.filter(r => r.importStatus === "new").map(r => r.key)));
+    setSearchSelected(
+      new Set(
+        searchResults
+          .filter(r => r.importStatus === "new")
+          .map(searchRowSelectKey)
+          .filter(Boolean)
+      )
+    );
   }
 
   async function importSelectedSearch() {
     const targetZip = searchForm.targetZip.trim();
     const radiusMiles = Number.parseFloat(searchForm.radiusMiles || "0");
     const placeIds = searchResults
-      .filter(r => r.provider === "google_places" && r.importStatus === "new" && searchSelected.has(r.key))
+      .filter(
+        r =>
+          r.provider === "google_places" &&
+          r.importStatus === "new" &&
+          searchSelected.has(searchRowSelectKey(r))
+      )
       .map(r => r.sourceRecordId || r.key)
       .filter((x): x is string => typeof x === "string" && x.length > 0);
 
@@ -598,10 +617,17 @@ export default function LeadEngineLeadsPage() {
                     <label className="flex items-center gap-2 text-sm font-heading">
                       <input
                         type="checkbox"
-                        checked={
-                          searchResults.filter(r => r.importStatus === "new").length > 0 &&
-                          searchSelected.size === searchResults.filter(r => r.importStatus === "new").length
-                        }
+                        checked={(() => {
+                          const newKeys = searchResults
+                            .filter(r => r.importStatus === "new")
+                            .map(searchRowSelectKey)
+                            .filter(Boolean);
+                          return (
+                            newKeys.length > 0 &&
+                            newKeys.every(k => searchSelected.has(k)) &&
+                            searchSelected.size === newKeys.length
+                          );
+                        })()}
                         onChange={e => toggleSearchAll(e.target.checked)}
                       />
                       Select all new
@@ -630,14 +656,15 @@ export default function LeadEngineLeadsPage() {
                       <tbody>
                         {searchResults.map(r => {
                           const selectable = r.importStatus === "new";
+                          const sk = searchRowSelectKey(r);
                           return (
-                            <tr key={r.key} className="border-t border-white/8">
+                            <tr key={sk || r.businessName} className="border-t border-white/8">
                               <td className="p-3">
                                 <input
                                   type="checkbox"
-                                  disabled={!selectable}
-                                  checked={selectable && searchSelected.has(r.key)}
-                                  onChange={e => toggleSearchRow(r.key, e.target.checked)}
+                                  disabled={!selectable || !sk}
+                                  checked={selectable && !!sk && searchSelected.has(sk)}
+                                  onChange={e => toggleSearchRow(sk, e.target.checked)}
                                 />
                               </td>
                               <td className="p-3 font-heading text-foreground">{r.businessName}</td>
