@@ -18,6 +18,7 @@ import ShopifyAlternative from "./pages/ShopifyAlternative";
 import ProfitCrmDemo from "./pages/ProfitCrmDemo";
 import ProfitDashboard from "./pages/ProfitDashboard";
 import AITeamPage from "./pages/AITeamPage";
+import TrafficDashboardPage from "./pages/backend/TrafficDashboardPage";
 import LeadEngineDashboardPage from "./lead-engine/pages/LeadEngineDashboardPage";
 import LeadEngineJobsPage from "./lead-engine/pages/LeadEngineJobsPage";
 import LeadEngineJobDetailPage from "./lead-engine/pages/LeadEngineJobDetailPage";
@@ -37,7 +38,7 @@ const staticMarketing = import.meta.env.VITE_STATIC_MARKETING === "true";
 /** Reference landing (hookahprice manus) has no sticky nav, chat bubble, or Spotify chrome. */
 function FloatingChrome() {
   const [location] = useLocation();
-  if (location === "/" || staticMarketing || location.startsWith("/lead-engine")) return null;
+  if (location === "/" || staticMarketing || location.startsWith("/lead-engine") || location.startsWith("/backend/traffic")) return null;
   return (
     <>
       <SpotifyBottomPlayer />
@@ -49,7 +50,7 @@ function FloatingChrome() {
 function Router() {
   const [location] = useLocation();
   const mainPad =
-    location === "/" || staticMarketing || location.startsWith("/lead-engine")
+    location === "/" || staticMarketing || location.startsWith("/lead-engine") || location.startsWith("/backend/traffic")
       ? "pb-0"
       : "pb-20 md:pb-20";
   return (
@@ -79,6 +80,7 @@ function Router() {
         <Route path={"/bot-analytics"} component={BotAnalytics} />
         <Route path={"/conversations"} component={ConversationHistory} />
         <Route path={"/spotify-callback"} component={SpotifyCallback} />
+        <Route path={"/backend/traffic"} component={TrafficDashboardPage} />
         <Route path={"/ai-team"} component={AITeamPage} />
         <Route path={"/ai-team/"} component={AITeamPage} />
         <Route path={"/lead-engine/jobs/:id"} component={LeadEngineJobDetailPage} />
