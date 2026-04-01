@@ -42,18 +42,32 @@ export function TrafficLineChart({ title, total, subtitle, data, color }: Props)
       label: parseChartDate(d.date),
     }));
   }, [data]);
+  const isSparse = rows.length > 0 && rows.length < 4;
+  const first = rows[0]?.value ?? 0;
+  const last = rows[rows.length - 1]?.value ?? 0;
+  const sparseChangePct = first === 0 ? null : ((last - first) / first) * 100;
 
   return (
-    <div className={`${trafficCard} flex min-h-[280px] flex-col p-5 sm:p-6`}>
+    <div className={`${trafficCard} flex h-full min-h-[360px] flex-col p-6 sm:p-7`}>
       <p className={trafficKicker}>{title}</p>
-      <p className={`mt-2 text-4xl sm:text-5xl ${trafficHeroNum}`}>{formatCompactInt(total)}</p>
+      <p className={`mt-2 text-[2.25rem] sm:text-[2.6rem] ${trafficHeroNum}`}>{formatCompactInt(total)}</p>
       <p className={`mt-1 ${trafficMuted}`}>{subtitle}</p>
       {rows.length === 0 ? (
         <p className="mt-8 flex flex-1 items-center justify-center text-center text-sm text-orange-200/40" role="status">
           No trend data for this period.
         </p>
+      ) : isSparse ? (
+        <div className="mt-5 flex h-[108px] min-h-[6.75rem] w-full items-center justify-between rounded-2xl border border-orange-800/25 bg-black/[0.12] px-5">
+          <div className="flex items-center gap-3">
+            <span className="h-2.5 w-2.5 rounded-full bg-amber-300/85 shadow-[0_0_0_4px_rgba(251,191,36,0.12)]" />
+            <span className="text-sm text-orange-100/80">Limited points</span>
+          </div>
+          <span className="text-sm font-medium tabular-nums text-amber-100/90">
+            {sparseChangePct == null ? "-" : `${sparseChangePct >= 0 ? "+" : "-"}${Math.abs(sparseChangePct).toFixed(1)}%`}
+          </span>
+        </div>
       ) : (
-        <div className="mt-4 h-44 min-h-[11rem] w-full min-w-0 flex-1">
+        <div className="mt-4 h-[210px] min-h-[210px] w-full min-w-0 flex-1">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={rows} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
               <defs>

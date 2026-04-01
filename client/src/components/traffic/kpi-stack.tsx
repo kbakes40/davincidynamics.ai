@@ -21,13 +21,13 @@ function KpiCard({ kpi }: { kpi: TrafficKpi }) {
   const pct = kpi.changePct;
 
   return (
-    <div className={`${trafficCard} p-5 sm:p-6`}>
+    <div className={`${trafficCard} p-6 sm:p-7`}>
       <p className={trafficKicker}>{kpi.label}</p>
-      <p className={`mt-3 text-3xl sm:text-4xl ${trafficHeroNum}`}>{kpi.valueDisplay}</p>
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <p className={`mt-3 text-[2.2rem] sm:text-[2.6rem] ${trafficHeroNum}`}>{kpi.valueDisplay}</p>
+      <div className="mt-4 flex flex-wrap items-center gap-2.5">
         <span
           className={clsx(
-            "rounded-full px-2.5 py-1 text-[11px] font-semibold tabular-nums",
+            "rounded-full px-2.5 py-1 text-[11px] font-medium tabular-nums",
             pct == null || !Number.isFinite(pct)
               ? "bg-white/[0.06] text-orange-200/50 ring-1 ring-white/10"
               : good
@@ -45,8 +45,8 @@ function KpiCard({ kpi }: { kpi: TrafficKpi }) {
 
 export function KpiStack({ items, dateRangeLabel }: Props) {
   return (
-    <div className="flex flex-col gap-4">
-      <p className={`${trafficMuted} text-center lg:text-left`}>{dateRangeLabel}</p>
+    <div className="flex h-full w-full max-w-[220px] flex-col gap-4">
+      <p className={`${trafficMuted} px-1 text-center lg:text-left`}>{dateRangeLabel}</p>
       <div className="grid grid-cols-1 gap-4">
         {items.map(kpi => (
           <KpiCard key={kpi.label} kpi={kpi} />

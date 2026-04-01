@@ -24,7 +24,7 @@ export function ChannelBubbleChart({ title, channels, mode, dateRangeLabel }: Pr
   const maxSize = list.length ? Math.max(...list.map(c => (mode === "sessions" ? c.sessions : c.users)), 1) : 1;
 
   return (
-    <div className={`${trafficCard} p-5 sm:p-6`}>
+    <div className={`${trafficCard} h-full min-h-[208px] p-5 sm:p-6`}>
       <p className={trafficKicker}>{title}</p>
       <p className={`mt-1 ${trafficMuted}`}>{dateRangeLabel}</p>
       {list.length === 0 ? (
@@ -33,7 +33,7 @@ export function ChannelBubbleChart({ title, channels, mode, dateRangeLabel }: Pr
         </p>
       ) : (
         <>
-          <div className="flex flex-wrap items-center justify-center gap-3 py-6 sm:gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3 py-4 sm:gap-4">
             {list.slice(0, 8).map((ch, i) => {
               const raw = mode === "sessions" ? ch.sessions : ch.users;
               const v = Number.isFinite(raw) ? raw : 0;
