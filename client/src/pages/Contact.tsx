@@ -32,7 +32,7 @@ const PAGE_TITLE = "Contact | DaVinci Dynamics";
 const PAGE_DESCRIPTION =
   "Talk with DaVinci Dynamics about owning your ecommerce stack with premium, conversion-focused systems built for control and stronger margins.";
 const PAGE_URL = "https://www.davincidynamics.ai/contact";
-const OG_IMAGE = "https://www.davincidynamics.ai/social-preview.svg";
+const OG_IMAGE = "https://www.davincidynamics.ai/og/da-vinci-share.jpg";
 
 export default function Contact() {
   const [formData, setFormData] = useState<{

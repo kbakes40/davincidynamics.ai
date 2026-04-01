@@ -38,14 +38,14 @@ export default function PlatformDemo() {
         <meta property="og:url" content="https://www.davincidynamics.ai/pricing" />
         <meta property="og:title" content="Pricing | Own Your Ecommerce Stack" />
         <meta property="og:description" content="Premium ecommerce systems built for control, stronger margins, and ownership. Choose the right DaVinci Dynamics build path for your growth stage." />
-        <meta property="og:image" content="https://www.davincidynamics.ai/social-preview.svg" />
+        <meta property="og:image" content="https://www.davincidynamics.ai/og/da-vinci-share.jpg" />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content="https://www.davincidynamics.ai/pricing" />
         <meta name="twitter:title" content="Pricing | Own Your Ecommerce Stack" />
         <meta name="twitter:description" content="Premium ecommerce systems built for control, stronger margins, and ownership. Choose the right DaVinci Dynamics build path for your growth stage." />
-        <meta name="twitter:image" content="https://www.davincidynamics.ai/social-preview.svg" />
+        <meta name="twitter:image" content="https://www.davincidynamics.ai/og/da-vinci-share.jpg" />
       </Helmet>
       <Navigation />
       <div className={brandBackdrop}>

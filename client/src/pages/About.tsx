@@ -25,7 +25,7 @@ const PAGE_TITLE = "About | DaVinci Dynamics";
 const PAGE_DESCRIPTION =
   "DaVinci Dynamics builds revenue systems from real sales and operations experience—lead capture, conversion, and follow-up. Book a strategy call.";
 const PAGE_URL = "https://www.davincidynamics.ai/about";
-const OG_IMAGE = "https://www.davincidynamics.ai/social-preview.svg";
+const OG_IMAGE = "https://www.davincidynamics.ai/og/da-vinci-share.jpg";
 
 const whoWeWorkWith = [
   {
