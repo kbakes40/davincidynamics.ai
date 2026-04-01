@@ -1,872 +1,274 @@
-/**
- * Shopify Alternative Landing Page
- * Uses existing DaVinci Dynamics design system
- */
-
-import { Button } from "@/components/ui/button";
-import { Check, ArrowRight, DollarSign, Zap, Shield, TrendingUp, Package, Clock, HelpCircle } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Check, CircleDollarSign, PlugZap, ShieldCheck, Workflow } from "lucide-react";
+import { Helmet } from "react-helmet-async";
+import { useLocation } from "wouter";
 import { onTelegramCta } from "@/lib/telegramCtas";
-import { useEffect, useState, useRef } from "react";
-import { useChat } from "@/contexts/ChatContext";
-import { useScrollFade } from "@/hooks/useScrollFade";
-import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import {
+  brandBackdrop,
+  brandBackdropLayerA,
+  brandBackdropLayerB,
+  brandGrayPanel,
+  brandGrayPanelHover,
+  brandPageRoot,
+  brandPrimaryButton,
+  brandSecondaryButton,
+  brandSectionY,
+} from "@/lib/brandStyles";
+
+const PAGE_TITLE = "Shopify Alternative | DaVinci Dynamics";
+const PAGE_DESCRIPTION =
+  "Reduce recurring Shopify overhead and own your commerce stack. DaVinci Dynamics builds conversion-focused ecommerce systems with migration and automation.";
+
+const CARD_BG =
+  "https://private-us-east-1.manuscdn.com/sessionFile/dCGapd5ewVrrofgrkY54Ge/sandbox/MDz8hgGj6z586IAHhYtAJw-img-3_1770941425000_na1fn_Y2FyZC10ZXh0dXJl.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZENHYXBkNWV3VnJyb2ZncmtZNTRHZS9zYW5kYm94L01EejhoZ0dqNno1ODZJQUhoWXRBSnctaW1nLTNfMTc3MDk0MTQyNTAwMF9uYTFmbl9ZMkZ5WkMxMFpYaDBkWEpsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=NwbO2hSlXZECY4hHxTgt3pwhEz65-RQLXrytXjEqXQcsiu-Naffa03ArEh0nCy0~-o0PVVV6hck6UbEKtR1kFbiII-i9EyI-Vphqpjpg4ZrjiiorMcpC6VNglSA0iVfO4s6VUDYmuxw9EUFhFNdpTx3DnSXUsdQBwMuLUthgKoxBZ~jdP8QcKeiY1rSAEiDquOAf~eV1OD5~aBaCbyYS1JZuTUKRbjYYjt4NbNo4SdL~6efi1BH~PjBhlV3qA9cFh-djHmYi2YGWJUvnBR-lfx49JO6W2Aqa1DT3bu~f8cAggept1WFo~jzOiF0qmt9Xw7tgm68f3i4RycvS-iPgsQ__";
+
+const grayPanelStyle = {
+  backgroundImage: `linear-gradient(160deg, rgba(68,84,108,0.58) 0%, rgba(49,64,88,0.72) 46%, rgba(26,37,58,0.88) 100%), url('${CARD_BG}')`,
+  backgroundBlendMode: "normal, soft-light" as const,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundColor: "rgba(24,35,54,0.85)",
+};
+
+const feeCards = [
+  {
+    icon: CircleDollarSign,
+    title: "Platform Plan + Extensions",
+    amount: "$400-$2,800/mo",
+    text: "Core platform fees, paid add-ons, and recurring tooling stack up quickly.",
+  },
+  {
+    icon: PlugZap,
+    title: "App and Integration Sprawl",
+    amount: "$250-$1,200/mo",
+    text: "Email, reviews, upsells, automation, bundles, and sync tools compound fast.",
+  },
+  {
+    icon: Workflow,
+    title: "Operational Friction Cost",
+    amount: "$500+/mo",
+    text: "Disconnected systems create manual work, slower fulfillment, and missed conversions.",
+  },
+];
+
+const outcomes = [
+  "Own your full storefront stack and customer data",
+  "Cut recurring platform and app overhead",
+  "Consolidate tools into one cohesive commerce system",
+  "Scale with custom automation instead of plugin sprawl",
+];
+
+const migrationSteps = [
+  {
+    step: "01",
+    title: "Audit and Strategy",
+    text: "We map your stack, fee burden, conversion leaks, and migration scope.",
+  },
+  {
+    step: "02",
+    title: "Build and Validate",
+    text: "Your new system is built in parallel with conversion paths, automation, and reporting.",
+  },
+  {
+    step: "03",
+    title: "Migrate and Launch",
+    text: "Products, customers, orders, and SEO signals transfer cleanly with minimal disruption.",
+  },
+];
+
+const faqs = [
+  {
+    q: "Will migration hurt SEO or sales momentum?",
+    a: "No. We preserve critical structure, implement redirects, and launch with verification checkpoints.",
+  },
+  {
+    q: "How quickly can we move off Shopify?",
+    a: "Most brands move in 2-5 weeks depending on catalog complexity and integration requirements.",
+  },
+  {
+    q: "Is this only for larger brands?",
+    a: "No. This is built for operators who want healthier margins and full control as they scale.",
+  },
+];
 
 export default function ShopifyAlternative() {
-  const { openChat } = useChat();
-  
-  // Set SEO-optimized page title
-  useEffect(() => {
-    document.title = "Shopify Alternative for Growing Stores | davincidynamics.ai";
-    
-    // Set meta description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Stop losing 60%+ of profits to Shopify fees. Own your e-commerce platform with davincidynamics.ai - custom automation, lower costs, and full control. Migration support included.');
-    }
-  }, []);
-  
-  // Scroll fade hooks
-  const costSection = useScrollFade();
-  const valueSection = useScrollFade();
-  const calculatorSection = useScrollFade();
-  const migrationSection = useScrollFade();
-  const faqSection = useScrollFade();
-  const finalCtaSection = useScrollFade();
-  
-  // Helper to get fade class
-  const getFadeClass = (isVisible: boolean) => 
-    isVisible ? 'animate-fade-in-up' : 'md:opacity-0';
-  
-  // Savings calculator state
-  const [shopifyPlan, setShopifyPlan] = useState("");
-  const [appStack, setAppStack] = useState("");
-  const [processing, setProcessing] = useState("");
-  const [showResults, setShowResults] = useState(false);
-  
-  // Lead capture state
-  const [showLeadForm, setShowLeadForm] = useState(false);
-  const [leadStep, setLeadStep] = useState(1);
-  const [storeUrl, setStoreUrl] = useState("");
-  const [monthlySpend, setMonthlySpend] = useState("");
-  const [leadName, setLeadName] = useState("");
-  const [leadEmail, setLeadEmail] = useState("");
-  const [leadPhone, setLeadPhone] = useState("");
-  
-  // Sticky CTA state
-  const [showStickyCta, setShowStickyCta] = useState(false);
-  
-  // Template showcase state
-  const [selectedAudience, setSelectedAudience] = useState<'all' | 'women' | 'men' | 'unisex'>('all');
-  const templateSection = useScrollFade();
-  
-  const leadCaptureMutation = trpc.leads.capture.useMutation();
-  
-  // Calculate savings
-  const calculateSavings = () => {
-    const plan = parseFloat(shopifyPlan) || 0;
-    const apps = parseFloat(appStack) || 0;
-    const proc = parseFloat(processing) || 0;
-    
-    const currentTotal = plan + apps + proc;
-    const optimizedLow = currentTotal * 0.3; // 70% savings
-    const optimizedHigh = currentTotal * 0.5; // 50% savings
-    
-    return {
-      currentTotal,
-      optimizedLow,
-      optimizedHigh,
-      savingsLow: currentTotal - optimizedHigh,
-      savingsHigh: currentTotal - optimizedLow
-    };
-  };
-  
-  const handleCalculate = () => {
-    if (!shopifyPlan || !appStack || !processing) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    setShowResults(true);
-  };
-  
-  const savings = calculateSavings();
-  
-  // Handle lead capture
-  const handleLeadSubmit = async () => {
-    if (leadStep === 1) {
-      if (!storeUrl || !monthlySpend) {
-        toast.error("Please fill in all fields");
-        return;
-      }
-      setLeadStep(2);
-    } else {
-      if (!leadName || !leadEmail || !leadPhone) {
-        toast.error("Please fill in all fields");
-        return;
-      }
-      
-      try {
-        await leadCaptureMutation.mutateAsync({
-          name: leadName,
-          email: leadEmail,
-          phone: leadPhone,
-          storeUrl,
-          monthlySpend: parseFloat(monthlySpend),
-          sourcePage: "/shopify",
-          utmParams: {
-            source: new URLSearchParams(window.location.search).get('utm_source') || undefined,
-            medium: new URLSearchParams(window.location.search).get('utm_medium') || undefined,
-            campaign: new URLSearchParams(window.location.search).get('utm_campaign') || undefined,
-          }
-        });
-        
-        toast.success("Thanks! We'll reach out within 24 hours.");
-        setShowLeadForm(false);
-        setLeadStep(1);
-        // Reset form
-        setStoreUrl("");
-        setMonthlySpend("");
-        setLeadName("");
-        setLeadEmail("");
-        setLeadPhone("");
-      } catch (error) {
-        toast.error("Something went wrong. Please try again.");
-      }
-    }
-  };
-  
-  // Sticky CTA on scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 800) {
-        setShowStickyCta(true);
-      } else {
-        setShowStickyCta(false);
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-  
-  const faqs = [
-    {
-      question: "What are the migration risks?",
-      answer: "We handle data migration with zero downtime. Your store stays live during the entire process. We migrate products, customers, orders, and all historical data with full verification."
-    },
-    {
-      question: "Will my SEO rankings drop?",
-      answer: "No. We implement proper 301 redirects, maintain URL structures where possible, and preserve all meta data. Most clients see SEO improvements within 30 days due to faster load times."
-    },
-    {
-      question: "How long does migration take?",
-      answer: "Typical migration takes 2-4 weeks from kickoff to launch. We work in parallel with your existing store, so there's no disruption to your business."
-    },
-    {
-      question: "How much does it cost compared to Shopify?",
-      answer: "Most clients save 50-70% monthly. Instead of $300-2000/month in Shopify + apps, you pay a one-time build fee and minimal hosting (~$50-100/month). ROI typically hits in 3-6 months."
-    }
-  ];
+  const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+    <div className={brandPageRoot}>
       <Navigation />
-      
-      {/* Background glow effects */}
-      <div 
-        className="absolute inset-0 opacity-30 pointer-events-none"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
+      <Helmet>
+        <title>{PAGE_TITLE}</title>
+        <meta name="description" content={PAGE_DESCRIPTION} />
+        <meta property="og:title" content={PAGE_TITLE} />
+        <meta property="og:description" content={PAGE_DESCRIPTION} />
+      </Helmet>
+
+      <div className={brandBackdrop}>
+        <div className={brandBackdropLayerA} />
+        <div className={brandBackdropLayerB} />
+      </div>
 
       <main className="relative z-10">
-        {/* Hero Section */}
-        <section className="container mx-auto px-4 py-16 lg:py-24">
-          <div className="max-w-5xl mx-auto text-center">
-            <div className="inline-block px-4 py-2 bg-accent/10 border border-accent/30 rounded-full mb-6 animate-fade-in-up">
-              <span className="text-accent font-heading font-semibold text-sm">
-                For Shopify Store Owners
-              </span>
-            </div>
-            
-            <h1 className="font-display font-black text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-6 leading-tight tracking-tight animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-              Shopify Fees{" "}
-              <span className="text-neon">Eating Your Margin?</span>
+        <section className="container mx-auto px-4 pb-24 pt-24 md:pb-28 md:pt-32">
+          <div className="mx-auto max-w-4xl text-center">
+            <div className="mx-auto mb-10 h-px w-20 bg-gradient-to-r from-transparent via-cyan-300/85 to-transparent" />
+            <p className="mb-6 font-heading text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200/90">
+              Shopify Alternative for Growth Operators
+            </p>
+            <h1 className="font-display text-4xl font-black leading-[1.05] tracking-tight text-white/92 sm:text-5xl md:text-6xl lg:text-[4rem]">
+              Stop Renting Your Storefront.
               <br />
-              Own Your Stack.
+              <span className="bg-gradient-to-r from-cyan-200 via-cyan-300 to-sky-300 bg-clip-text text-transparent">
+                Own the Commerce Stack.
+              </span>
             </h1>
-            
-            <p className="font-heading text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              Stop losing 60%+ of your profits to platform fees, app subscriptions, and processing overhead. 
-              We build you a <span className="text-accent font-semibold">custom e-commerce system</span> that you own—
-              with migration support, automation, and costs that actually make sense.
+            <p className="mx-auto mt-8 max-w-3xl font-heading text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
+              We help store owners reduce platform overhead and move into an owned ecommerce system
+              built for conversion, automation, and stronger margins.
             </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              <Button
-                size="lg"
-                className="bg-accent text-background hover:bg-accent/90 font-heading font-bold text-lg px-8 py-6 neon-glow"
-                onClick={() => setShowLeadForm(true)}
-              >
+            <ul className="mx-auto mt-10 inline-block space-y-3 text-left font-heading text-muted-foreground/95">
+              {["Lower recurring cost", "Full data ownership", "Migration support included"].map((item) => (
+                <li key={item} className="flex items-center gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-cyan-300/35 bg-cyan-400/15 text-cyan-200">
+                    <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
+                  </span>
+                  <span className="text-base md:text-lg">{item}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-12 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
+              <Button size="lg" className={brandPrimaryButton} type="button" onClick={onTelegramCta("audit")}>
                 Get My Savings Plan
-                <ArrowRight className="ml-2 w-5 h-5" />
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold text-lg px-8 py-6"
-                type="button"
-                onClick={onTelegramCta("audit")}
-              >
-                Book Demo
-              </Button>
-            </div>
-
-            {/* Social Proof */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground font-heading animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-accent" />
-                <span>Zero monthly platform fees</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-accent" />
-                <span>Full data migration included</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-accent" />
-                <span>50-70% cost reduction</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Cost Breakdown Section */}
-        <section ref={costSection.ref} className={`container mx-auto px-4 py-16 ${getFadeClass(costSection.isVisible)}`}>
-          <div className="max-w-5xl mx-auto">
-            <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-5xl text-center mb-4">
-              Where Your <span className="text-neon">Money Goes</span>
-            </h2>
-            <p className="text-center text-muted-foreground font-heading text-lg mb-12">
-              The real cost of Shopify adds up fast
-            </p>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                { icon: DollarSign, title: "Shopify Plan", cost: "$29-$2,000/mo", desc: "Base platform fee" },
-                { icon: Package, title: "App Stack", cost: "$200-$800/mo", desc: "Email, reviews, upsells, etc." },
-                { icon: TrendingUp, title: "Processing Fees", cost: "2.9% + 30¢", desc: "Per transaction" },
-                { icon: Clock, title: "Operational Overhead", cost: "$500+/mo", desc: "Managing integrations" }
-              ].map((item, idx) => (
-                <div key={idx} className="bg-card border border-border rounded-xl p-6 hover:border-accent/50 transition-all">
-                  <item.icon className="w-10 h-10 text-accent mb-4" />
-                  <h3 className="font-heading font-bold text-xl mb-2">{item.title}</h3>
-                  <p className="text-2xl font-display font-bold text-accent mb-2">{item.cost}</p>
-                  <p className="text-sm text-muted-foreground">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-            
-            <div className="mt-8 bg-destructive/10 border border-destructive/30 rounded-xl p-6 text-center">
-              <p className="font-heading text-lg">
-                <span className="font-bold text-destructive">Typical Total:</span> $800-$3,500/month + 2.9% of every sale
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Value Proposition Section */}
-        <section ref={valueSection.ref} className={`container mx-auto px-4 py-16 ${getFadeClass(valueSection.isVisible)}`}>
-          <div className="max-w-5xl mx-auto">
-            <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-5xl text-center mb-4">
-              What You Get <span className="text-neon">Instead</span>
-            </h2>
-            <p className="text-center text-muted-foreground font-heading text-lg mb-12">
-              A platform built for your business, not theirs
-            </p>
-            
-            <div className="grid md:grid-cols-2 gap-8">
-              {[
-                {
-                  icon: Shield,
-                  title: "Custom Owned E-commerce System",
-                  desc: "Your platform, your rules. No vendor lock-in, no arbitrary limits, no surprise fee increases."
-                },
-                {
-                  icon: Zap,
-                  title: "Built-in Automation",
-                  desc: "SMS, Telegram, WhatsApp notifications. Inventory sync. Order management. All included, no app fees."
-                },
-                {
-                  icon: TrendingUp,
-                  title: "Simplified Operations",
-                  desc: "One system instead of 15 apps. One login. One support contact. Everything works together."
-                },
-                {
-                  icon: Package,
-                  title: "Migration Support",
-                  desc: "We handle the entire migration. Products, customers, orders, SEO. Zero downtime, full verification."
-                }
-              ].map((item, idx) => (
-                <div key={idx} className="bg-card border border-border rounded-xl p-8 hover:border-accent/50 transition-all">
-                  <item.icon className="w-12 h-12 text-accent mb-4" />
-                  <h3 className="font-heading font-bold text-2xl mb-3">{item.title}</h3>
-                  <p className="text-muted-foreground font-heading">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Template Showcase Section */}
-        <section ref={templateSection.ref} className={`container mx-auto px-4 py-16 ${templateSection.isVisible ? 'animate-fade-in-up' : 'md:opacity-0'}`}>
-          <div className="max-w-7xl mx-auto">
-            <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-5xl text-center mb-4">
-              Built for <span className="text-neon">Your Audience</span>
-            </h2>
-            <p className="text-center text-muted-foreground font-heading text-lg mb-8">
-              Choose from audience-optimized templates designed to convert
-            </p>
-            
-            {/* Audience Filters */}
-            <div className="flex flex-wrap justify-center gap-3 mb-12">
-              {[
-                { value: 'all' as const, label: 'All Templates' },
-                { value: 'women' as const, label: 'Women' },
-                { value: 'men' as const, label: 'Men' },
-                { value: 'unisex' as const, label: 'Unisex' }
-              ].map((filter) => (
-                <button
-                  key={filter.value}
-                  onClick={() => setSelectedAudience(filter.value)}
-                  className={`px-6 py-3 rounded-lg font-heading font-semibold transition-all ${
-                    selectedAudience === filter.value
-                      ? 'bg-accent text-background neon-glow'
-                      : 'bg-card border border-border hover:border-accent/50 text-foreground'
-                  }`}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
-            
-            {/* Template Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {[
-                // Women-focused templates
-                {
-                  audience: 'women',
-                  name: 'Beauty & Skincare',
-                  desc: 'Hero product focus, ingredient storytelling, before/after galleries, quiz-based product finder',
-                  features: ['Product quiz', 'Ingredient glossary', 'Routine builder', 'Subscription upsells'],
-                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/jfOVVKlIdaUaRJkU.png'
-                },
-                {
-                  audience: 'women',
-                  name: "Women's Fashion",
-                  desc: 'Lookbook-style layout, outfit bundling, size guide integration, style quiz, wishlist',
-                  features: ['Lookbook grid', 'Outfit bundles', 'Virtual stylist', 'Size recommendations'],
-                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/scXgWShWRxduEmdi.png'
-                },
-                {
-                  audience: 'women',
-                  name: 'Jewelry & Accessories',
-                  desc: 'High-res zoom, customization options, gift messaging, occasion-based filtering',
-                  features: ['360° product view', 'Engraving options', 'Gift packaging', 'Occasion filters'],
-                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/qHFwUwzyGuChZEqi.png'
-                },
-                {
-                  audience: 'women',
-                  name: 'Wellness/Self-Care',
-                  desc: 'Editorial content, wellness quiz, subscription boxes, community features, education hub',
-                  features: ['Wellness quiz', 'Subscription boxes', 'Content library', 'Community forum'],
-                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/dNixKOxvDADpEHKi.png'
-                },
-                // Men-focused templates
-                {
-                  audience: 'men',
-                  name: "Men's Grooming",
-                  desc: 'Problem-solution layout, routine builder, subscription model, educational content',
-                  features: ['Routine builder', 'Auto-replenish', 'Grooming guides', 'Product comparisons'],
-                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/waIgqYCszsKAKqho.png'
-                },
-                {
-                  audience: 'men',
-                  name: "Men's Streetwear",
-                  desc: 'Drop-style releases, countdown timers, limited edition badges, hype-driven copy',
-                  features: ['Drop calendar', 'Countdown timers', 'Limited badges', 'Waitlist signup'],
-                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/IgmbyaNhxyfKsmfw.png'
-                },
-                {
-                  audience: 'men',
-                  name: 'Fitness/Supplements',
-                  desc: 'Goal-based product finder, stack builder, progress tracking, educational content',
-                  features: ['Goal selector', 'Stack builder', 'Progress tracker', 'Nutrition guides'],
-                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/isJeIbKzVdqHcBkQ.png'
-                },
-                {
-                  audience: 'men',
-                  name: 'Watches/Accessories',
-                  desc: 'Luxury presentation, detailed specs, comparison tool, authentication guarantee',
-                  features: ['Spec sheets', 'Side-by-side compare', 'Authentication', 'Warranty info'],
-                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/dNNBebWyucaNbVzt.png'
-                },
-                // Unisex templates
-                {
-                  audience: 'unisex',
-                  name: 'Minimal DTC',
-                  desc: 'Clean single-product focus, benefits-driven copy, social proof, simple checkout',
-                  features: ['Single product', 'Benefits focus', 'Social proof', 'One-click checkout'],
-                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/CASVovFoLTwzhcWQ.png'
-                },
-                {
-                  audience: 'unisex',
-                  name: 'Bundle/Upsell',
-                  desc: 'Bundle builder, volume discounts, "Complete the set" prompts, cart upsells',
-                  features: ['Bundle builder', 'Volume pricing', 'Cart upsells', 'Gift sets'],
-                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/fieGEuaZBoXVLpWX.png'
-                },
-                {
-                  audience: 'unisex',
-                  name: 'Social-Proof UGC',
-                  desc: 'Customer photo gallery, video reviews, Instagram feed, community highlights',
-                  features: ['UGC gallery', 'Video reviews', 'Instagram feed', 'Community stories'],
-                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/unNwnuYiDnnfoQRv.png'
-                },
-                {
-                  audience: 'unisex',
-                  name: 'One-Product Funnel',
-                  desc: 'Long-form sales page, video hero, testimonials, urgency elements, guarantee',
-                  features: ['Video sales letter', 'Testimonial wall', 'Urgency timer', 'Money-back guarantee'],
-                  image: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/iRxNelwIbhmJcsxW.png'
-                }
-              ]
-                .filter(template => selectedAudience === 'all' || template.audience === selectedAudience)
-                .map((template, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-card border border-border rounded-xl overflow-hidden hover:border-accent/50 transition-all group"
-                  >
-                    {/* Template Preview Image */}
-                    {template.image && (
-                      <div className="relative w-full h-48 bg-muted overflow-hidden">
-                        <img
-                          src={template.image}
-                          alt={`${template.name} template preview`}
-                          className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                    )}
-                    
-                    <div className="p-6">
-                    <div className="mb-4">
-                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-heading font-semibold mb-3 ${
-                        template.audience === 'women' ? 'bg-pink-500/20 text-pink-400' :
-                        template.audience === 'men' ? 'bg-blue-500/20 text-blue-400' :
-                        'bg-purple-500/20 text-purple-400'
-                      }`}>
-                        {template.audience === 'women' ? 'Women' : template.audience === 'men' ? 'Men' : 'Unisex'}
-                      </span>
-                      <h3 className="font-heading font-bold text-xl mb-2 group-hover:text-accent transition-colors">
-                        {template.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-4">{template.desc}</p>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      {template.features.map((feature, fIdx) => (
-                        <div key={fIdx} className="flex items-start gap-2">
-                          <Check className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                          <span className="text-sm font-heading">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <Button
-                      variant="outline"
-                      className="w-full mt-6 border-accent/30 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold"
-                      onClick={() => setShowLeadForm(true)}
-                    >
-                      Get This Template
-                    </Button>
-                    </div>
-                  </div>
-                ))}
-            </div>
-            
-            <div className="mt-12 text-center">
-              <p className="text-muted-foreground font-heading mb-6">
-                All templates include full migration support, custom branding, and built-in automation
-              </p>
-              <Button
-                size="lg"
-                className="bg-accent text-background hover:bg-accent/90 font-heading font-bold text-lg px-8 py-6 neon-glow"
-                type="button"
-                onClick={onTelegramCta("audit")}
-              >
-                Book Strategy Call
-                <ArrowRight className="ml-2 w-5 h-5" />
+              <Button size="lg" variant="outline" className={brandSecondaryButton} onClick={() => setLocation("/pricing")}>
+                See Pricing
               </Button>
             </div>
           </div>
         </section>
 
-        {/* Savings Calculator Section */}
-        <section ref={calculatorSection.ref} className={`container mx-auto px-4 py-16 ${getFadeClass(calculatorSection.isVisible)}`}>         <div className="max-w-3xl mx-auto">
-            <div className="bg-card border border-accent/30 rounded-2xl p-8 md:p-12 neon-glow">
-              <h2 className="font-display font-bold text-3xl md:text-4xl text-center mb-4">
-                Calculate Your <span className="text-neon">Savings</span>
+        <section className={cn("border-y border-cyan-300/12 bg-card/[0.06]", brandSectionY)}>
+          <div className="container mx-auto px-4">
+            <div className="mx-auto mb-12 max-w-3xl text-center">
+              <h2 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-[2.5rem]">
+                Where the Margin Gets Eaten
               </h2>
-              <p className="text-center text-muted-foreground font-heading mb-8">
-                See how much you could save by owning your platform
+              <p className="mt-5 font-heading text-base leading-relaxed text-muted-foreground md:text-lg">
+                The issue is rarely one fee. It is the full stack cost plus operational drag.
               </p>
-              
-              <div className="space-y-6 mb-8">
-                <div>
-                  <label className="block font-heading font-semibold mb-2">Monthly Shopify Plan Cost</label>
-                  <input
-                    type="number"
-                    placeholder="e.g., 79"
-                    value={shopifyPlan}
-                    onChange={(e) => setShopifyPlan(e.target.value)}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 font-heading focus:border-accent focus:outline-none"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block font-heading font-semibold mb-2">Monthly App Stack Total</label>
-                  <input
-                    type="number"
-                    placeholder="e.g., 450"
-                    value={appStack}
-                    onChange={(e) => setAppStack(e.target.value)}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 font-heading focus:border-accent focus:outline-none"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block font-heading font-semibold mb-2">Monthly Processing Estimate</label>
-                  <input
-                    type="number"
-                    placeholder="e.g., 300"
-                    value={processing}
-                    onChange={(e) => setProcessing(e.target.value)}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 font-heading focus:border-accent focus:outline-none"
-                  />
-                </div>
-              </div>
-              
-              <Button
-                size="lg"
-                className="w-full bg-accent text-background hover:bg-accent/90 font-heading font-bold text-lg py-6"
-                onClick={handleCalculate}
-              >
-                Calculate Savings
-              </Button>
-              
-              {showResults && (
-                <div className="mt-8 space-y-4 animate-fade-in-up">
-                  <div className="bg-background border border-border rounded-lg p-6">
-                    <p className="text-sm text-muted-foreground font-heading mb-1">Current Monthly Total</p>
-                    <p className="text-3xl font-display font-bold text-destructive">
-                      ${savings.currentTotal.toFixed(2)}
-                    </p>
-                  </div>
-                  
-                  <div className="bg-accent/10 border border-accent/30 rounded-lg p-6">
-                    <p className="text-sm text-accent font-heading mb-1">Projected Optimized Range</p>
-                    <p className="text-3xl font-display font-bold text-accent">
-                      ${savings.optimizedLow.toFixed(2)} - ${savings.optimizedHigh.toFixed(2)}
-                    </p>
-                  </div>
-                  
-                  <div className="bg-card border border-border rounded-lg p-6">
-                    <p className="text-sm text-muted-foreground font-heading mb-1">Monthly Savings</p>
-                    <p className="text-3xl font-display font-bold text-neon">
-                      ${savings.savingsLow.toFixed(2)} - ${savings.savingsHigh.toFixed(2)}
-                    </p>
-                  </div>
-                  
-                  <Button
-                    size="lg"
-                    className="w-full bg-neon text-background hover:bg-neon/90 font-heading font-bold text-lg py-6 neon-glow"
-                    onClick={() => setShowLeadForm(true)}
-                  >
-                    Get My Custom Savings Plan
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </Button>
-                </div>
-              )}
             </div>
-          </div>
-        </section>
-
-        {/* Migration Reassurance */}
-        <section ref={migrationSection.ref} className={`container mx-auto px-4 py-16 ${getFadeClass(migrationSection.isVisible)}`}>
-          <div className="max-w-4xl mx-auto">
-            <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-5xl text-center mb-4">
-              Migration <span className="text-neon">Made Simple</span>
-            </h2>
-            <p className="text-center text-muted-foreground font-heading text-lg mb-12">
-              We handle everything so you can focus on running your business
-            </p>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              {[
-                {
-                  title: "Data Migration Support",
-                  desc: "Products, customers, orders, and all historical data transferred with full verification"
-                },
-                {
-                  title: "Minimal Downtime",
-                  desc: "Your store stays live during migration. We work in parallel and switch when ready"
-                },
-                {
-                  title: "Onboarding & Training",
-                  desc: "Full training on your new system. Documentation, videos, and ongoing support"
-                }
-              ].map((item, idx) => (
-                <div key={idx} className="bg-card border border-border rounded-xl p-6 text-center">
-                  <div className="w-12 h-12 bg-accent/10 border border-accent/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-accent font-display font-bold text-xl">{idx + 1}</span>
-                  </div>
-                  <h3 className="font-heading font-bold text-xl mb-3">{item.title}</h3>
-                  <p className="text-muted-foreground font-heading">{item.desc}</p>
+            <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3 lg:gap-8">
+              {feeCards.map((card) => (
+                <div key={card.title} className={`${brandGrayPanel} ${brandGrayPanelHover} p-8 text-center`} style={grayPanelStyle}>
+                  <card.icon className="mx-auto mb-5 h-7 w-7 text-accent" strokeWidth={1.6} />
+                  <h3 className="mb-3 font-heading text-xl font-bold text-foreground">{card.title}</h3>
+                  <p className="mb-3 font-display text-3xl font-black tracking-tight text-accent">{card.amount}</p>
+                  <p className="font-heading text-sm leading-relaxed text-muted-foreground">{card.text}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* FAQ Section */}
-        <section ref={faqSection.ref} className={`container mx-auto px-4 py-16 ${getFadeClass(faqSection.isVisible)}`}>
-          <div className="max-w-3xl mx-auto">
-            <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-5xl text-center mb-4">
-              Common <span className="text-neon">Questions</span>
+        <section className={cn("container mx-auto px-4", brandSectionY)}>
+          <div className="mx-auto mb-12 max-w-3xl text-center">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-[2.5rem]">
+              Why Brands Switch
             </h2>
-            <p className="text-center text-muted-foreground font-heading text-lg mb-12">
-              Everything you need to know about switching from Shopify
+            <p className="mt-5 font-heading text-base leading-relaxed text-muted-foreground md:text-lg">
+              This is not a theme refresh. It is a strategic move to better economics and cleaner execution.
             </p>
-            
+          </div>
+          <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2 lg:gap-8">
+            <div className={`${brandGrayPanel} ${brandGrayPanelHover} p-8 text-center`} style={grayPanelStyle}>
+              <h3 className="mb-5 font-heading text-2xl font-bold text-cyan-100">What You Keep</h3>
+              <ul className="space-y-3">
+                {["Brand equity and customer trust", "Product catalog and order history", "Sales momentum during transition"].map((item) => (
+                  <li key={item} className="flex items-start justify-center gap-3 text-left font-heading text-sm text-foreground/90">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className={`${brandGrayPanel} ${brandGrayPanelHover} p-8 text-center`} style={grayPanelStyle}>
+              <h3 className="mb-5 font-heading text-2xl font-bold text-cyan-100">What You Gain</h3>
+              <ul className="space-y-3">
+                {outcomes.map((item) => (
+                  <li key={item} className="flex items-start justify-center gap-3 text-left font-heading text-sm text-foreground/90">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section className={cn("border-y border-cyan-300/12 bg-card/[0.05]", brandSectionY)}>
+          <div className="container mx-auto px-4">
+            <div className="mx-auto mb-12 max-w-3xl text-center">
+              <h2 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-[2.5rem]">
+                Migration Without Chaos
+              </h2>
+              <p className="mt-5 font-heading text-base leading-relaxed text-muted-foreground md:text-lg">
+                We run a controlled process that keeps your business running while the new stack is built.
+              </p>
+            </div>
+            <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3 lg:gap-8">
+              {migrationSteps.map((step) => (
+                <div key={step.step} className={`${brandGrayPanel} ${brandGrayPanelHover} p-8 text-center`} style={grayPanelStyle}>
+                  <p className="mb-4 font-display text-lg font-black tracking-[0.12em] text-cyan-200/90">{step.step}</p>
+                  <h3 className="mb-3 font-heading text-xl font-bold text-foreground">{step.title}</h3>
+                  <p className="font-heading text-sm leading-relaxed text-muted-foreground">{step.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className={cn("container mx-auto px-4", brandSectionY)}>
+          <div className="mx-auto max-w-4xl">
+            <h2 className="mb-10 text-center font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+              Common Questions
+            </h2>
             <div className="space-y-4">
-              {faqs.map((faq, idx) => (
-                <details key={idx} className="bg-card border border-border rounded-xl p-6 group">
-                  <summary className="font-heading font-bold text-lg cursor-pointer flex items-center justify-between">
-                    <span>{faq.question}</span>
-                    <HelpCircle className="w-5 h-5 text-accent group-open:rotate-180 transition-transform" />
+              {faqs.map((item) => (
+                <details key={item.q} className={`${brandGrayPanel} ${brandGrayPanelHover} rounded-xl p-6`} style={grayPanelStyle}>
+                  <summary className="cursor-pointer list-none font-heading text-lg font-bold text-foreground">
+                    {item.q}
                   </summary>
-                  <p className="mt-4 text-muted-foreground font-heading leading-relaxed">
-                    {faq.answer}
-                  </p>
+                  <p className="mt-4 font-heading text-sm leading-relaxed text-muted-foreground">{item.a}</p>
                 </details>
               ))}
             </div>
-            
-            <div className="mt-8 text-center">
-              <p className="text-muted-foreground font-heading mb-4">
-                Have more questions?
-              </p>
-              <Button
-                variant="outline"
-                className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold"
-                type="button"
-                onClick={onTelegramCta("contact")}
-              >
-                Contact Us
-              </Button>
-            </div>
           </div>
         </section>
 
-        {/* Final CTA Section */}
-        <section ref={finalCtaSection.ref} className={`container mx-auto px-4 py-16 lg:py-24 ${getFadeClass(finalCtaSection.isVisible)}`}>
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/30 rounded-2xl p-12 neon-glow">
-              <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-5xl mb-6">
-                Book Your Shopify <span className="text-neon">Savings Demo</span>
-              </h2>
-              <p className="font-heading text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                See exactly how much you'll save and what your custom platform will look like. 
-                30-minute demo, zero pressure.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-accent text-background hover:bg-accent/90 font-heading font-bold text-lg px-8 py-6 neon-glow"
-                  onClick={() => setShowLeadForm(true)}
-                >
-                  Get My Savings Plan
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold text-lg px-8 py-6"
-                  type="button"
-                  onClick={onTelegramCta("audit")}
-                >
-                  Book Demo
-                </Button>
-              </div>
-              
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground font-heading">
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-accent" />
-                  <span>No credit card required</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-accent" />
-                  <span>Free cost analysis</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-accent" />
-                  <span>Response within 24 hours</span>
-                </div>
-              </div>
+        <section className="container mx-auto px-4 pb-28 pt-8 md:pb-36">
+          <div className={`${brandGrayPanel} ${brandGrayPanelHover} mx-auto max-w-4xl rounded-2xl px-8 py-14 text-center md:px-12 md:py-16`} style={grayPanelStyle}>
+            <h2 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-[2.8rem]">
+              Ready to Stop Paying Platform Tax?
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl font-heading text-base leading-relaxed text-muted-foreground md:text-lg">
+              Book a focused strategy call and we will map your stack, likely savings, and migration path.
+            </p>
+            <div className="mt-10 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
+              <Button size="lg" className={brandPrimaryButton} type="button" onClick={onTelegramCta("audit")}>
+                Get My Savings Plan
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button size="lg" variant="outline" className={brandSecondaryButton} type="button" onClick={onTelegramCta("audit")}>
+                Book Demo
+              </Button>
             </div>
           </div>
         </section>
       </main>
-
-      {/* Sticky CTA */}
-      {showStickyCta && (
-        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-accent/30 p-4 z-50 animate-fade-in-up">
-          <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <p className="font-heading font-bold text-lg">Ready to own your platform?</p>
-              <p className="text-sm text-muted-foreground">Save 50-70% on monthly costs</p>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                className="bg-accent text-background hover:bg-accent/90 font-heading font-bold"
-                onClick={() => setShowLeadForm(true)}
-              >
-                Get Savings Plan
-              </Button>
-              <Button
-                variant="outline"
-                className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold"
-                type="button"
-                onClick={onTelegramCta("audit")}
-              >
-                Book Demo
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Lead Capture Modal */}
-      {showLeadForm && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-card border border-accent/30 rounded-2xl p-8 max-w-md w-full neon-glow animate-fade-in-up">
-            <h3 className="font-display font-bold text-2xl mb-2">
-              {leadStep === 1 ? "Get Your Savings Plan" : "Almost There"}
-            </h3>
-            <p className="text-muted-foreground font-heading mb-6">
-              {leadStep === 1 ? "Tell us about your store" : "How can we reach you?"}
-            </p>
-            
-            {leadStep === 1 ? (
-              <div className="space-y-4">
-                <div>
-                  <label className="block font-heading font-semibold mb-2 text-sm">Store URL</label>
-                  <input
-                    type="url"
-                    placeholder="yourstore.myshopify.com or davincidynamics.ai"
-                    value={storeUrl}
-                    onChange={(e) => setStoreUrl(e.target.value)}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 font-heading focus:border-accent focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-heading font-semibold mb-2 text-sm">Monthly Shopify + Apps Spend</label>
-                  <input
-                    type="number"
-                    placeholder="e.g., 800"
-                    value={monthlySpend}
-                    onChange={(e) => setMonthlySpend(e.target.value)}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 font-heading focus:border-accent focus:outline-none"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <label className="block font-heading font-semibold mb-2 text-sm">Name</label>
-                  <input
-                    type="text"
-                    placeholder="Your name"
-                    value={leadName}
-                    onChange={(e) => setLeadName(e.target.value)}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 font-heading focus:border-accent focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-heading font-semibold mb-2 text-sm">Email</label>
-                  <input
-                    type="email"
-                    placeholder="you@davincidynamics.ai"
-                    value={leadEmail}
-                    onChange={(e) => setLeadEmail(e.target.value)}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 font-heading focus:border-accent focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-heading font-semibold mb-2 text-sm">Phone</label>
-                  <input
-                    type="tel"
-                    placeholder="+1 (555) 000-0000"
-                    value={leadPhone}
-                    onChange={(e) => setLeadPhone(e.target.value)}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 font-heading focus:border-accent focus:outline-none"
-                  />
-                </div>
-              </div>
-            )}
-            
-            <div className="flex gap-3 mt-6">
-              <Button
-                variant="outline"
-                className="flex-1 border-border hover:bg-secondary font-heading"
-                onClick={() => {
-                  setShowLeadForm(false);
-                  setLeadStep(1);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 bg-accent text-background hover:bg-accent/90 font-heading font-bold"
-                onClick={handleLeadSubmit}
-                disabled={leadCaptureMutation.isPending}
-              >
-                {leadCaptureMutation.isPending ? "Submitting..." : leadStep === 1 ? "Next" : "Submit"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* FAQ Schema for SEO */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          "mainEntity": faqs.map(faq => ({
-            "@type": "Question",
-            "name": faq.question,
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": faq.answer
-            }
-          }))
-        })}
-      </script>
     </div>
   );
 }

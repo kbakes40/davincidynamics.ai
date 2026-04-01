@@ -395,7 +395,7 @@ export default function Home() {
                   )}
                   style={homeGrayCardSurfaceStyle}
                 >
-                  <Icon className="w-7 h-7 text-accent mb-5 opacity-90" strokeWidth={1.5} />
+                  <Icon className="w-7 h-7 text-accent mb-5 opacity-90 self-center" strokeWidth={1.5} />
                   <h3 className="font-heading font-bold text-lg text-foreground mb-3">
                     {title}
                   </h3>
