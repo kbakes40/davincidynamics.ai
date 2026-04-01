@@ -32,8 +32,8 @@ function parseChartDate(d: string): string {
 export function TrafficLineChart({ title, total, subtitle, data, color }: Props) {
   const gid = useId().replace(/:/g, "");
   const gradId = `trafficArea-${color}-${gid}`;
-  const stroke = color === "amber" ? "#fbbf24" : "#fb923c";
-  const fillLow = color === "amber" ? "#fbbf24" : "#fb923c";
+  const stroke = color === "amber" ? "#fde68a" : "#fdba74";
+  const fillLow = color === "amber" ? "#f59e0b" : "#f97316";
 
   const rows = useMemo(() => {
     return (Array.isArray(data) ? data : []).map(d => ({
@@ -58,13 +58,13 @@ export function TrafficLineChart({ title, total, subtitle, data, color }: Props)
             <AreaChart data={rows} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={fillLow} stopOpacity={0.35} />
+                  <stop offset="0%" stopColor={fillLow} stopOpacity={0.42} />
                   <stop offset="100%" stopColor={fillLow} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis
                 dataKey="label"
-                tick={{ fill: "rgba(254, 243, 199, 0.45)", fontSize: 10 }}
+                tick={{ fill: "rgba(254, 243, 199, 0.62)", fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
                 interval="preserveStartEnd"
@@ -83,9 +83,11 @@ export function TrafficLineChart({ title, total, subtitle, data, color }: Props)
                 type="monotone"
                 dataKey="value"
                 stroke={stroke}
-                strokeWidth={1.5}
+                strokeOpacity={0.95}
+                strokeWidth={2}
                 fill={`url(#${gradId})`}
                 dot={false}
+                activeDot={{ r: 3, fill: stroke, stroke: "rgba(28,10,2,0.8)", strokeWidth: 1.5 }}
                 isAnimationActive={rows.length < 120}
               />
             </AreaChart>

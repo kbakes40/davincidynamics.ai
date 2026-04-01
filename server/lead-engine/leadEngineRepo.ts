@@ -564,30 +564,58 @@ export async function findDuplicateLeadId(
     longitude?: number | null;
   }
 ): Promise<string | null> {
+  const loadIdentityRows = async () =>
+    db
+      .select({
+        id: leadEngineLeads.id,
+        sourceRecordId: leadEngineLeads.sourceRecordId,
+        normalizedPhone: leadEngineLeads.normalizedPhone,
+        normalizedWebsite: leadEngineLeads.normalizedWebsite,
+      })
+      .from(leadEngineLeads);
+
   const sid = n.sourceRecordId?.trim();
   if (sid) {
-    const r = await db
-      .select({ id: leadEngineLeads.id })
-      .from(leadEngineLeads)
-      .where(eq(leadEngineLeads.sourceRecordId, sid))
-      .limit(1);
-    if (r[0]) return r[0].id;
+    try {
+      const r = await db
+        .select({ id: leadEngineLeads.id })
+        .from(leadEngineLeads)
+        .where(eq(leadEngineLeads.sourceRecordId, sid))
+        .limit(1);
+      if (r[0]) return r[0].id;
+    } catch {
+      const rows = await loadIdentityRows();
+      const match = rows.find(row => (row.sourceRecordId ?? "").trim() === sid);
+      if (match) return match.id;
+    }
   }
   if (n.normalizedPhone) {
-    const r = await db
-      .select({ id: leadEngineLeads.id })
-      .from(leadEngineLeads)
-      .where(eq(leadEngineLeads.normalizedPhone, n.normalizedPhone))
-      .limit(1);
-    if (r[0]) return r[0].id;
+    try {
+      const r = await db
+        .select({ id: leadEngineLeads.id })
+        .from(leadEngineLeads)
+        .where(eq(leadEngineLeads.normalizedPhone, n.normalizedPhone))
+        .limit(1);
+      if (r[0]) return r[0].id;
+    } catch {
+      const rows = await loadIdentityRows();
+      const match = rows.find(row => (row.normalizedPhone ?? "") === n.normalizedPhone);
+      if (match) return match.id;
+    }
   }
   if (n.normalizedWebsite) {
-    const r = await db
-      .select({ id: leadEngineLeads.id })
-      .from(leadEngineLeads)
-      .where(eq(leadEngineLeads.normalizedWebsite, n.normalizedWebsite))
-      .limit(1);
-    if (r[0]) return r[0].id;
+    try {
+      const r = await db
+        .select({ id: leadEngineLeads.id })
+        .from(leadEngineLeads)
+        .where(eq(leadEngineLeads.normalizedWebsite, n.normalizedWebsite))
+        .limit(1);
+      if (r[0]) return r[0].id;
+    } catch {
+      const rows = await loadIdentityRows();
+      const match = rows.find(row => (row.normalizedWebsite ?? "") === n.normalizedWebsite);
+      if (match) return match.id;
+    }
   }
   if (n.normalizedBusinessName && n.zip) {
     const r = await db

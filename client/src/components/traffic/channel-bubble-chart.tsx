@@ -64,13 +64,15 @@ export function ChannelBubbleChart({ title, channels, mode, dateRangeLabel }: Pr
               );
             })}
           </div>
-          <div className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-2 border-t border-white/[0.06] pt-4">
+          <div className="mt-2 flex flex-wrap justify-center gap-x-5 gap-y-2.5 border-t border-white/[0.06] pt-4 sm:pt-5">
             {list.slice(0, 8).map((ch, i) => {
               const style = PALETTE[i % PALETTE.length]!;
               return (
-                <div key={`${ch.channel}-leg-${i}`} className="flex items-center gap-2">
-                  <span className="h-2 w-2 shrink-0 rounded-full ring-1 ring-white/15" style={{ background: style.ring }} />
-                  <span className="text-[10px] font-medium text-orange-200/55">{ch.channel}</span>
+                <div key={`${ch.channel}-leg-${i}`} className="flex items-center gap-2.5">
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-white/20" style={{ background: style.ring }} />
+                  <span className="max-w-[110px] truncate text-[11px] font-medium text-orange-200/65" title={ch.channel}>
+                    {ch.channel}
+                  </span>
                 </div>
               );
             })}
