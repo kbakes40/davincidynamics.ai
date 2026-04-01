@@ -45,7 +45,7 @@ function KpiCard({ kpi }: { kpi: TrafficKpi }) {
 
 export function KpiStack({ items, dateRangeLabel }: Props) {
   return (
-    <div className="flex h-full w-full max-w-[220px] flex-col gap-4">
+    <div className="flex h-full w-full max-w-[280px] flex-col gap-4">
       <p className={`${trafficMuted} px-1 text-center lg:text-left`}>{dateRangeLabel}</p>
       <div className="grid grid-cols-1 gap-4">
         {items.map(kpi => (

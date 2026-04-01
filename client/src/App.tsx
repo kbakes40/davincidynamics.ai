@@ -29,6 +29,9 @@ import LeadEngineOutreachPage from "./lead-engine/pages/LeadEngineOutreachPage";
 import LeadEngineAnalyticsPage from "./lead-engine/pages/LeadEngineAnalyticsPage";
 import LeadEngineCampaignsPage from "./lead-engine/pages/LeadEngineCampaignsPage";
 import LeadEngineCampaignDetailPage from "./lead-engine/pages/LeadEngineCampaignDetailPage";
+import OperatorLoginPage from "./pages/operator/OperatorLoginPage";
+import OperatorDashboardPage from "./pages/operator/OperatorDashboardPage";
+import OperatorPlaceholderPage from "./pages/operator/OperatorPlaceholderPage";
 import { BookingProvider } from "./contexts/BookingContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import GlassChatWidget from "./components/GlassChatWidget";
@@ -38,7 +41,7 @@ const staticMarketing = import.meta.env.VITE_STATIC_MARKETING === "true";
 /** Reference landing (hookahprice manus) has no sticky nav, chat bubble, or Spotify chrome. */
 function FloatingChrome() {
   const [location] = useLocation();
-  if (location === "/" || staticMarketing || location.startsWith("/lead-engine") || location.startsWith("/backend/traffic")) return null;
+  if (location === "/" || staticMarketing || location.startsWith("/lead-engine") || location.startsWith("/backend/traffic") || location.startsWith("/control")) return null;
   return (
     <>
       <SpotifyBottomPlayer />
@@ -50,7 +53,7 @@ function FloatingChrome() {
 function Router() {
   const [location] = useLocation();
   const mainPad =
-    location === "/" || staticMarketing || location.startsWith("/lead-engine") || location.startsWith("/backend/traffic")
+    location === "/" || staticMarketing || location.startsWith("/lead-engine") || location.startsWith("/backend/traffic") || location.startsWith("/control")
       ? "pb-0"
       : "pb-20 md:pb-20";
   return (
@@ -81,6 +84,11 @@ function Router() {
         <Route path={"/conversations"} component={ConversationHistory} />
         <Route path={"/spotify-callback"} component={SpotifyCallback} />
         <Route path={"/backend/traffic"} component={TrafficDashboardPage} />
+        <Route path={"/control/login"} component={OperatorLoginPage} />
+        <Route path={"/control/sites"}>{() => <OperatorPlaceholderPage title="Sites" description="Manage internal site operations, launch states, and platform ownership mapping." />}</Route>
+        <Route path={"/control/admin-tools"}>{() => <OperatorPlaceholderPage title="Admin Tools" description="Internal administration tools, access controls, and operator utility workflows." />}</Route>
+        <Route path={"/control/settings"}>{() => <OperatorPlaceholderPage title="Settings" description="Portal settings and secure operator configuration controls." />}</Route>
+        <Route path={"/control"} component={OperatorDashboardPage} />
         <Route path={"/ai-team"} component={AITeamPage} />
         <Route path={"/ai-team/"} component={AITeamPage} />
         <Route path={"/lead-engine/jobs/:id"} component={LeadEngineJobDetailPage} />

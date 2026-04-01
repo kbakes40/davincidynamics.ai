@@ -829,8 +829,20 @@ export default function LeadEngineLeadsPage() {
           </SheetHeader>
           <div className="mt-6 space-y-4">
             <div className="grid sm:grid-cols-3 gap-3">
-              <Input placeholder="Target ZIP" value={searchForm.targetZip} onChange={e => setSearchForm(v => ({ ...v, targetZip: e.target.value }))} />
-              <Input placeholder="Radius miles" value={searchForm.radiusMiles} onChange={e => setSearchForm(v => ({ ...v, radiusMiles: e.target.value }))} />
+              <Input
+                placeholder="Target ZIP"
+                autoComplete="new-password"
+                name="lead-search-target-zip"
+                value={searchForm.targetZip}
+                onChange={e => setSearchForm(v => ({ ...v, targetZip: e.target.value }))}
+              />
+              <Input
+                placeholder="Radius miles"
+                autoComplete="new-password"
+                name="lead-search-radius-miles"
+                value={searchForm.radiusMiles}
+                onChange={e => setSearchForm(v => ({ ...v, radiusMiles: e.target.value }))}
+              />
               <select
                 value={searchForm.websiteStatus}
                 onChange={e => setSearchForm(v => ({ ...v, websiteStatus: e.target.value as any }))}
@@ -860,10 +872,34 @@ export default function LeadEngineLeadsPage() {
                 <option value="gyms">Gyms</option>
                 <option value="law_firms">Law firms</option>
               </select>
-              <Input placeholder="City (optional)" value={searchForm.city} onChange={e => setSearchForm(v => ({ ...v, city: e.target.value }))} />
-              <Input placeholder="State (optional)" value={searchForm.state} onChange={e => setSearchForm(v => ({ ...v, state: e.target.value }))} />
-              <Input placeholder="Category (optional)" value={searchForm.category} onChange={e => setSearchForm(v => ({ ...v, category: e.target.value }))} />
-              <Input placeholder="Keyword (optional)" value={searchForm.keyword} onChange={e => setSearchForm(v => ({ ...v, keyword: e.target.value }))} />
+              <Input
+                placeholder="City (optional)"
+                autoComplete="new-password"
+                name="lead-search-city"
+                value={searchForm.city}
+                onChange={e => setSearchForm(v => ({ ...v, city: e.target.value }))}
+              />
+              <Input
+                placeholder="State (optional)"
+                autoComplete="new-password"
+                name="lead-search-state"
+                value={searchForm.state}
+                onChange={e => setSearchForm(v => ({ ...v, state: e.target.value }))}
+              />
+              <Input
+                placeholder="Category (optional)"
+                autoComplete="new-password"
+                name="lead-search-category"
+                value={searchForm.category}
+                onChange={e => setSearchForm(v => ({ ...v, category: e.target.value }))}
+              />
+              <Input
+                placeholder="Keyword (optional)"
+                autoComplete="new-password"
+                name="lead-search-keyword"
+                value={searchForm.keyword}
+                onChange={e => setSearchForm(v => ({ ...v, keyword: e.target.value }))}
+              />
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className={cn(leMuted, "text-sm")}>

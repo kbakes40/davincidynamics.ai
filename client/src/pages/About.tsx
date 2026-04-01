@@ -8,6 +8,18 @@ import { Check, ArrowRight, Building2, Radio, Wrench, ShoppingBag } from "lucide
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet-async";
 import { onTelegramCta } from "@/lib/telegramCtas";
+import {
+  brandBreakdownButton,
+  brandBackdrop,
+  brandBackdropLayerA,
+  brandBackdropLayerB,
+  brandCard,
+  brandCardHover,
+  brandPageRoot,
+  brandPrimaryButton,
+  brandSecondaryButton,
+  brandSectionY,
+} from "@/lib/brandStyles";
 
 const PAGE_TITLE = "About | DaVinci Dynamics";
 const PAGE_DESCRIPTION =
@@ -40,7 +52,7 @@ export default function About() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+    <div className={brandPageRoot}>
       <Navigation />
       <Helmet>
         <title>{PAGE_TITLE}</title>
@@ -49,32 +61,27 @@ export default function About() {
         <meta property="og:description" content={PAGE_DESCRIPTION} />
       </Helmet>
 
-      <div
-        className="absolute inset-0 opacity-[0.18] pointer-events-none"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      />
+      <div className={brandBackdrop}>
+        <div className={brandBackdropLayerA} />
+        <div className={brandBackdropLayerB} />
+      </div>
 
       <main className="relative z-10">
         {/* Hero */}
-        <section className="container mx-auto px-4 pt-20 pb-16 md:pt-28 md:pb-20">
+        <section className="container mx-auto px-4 pb-24 pt-24 md:pb-28 md:pt-32">
           <div className="max-w-3xl mx-auto text-center">
             <div className="h-px w-16 bg-gradient-to-r from-transparent via-accent to-transparent mx-auto mb-10 opacity-80" />
-            <h1 className="font-display font-black text-4xl sm:text-5xl md:text-6xl leading-[1.08] tracking-tight text-foreground mb-8">
+            <h1 className="font-display font-black text-4xl leading-[1.06] tracking-tight text-white/92 sm:text-5xl md:text-6xl">
               Built From Real Experience, Not Theory
             </h1>
-            <p className="font-heading text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed mb-12 max-w-2xl mx-auto">
+            <p className="mx-auto mb-12 mt-8 max-w-2xl font-heading text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
               DaVinci Dynamics was built from years of working directly with
               customers, sales systems, and real business operations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center">
               <Button
                 size="lg"
-                className="bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base md:text-lg px-8 py-6 h-auto neon-glow"
+                className={brandPrimaryButton}
                 type="button"
                 onClick={onTelegramCta("about")}
               >
@@ -84,7 +91,7 @@ export default function About() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-accent/40 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold text-base md:text-lg px-8 py-6 h-auto bg-background/30 backdrop-blur-sm"
+                className={brandSecondaryButton}
                 onClick={() => setLocation("/pricing")}
               >
                 See Pricing
@@ -94,7 +101,7 @@ export default function About() {
         </section>
 
         {/* Personal story */}
-        <section className="container mx-auto px-4 py-12 md:py-16">
+        <section className={`container mx-auto px-4 ${brandSectionY}`}>
           <div className="max-w-2xl mx-auto">
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-8 tracking-tight text-center md:text-left">
               Why DaVinci Dynamics Exists
@@ -127,7 +134,7 @@ export default function About() {
               <p className="text-foreground pt-2">
                 DaVinci Dynamics was built to fix that.
               </p>
-              <p className="text-sm text-muted-foreground/90 pt-4 border-t border-accent/15">
+              <p className="border-t border-cyan-300/15 pt-4 text-sm text-muted-foreground/90">
                 — Kevin Baker, founder
               </p>
             </div>
@@ -135,8 +142,8 @@ export default function About() {
         </section>
 
         {/* What makes us different */}
-        <section className="container mx-auto px-4 py-12 md:py-16">
-          <div className="max-w-2xl mx-auto border-y border-accent/15 py-12 md:py-14">
+        <section className={`container mx-auto px-4 ${brandSectionY}`}>
+          <div className="mx-auto max-w-2xl border-y border-cyan-300/14 py-12 md:py-14">
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-5 tracking-tight text-center">
               Not Just Websites, Real Systems
             </h2>
@@ -169,7 +176,7 @@ export default function About() {
         </section>
 
         {/* Experience / positioning */}
-        <section className="container mx-auto px-4 py-12 md:py-16">
+        <section className={`container mx-auto px-4 ${brandSectionY}`}>
           <div className="max-w-2xl mx-auto text-center md:text-left">
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-6 tracking-tight">
               Built by Someone Who Understands Sales
@@ -189,7 +196,7 @@ export default function About() {
         </section>
 
         {/* Who we work with */}
-        <section className="container mx-auto px-4 py-12 md:py-20">
+        <section className={`container mx-auto px-4 ${brandSectionY}`}>
           <div className="max-w-5xl mx-auto">
             <h2 className="font-display font-bold text-2xl md:text-3xl lg:text-4xl text-center text-foreground mb-10 md:mb-14 tracking-tight">
               Who We Work With
@@ -198,7 +205,7 @@ export default function About() {
               {whoWeWorkWith.map(({ icon: Icon, title, body }) => (
                 <div
                   key={title}
-                  className="rounded-2xl border border-accent/15 bg-background/50 backdrop-blur-sm p-7 md:p-8 flex flex-col items-start text-left hover:border-accent/25 transition-colors"
+                  className={`${brandCard} ${brandCardHover} flex flex-col items-start p-7 text-left md:p-8`}
                 >
                   <Icon className="w-6 h-6 text-accent mb-4 opacity-90" strokeWidth={1.5} />
                   <h3 className="font-heading font-bold text-lg text-foreground mb-2">
@@ -214,8 +221,8 @@ export default function About() {
         </section>
 
         {/* Final CTA */}
-        <section className="container mx-auto px-4 pt-8 pb-24 md:pb-28">
-          <div className="max-w-2xl mx-auto text-center rounded-2xl border border-accent/25 bg-accent/[0.06] backdrop-blur-sm px-6 py-12 md:px-10 md:py-14">
+        <section className="container mx-auto px-4 pb-28 pt-8 md:pb-32">
+          <div className="mx-auto max-w-2xl rounded-2xl border border-cyan-300/24 bg-cyan-400/[0.08] px-6 py-12 text-center backdrop-blur-sm md:px-10 md:py-14">
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-5 tracking-tight">
               Let&apos;s Build the Right System for Your Business
             </h2>
@@ -226,7 +233,7 @@ export default function About() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center">
               <Button
                 size="lg"
-                className="bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base md:text-lg px-8 py-6 h-auto neon-glow"
+                className={brandPrimaryButton}
                 type="button"
                 onClick={onTelegramCta("about")}
               >
@@ -236,7 +243,7 @@ export default function About() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-accent/50 text-accent hover:bg-accent/10 font-heading font-semibold text-base md:text-lg px-8 py-6 h-auto"
+                className={`${brandBreakdownButton} h-auto px-8 py-6 text-base md:text-lg`}
                 type="button"
                 onClick={onTelegramCta("audit")}
               >

@@ -8,6 +8,20 @@ import { Check, ArrowRight, Monitor, Workflow, TrendingUp, Building2, Radio, Wre
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet-async";
 import { onTelegramCta } from "@/lib/telegramCtas";
+import {
+  brandBreakdownButton,
+  brandBackdrop,
+  brandBackdropLayerA,
+  brandBackdropLayerB,
+  brandCard,
+  brandCardHover,
+  brandGrayPanel,
+  brandGrayPanelHover,
+  brandPageRoot,
+  brandPrimaryButton,
+  brandSecondaryButton,
+  brandSectionY,
+} from "@/lib/brandStyles";
 
 const PAGE_TITLE = "Solutions | DaVinci Dynamics";
 const PAGE_DESCRIPTION =
@@ -97,7 +111,7 @@ export default function Solutions() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+    <div className={brandPageRoot}>
       <Navigation />
       <Helmet>
         <title>{PAGE_TITLE}</title>
@@ -106,25 +120,20 @@ export default function Solutions() {
         <meta property="og:description" content={PAGE_DESCRIPTION} />
       </Helmet>
 
-      <div
-        className="absolute inset-0 opacity-[0.18] pointer-events-none"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      />
+      <div className={brandBackdrop}>
+        <div className={brandBackdropLayerA} />
+        <div className={brandBackdropLayerB} />
+      </div>
 
       <main className="relative z-10">
         {/* Hero */}
-        <section className="container mx-auto px-4 pt-20 pb-16 md:pt-28 md:pb-20">
+        <section className="container mx-auto px-4 pb-24 pt-24 md:pb-28 md:pt-32">
           <div className="max-w-3xl mx-auto text-center">
             <div className="h-px w-16 bg-gradient-to-r from-transparent via-accent to-transparent mx-auto mb-10 opacity-80" />
-            <h1 className="font-display font-black text-4xl sm:text-5xl md:text-6xl leading-[1.08] tracking-tight text-foreground mb-8">
+            <h1 className="font-display font-black text-4xl leading-[1.06] tracking-tight text-white/92 sm:text-5xl md:text-6xl">
               Solutions Built to Capture, Convert, and Scale
             </h1>
-            <p className="font-heading text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed mb-12 max-w-2xl mx-auto">
+            <p className="mx-auto mb-12 mt-8 max-w-2xl font-heading text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
               From conversion focused websites to automation and lead systems,
               every solution is designed to help your business turn traffic into
               customers.
@@ -132,7 +141,7 @@ export default function Solutions() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center">
               <Button
                 size="lg"
-                className="bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base md:text-lg px-8 py-6 h-auto neon-glow"
+                className={brandPrimaryButton}
                 type="button"
                 onClick={onTelegramCta("solutions")}
               >
@@ -142,7 +151,7 @@ export default function Solutions() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-accent/40 text-accent hover:bg-accent/10 hover:border-accent font-heading font-semibold text-base md:text-lg px-8 py-6 h-auto bg-background/30 backdrop-blur-sm"
+                className={brandSecondaryButton}
                 onClick={() => setLocation("/pricing")}
               >
                 See Pricing
@@ -152,8 +161,8 @@ export default function Solutions() {
         </section>
 
         {/* Intro */}
-        <section className="container mx-auto px-4 py-12 md:py-16">
-          <div className="max-w-2xl mx-auto text-center border-y border-accent/15 py-12 md:py-14">
+        <section className={`container mx-auto px-4 ${brandSectionY}`}>
+          <div className="mx-auto max-w-2xl border-y border-cyan-300/14 py-12 text-center md:py-14">
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-5 tracking-tight">
               Built Around Revenue, Not Just Design
             </h2>
@@ -166,12 +175,12 @@ export default function Solutions() {
         </section>
 
         {/* Solutions grid */}
-        <section className="container mx-auto px-4 py-12 md:py-20">
+        <section className={`container mx-auto px-4 ${brandSectionY}`}>
           <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-6 lg:gap-8">
             {solutions.map(({ icon: Icon, title, description, bullets }) => (
               <div
                 key={title}
-                className="rounded-2xl border border-accent/20 p-8 flex flex-col backdrop-blur-sm text-left"
+                className={`${brandGrayPanel} ${brandGrayPanelHover} flex flex-col p-8 text-left`}
                 style={{
                   backgroundImage: `url('${CARD_BG}')`,
                   backgroundSize: "cover",
@@ -201,7 +210,7 @@ export default function Solutions() {
         </section>
 
         {/* Who this is for */}
-        <section className="container mx-auto px-4 py-12 md:py-20">
+        <section className={`container mx-auto px-4 ${brandSectionY}`}>
           <div className="max-w-5xl mx-auto">
             <h2 className="font-display font-bold text-2xl md:text-3xl lg:text-4xl text-center text-foreground mb-10 md:mb-14 tracking-tight">
               Built for Businesses Ready to Grow
@@ -210,7 +219,7 @@ export default function Solutions() {
               {audiences.map(({ icon: Icon, title, body }) => (
                 <div
                   key={title}
-                  className="rounded-2xl border border-accent/15 bg-background/50 backdrop-blur-sm p-7 md:p-8 flex flex-col items-start text-left hover:border-accent/25 transition-colors"
+                  className={`${brandCard} ${brandCardHover} flex flex-col items-start p-7 text-left md:p-8`}
                 >
                   <Icon className="w-6 h-6 text-accent mb-4 opacity-90" strokeWidth={1.5} />
                   <h3 className="font-heading font-bold text-lg text-foreground mb-2">
@@ -226,7 +235,7 @@ export default function Solutions() {
         </section>
 
         {/* Process */}
-        <section className="container mx-auto px-4 py-12 md:py-20">
+        <section className={`container mx-auto px-4 ${brandSectionY}`}>
           <div className="max-w-4xl mx-auto">
             <h2 className="font-display font-bold text-2xl md:text-3xl text-center text-foreground mb-12 md:mb-14 tracking-tight">
               How It Works
@@ -235,9 +244,9 @@ export default function Solutions() {
               {steps.map((step, i) => (
                 <div
                   key={step.title}
-                  className="flex gap-6 md:gap-8 pb-10 md:pb-12 last:pb-0 border-b border-accent/10 last:border-0"
+                  className="flex gap-6 border-b border-cyan-300/12 pb-10 last:border-0 last:pb-0 md:gap-8 md:pb-12"
                 >
-                  <div className="shrink-0 w-10 h-10 rounded-full border border-accent/40 flex items-center justify-center font-display font-bold text-accent text-sm">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-cyan-300/40 font-display text-sm font-bold text-cyan-200">
                     {i + 1}
                   </div>
                   <div className="pt-0.5">
@@ -255,8 +264,8 @@ export default function Solutions() {
         </section>
 
         {/* CTA */}
-        <section className="container mx-auto px-4 pt-8 pb-24 md:pb-28">
-          <div className="max-w-2xl mx-auto text-center rounded-2xl border border-accent/25 bg-accent/[0.06] backdrop-blur-sm px-6 py-12 md:px-10 md:py-14">
+        <section className="container mx-auto px-4 pb-28 pt-8 md:pb-32">
+          <div className="mx-auto max-w-2xl rounded-2xl border border-cyan-300/24 bg-cyan-400/[0.08] px-6 py-12 text-center backdrop-blur-sm md:px-10 md:py-14">
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-5 tracking-tight">
               Let&apos;s Build the Right Solution for Your Business
             </h2>
@@ -268,7 +277,7 @@ export default function Solutions() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center">
               <Button
                 size="lg"
-                className="bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base md:text-lg px-8 py-6 h-auto neon-glow"
+                className={brandPrimaryButton}
                 type="button"
                 onClick={onTelegramCta("solutions")}
               >
@@ -278,7 +287,7 @@ export default function Solutions() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-accent/50 text-accent hover:bg-accent/10 font-heading font-semibold text-base md:text-lg px-8 py-6 h-auto"
+                className={`${brandBreakdownButton} h-auto px-8 py-6 text-base md:text-lg`}
                 type="button"
                 onClick={onTelegramCta("audit")}
               >

@@ -9,6 +9,7 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { trackButtonClick, trackConversion } from "@/lib/analytics";
 import { openVinciBot } from "@/lib/telegramCtas";
+import { brandBreakdownButton } from "@/lib/brandStyles";
 
 export default function Navigation() {
   const [location] = useLocation();
@@ -25,24 +26,27 @@ export default function Navigation() {
   const isActive = (path: string) => location === path;
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-accent/20">
+    <nav className="sticky top-0 z-50 border-b border-cyan-300/20 bg-slate-950/88 backdrop-blur-xl">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="font-display font-black text-xl lg:text-2xl text-neon hover:text-accent transition-colors cursor-pointer">
+          <Link
+            href="/"
+            className="cursor-pointer bg-gradient-to-r from-cyan-200 via-cyan-300 to-sky-400 bg-clip-text font-display text-xl font-black text-transparent drop-shadow-[0_0_18px_rgba(34,211,238,0.45)] transition-colors hover:from-cyan-100 hover:via-cyan-200 hover:to-sky-300 lg:text-2xl"
+          >
             DaVinci Dynamics
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             {navItems.map((item) => (
-              <Link 
-                key={item.path} 
+              <Link
+                key={item.path}
                 href={item.path}
-                className={`font-heading font-semibold transition-colors cursor-pointer ${
+                className={`cursor-pointer font-heading font-semibold transition-colors ${
                   isActive(item.path)
-                    ? "text-accent"
-                    : "text-foreground hover:text-accent"
+                    ? "text-cyan-200"
+                    : "text-foreground hover:text-cyan-200"
                 }`}
               >
                 {item.name}
@@ -51,7 +55,7 @@ export default function Navigation() {
             <Button
               type="button"
               size="sm"
-              className="bg-accent text-background hover:bg-accent/90 font-heading font-bold neon-glow"
+              className={brandBreakdownButton}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -66,7 +70,7 @@ export default function Navigation() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-accent"
+            className="text-cyan-200 md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -75,16 +79,16 @@ export default function Navigation() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-accent/20">
+          <div className="border-t border-cyan-300/20 py-4 md:hidden">
             <div className="flex flex-col gap-4">
-              {navItems.map((item) => (
-                <Link 
-                  key={item.path} 
+              {navItems.map(item => (
+                <Link
+                  key={item.path}
                   href={item.path}
-                  className={`font-heading font-semibold block py-2 transition-colors cursor-pointer ${
+                  className={`block cursor-pointer py-2 font-heading font-semibold transition-colors ${
                     isActive(item.path)
-                      ? "text-accent"
-                      : "text-foreground hover:text-accent"
+                      ? "text-cyan-200"
+                      : "text-foreground hover:text-cyan-200"
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -94,7 +98,7 @@ export default function Navigation() {
               <Button
                 type="button"
                 size="sm"
-                className="bg-accent text-background hover:bg-accent/90 font-heading font-bold w-full"
+                className={`${brandBreakdownButton} w-full`}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();

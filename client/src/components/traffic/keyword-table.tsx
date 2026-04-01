@@ -14,7 +14,7 @@ export function KeywordTable({ title, rows, dateRangeLabel }: Props) {
   const list = Array.isArray(rows) ? rows : [];
 
   return (
-    <div className={`${trafficCard} p-6 sm:p-7`}>
+    <div className={`${trafficCard} h-full min-h-[360px] p-8 sm:p-9`}>
       <p className={trafficKicker}>{title}</p>
       <p className={`mt-1 ${trafficMuted}`}>{dateRangeLabel}</p>
       {list.length === 0 ? (
@@ -22,12 +22,12 @@ export function KeywordTable({ title, rows, dateRangeLabel }: Props) {
           No rows returned for this period.
         </p>
       ) : (
-        <div className="mt-5 overflow-x-auto pr-1">
-          <table className="w-full min-w-[280px] border-separate border-spacing-y-1 text-left text-[13px]">
+        <div className="mt-6 overflow-x-auto pr-1">
+          <table className="w-full min-w-[280px] border-separate border-spacing-y-2 text-left text-[13px]">
             <thead>
-              <tr className="text-[11px] uppercase tracking-wide text-orange-200/45">
+              <tr className="text-[11px] uppercase tracking-[0.2em] text-orange-200/45">
                 <th className="pb-2 pr-4 font-medium">Label</th>
-                <th className="pb-2 pl-3 text-right font-medium">Sessions</th>
+                <th className="pb-2 pl-3 text-right font-medium">SESSIONS</th>
               </tr>
             </thead>
             <tbody>

@@ -11,6 +11,16 @@ import { Helmet } from "react-helmet-async";
 import { trackButtonClick } from "@/lib/analytics";
 import { onTelegramCta, openVinciBot } from "@/lib/telegramCtas";
 import { cn } from "@/lib/utils";
+import {
+  brandBackdrop,
+  brandBackdropLayerA,
+  brandBackdropLayerB,
+  brandGrayPanel,
+  brandGrayPanelHover,
+  brandPageRoot,
+  brandPrimaryButton,
+  brandSecondaryButton,
+} from "@/lib/brandStyles";
 
 export default function PlatformDemo() {
 
@@ -18,7 +28,7 @@ export default function PlatformDemo() {
   const { growthHovered, onGrowthEnter, onGrowthLeave } = useLgPricingHover();
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+    <div className={brandPageRoot}>
       <Helmet>
         <title>Pricing - DaVinci Dynamics</title>
         <meta name="description" content="Choose the system that fits your growth stage. Conversion-focused websites, automation, and follow-up systems from DaVinci Dynamics." />
@@ -38,15 +48,10 @@ export default function PlatformDemo() {
         <meta property="twitter:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/PXfURBFNVBolMqns.png" />
       </Helmet>
       <Navigation />
-      {/* Background glow effects */}
-      <div 
-        className="absolute inset-0 opacity-30 pointer-events-none"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
+      <div className={brandBackdrop}>
+        <div className={brandBackdropLayerA} />
+        <div className={brandBackdropLayerB} />
+      </div>
 
       <main className="relative z-10 container mx-auto px-4 py-6 lg:py-8">
         {/* Pricing Cards - Horizontal Layout for Desktop */}
@@ -62,7 +67,7 @@ export default function PlatformDemo() {
 
           <div className="relative z-[1]">
           <div className="text-center mb-12 md:mb-14 lg:mb-16 max-w-3xl mx-auto">
-            <h2 className="font-display font-black text-2xl md:text-3xl lg:text-[2.25rem] leading-[1.12] tracking-tight text-foreground mb-4 md:mb-5">
+            <h2 className="mb-4 font-display text-2xl font-black leading-[1.12] tracking-tight text-white/92 md:mb-5 md:text-3xl lg:text-[2.25rem]">
               Choose the System That Fits Your Growth Stage
             </h2>
             <p className="font-heading text-base md:text-lg text-muted-foreground/80 font-normal max-w-2xl mx-auto leading-relaxed">
@@ -75,11 +80,11 @@ export default function PlatformDemo() {
           <div 
             className={cn(
               "group/starter relative flex flex-col overflow-hidden rounded-xl p-7 lg:p-8",
-              "border border-white/[0.08] bg-card/45 backdrop-blur-md",
-              "shadow-[0_4px_28px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.06)]",
+              brandGrayPanel,
+              brandGrayPanelHover,
               "before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/18 before:to-transparent",
               "transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
-              "lg:hover:-translate-y-1.5 lg:hover:shadow-[0_16px_48px_rgba(0,0,0,0.48),inset_0_1px_0_rgba(255,255,255,0.08)]",
+              "lg:hover:-translate-y-1.5",
               growthHovered && "lg:opacity-[0.68] lg:scale-[0.985]"
             )}
             style={{
@@ -121,7 +126,7 @@ export default function PlatformDemo() {
             <Button 
               type="button"
               variant="outline" 
-              className="mt-6 h-12 w-full rounded-lg border border-accent/35 font-heading text-sm font-semibold text-accent shadow-sm transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] hover:bg-accent/10 lg:hover:border-accent/55 lg:hover:shadow-[0_0_18px_rgba(0,200,255,0.12)]"
+              className={`${brandSecondaryButton} mt-6 h-12 w-full rounded-lg px-6 py-0 text-sm`}
               onClick={onTelegramCta("pricing")}
             >
               Book Your Strategy Call
@@ -132,13 +137,15 @@ export default function PlatformDemo() {
           <div 
             className={cn(
               "group/growth relative z-[2] flex flex-col overflow-visible rounded-xl px-7 pb-7 pt-10 animate-fade-in-up lg:px-8 lg:pb-8 lg:pt-11",
-              "border border-cyan-400/40 bg-card/55 backdrop-blur-md",
-              "shadow-[0_0_0_1px_rgba(0,200,255,0.14),0_8px_36px_rgba(0,0,0,0.42),0_0_100px_-28px_rgba(0,200,255,0.18)]",
+              brandGrayPanel,
+              brandGrayPanelHover,
+              "border-cyan-300/34",
+              "shadow-[0_0_0_1px_rgba(34,211,238,0.12),0_12px_42px_rgba(0,0,0,0.48),0_0_90px_-30px_rgba(34,211,238,0.16),inset_0_1px_0_rgba(255,255,255,0.09)]",
               "before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-cyan-400/45 before:to-transparent",
               "transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
               "lg:scale-[1.035]",
               "lg:hover:-translate-y-2 lg:hover:scale-[1.055] lg:hover:border-cyan-400/65",
-              "lg:hover:shadow-[0_0_0_1px_rgba(0,200,255,0.28),0_22px_56px_rgba(0,0,0,0.55),0_0_120px_-24px_rgba(0,200,255,0.22)]"
+              "lg:hover:shadow-[0_0_0_1px_rgba(34,211,238,0.22),0_22px_56px_rgba(0,0,0,0.55),0_0_120px_-24px_rgba(34,211,238,0.2),inset_0_1px_0_rgba(255,255,255,0.11)]"
             )}
             onMouseEnter={onGrowthEnter}
             onMouseLeave={onGrowthLeave}
@@ -194,7 +201,7 @@ export default function PlatformDemo() {
             
             <Button 
               type="button"
-              className="relative z-10 mt-6 h-12 w-full rounded-lg bg-accent font-heading text-sm font-bold text-background shadow-[0_2px_16px_rgba(0,200,255,0.38),inset_0_1px_0_rgba(255,255,255,0.22)] transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] hover:bg-accent/92 hover:shadow-[0_4px_22px_rgba(0,200,255,0.45),inset_0_1px_0_rgba(255,255,255,0.26)] lg:group-hover/growth:shadow-[0_4px_26px_rgba(0,200,255,0.48),inset_0_1px_0_rgba(255,255,255,0.28)]"
+              className={`${brandPrimaryButton} relative z-10 mt-6 h-12 w-full rounded-lg px-6 py-0 text-sm`}
               onClick={onTelegramCta("pricing")}
             >
               Book Your Strategy Call
@@ -205,11 +212,11 @@ export default function PlatformDemo() {
           <div 
             className={cn(
               "group/scale relative flex flex-col overflow-hidden rounded-xl p-7 lg:p-8",
-              "border border-white/[0.08] bg-card/45 backdrop-blur-md",
-              "shadow-[0_4px_28px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.06)]",
+              brandGrayPanel,
+              brandGrayPanelHover,
               "before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/18 before:to-transparent",
               "transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
-              "lg:hover:-translate-y-1.5 lg:hover:shadow-[0_16px_48px_rgba(0,0,0,0.48),inset_0_1px_0_rgba(255,255,255,0.08)]",
+              "lg:hover:-translate-y-1.5",
               growthHovered && "lg:opacity-[0.68] lg:scale-[0.985]"
             )}
             style={{
@@ -252,7 +259,7 @@ export default function PlatformDemo() {
             <Button 
               type="button"
               variant="outline" 
-              className="mt-6 h-12 w-full rounded-lg border border-accent/35 font-heading text-sm font-semibold text-accent shadow-sm transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] hover:bg-accent/10 lg:hover:border-accent/55 lg:hover:shadow-[0_0_18px_rgba(0,200,255,0.12)]"
+              className={`${brandSecondaryButton} mt-6 h-12 w-full rounded-lg px-6 py-0 text-sm`}
               onClick={onTelegramCta("pricing")}
             >
               Book Your Strategy Call
@@ -281,7 +288,7 @@ export default function PlatformDemo() {
             <Button 
               type="button"
               size="lg"
-              className="w-full sm:w-auto lg:px-16 bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base lg:text-lg py-6 transition-all duration-300 neon-glow-intense"
+              className={`${brandPrimaryButton} w-full text-base lg:w-auto lg:px-16 lg:text-lg`}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -295,7 +302,7 @@ export default function PlatformDemo() {
               type="button"
               size="lg"
               variant="outline"
-              className="w-full sm:w-auto lg:px-16 border-accent/50 text-accent hover:bg-accent/10 hover:border-accent font-heading font-bold text-base lg:text-lg py-6 transition-all duration-300"
+              className={`${brandSecondaryButton} w-full text-base lg:w-auto lg:px-16 lg:text-lg`}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();

@@ -4,6 +4,7 @@ import { registerAnthropicChatRoute } from "../chat/anthropicChatRoute";
 import { registerOpenclawLeoRoute } from "../chat/openclawLeoRoute";
 import { registerLeadEngineRoutes } from "../lead-engine/registerLeadEngineRoutes";
 import { registerTrafficRoutes } from "../traffic/registerTrafficRoutes";
+import { registerInternalPortalRoutes } from "../internal/registerInternalPortalRoutes";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
@@ -23,6 +24,7 @@ export function createApp(): express.Express {
   registerAnthropicChatRoute(app);
   registerLeadEngineRoutes(app);
   registerTrafficRoutes(app);
+  registerInternalPortalRoutes(app);
 
   app.post("/api/telegram-handoff-webhook", async (req, res) => {
     try {

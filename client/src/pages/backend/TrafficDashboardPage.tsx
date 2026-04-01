@@ -84,9 +84,9 @@ export default function TrafficDashboardPage() {
       />
 
       <header className={trafficHeaderBar}>
-        <div className="mx-auto flex max-w-[1520px] min-w-0 flex-col gap-5 px-5 py-5 sm:px-8 sm:py-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mx-auto flex w-full max-w-[1560px] min-w-0 flex-col gap-4 px-4 py-5 sm:px-6 sm:py-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div className="min-w-0 shrink-0 lg:max-w-[42%]">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-orange-200/45">DaVinci Dynamics</p>
+            <p className="text-[10px] font-medium uppercase tracking-[0.28em] text-orange-200/45">davincidynamics.ai</p>
             <h1 className="mt-1 text-xl font-semibold tracking-tight text-[#fffbeb] sm:text-2xl">Traffic Intelligence</h1>
             <p className="mt-1 text-xs text-orange-100/45">Website traffic and engagement overview</p>
           </div>
@@ -114,23 +114,27 @@ export default function TrafficDashboardPage() {
 
 function TrafficSkeleton() {
   return (
-    <div className="mx-auto max-w-[1520px] space-y-7 px-5 pb-12 pt-10 sm:px-8">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="h-96 animate-pulse rounded-3xl border border-orange-950/30 bg-orange-950/20 lg:col-span-3" />
-        <div className="space-y-6 lg:col-span-6">
+    <div className="mx-auto w-full max-w-[1800px] space-y-8 px-4 pb-16 pt-8 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-1 gap-10 xl:grid-cols-[280px_minmax(0,1.9fr)_456px]">
+        <div className="h-[520px] animate-pulse rounded-3xl border border-orange-950/30 bg-orange-950/20" />
+        <div className="space-y-5">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="h-72 animate-pulse rounded-3xl border border-orange-900/30 bg-orange-950/15" />
-            <div className="h-72 animate-pulse rounded-3xl border border-orange-900/30 bg-orange-950/15" />
-          </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="h-64 animate-pulse rounded-3xl border border-orange-950/30 bg-orange-950/20" />
-            <div className="h-64 animate-pulse rounded-3xl border border-orange-950/30 bg-orange-950/20" />
+            <div className="h-[440px] animate-pulse rounded-3xl border border-orange-900/30 bg-orange-950/15" />
+            <div className="h-[440px] animate-pulse rounded-3xl border border-orange-900/30 bg-orange-950/15" />
           </div>
         </div>
-        <div className="space-y-6 lg:col-span-3">
-          <div className="h-56 animate-pulse rounded-3xl border border-orange-950/30 bg-orange-950/20" />
-          <div className="h-72 animate-pulse rounded-3xl border border-orange-950/30 bg-orange-950/20" />
+        <div className="space-y-7">
+          <div className="h-[396px] animate-pulse rounded-3xl border border-orange-950/30 bg-orange-950/20 sm:h-[408px]" />
+          <div className="h-[396px] animate-pulse rounded-3xl border border-orange-950/30 bg-orange-950/20 sm:h-[408px]" />
         </div>
+      </div>
+      <div className="grid grid-cols-1 gap-10 xl:grid-cols-[280px_minmax(0,1.9fr)_456px]">
+        <div />
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+          <div className="h-[252px] animate-pulse rounded-3xl border border-orange-950/30 bg-orange-950/20" />
+          <div className="h-[252px] animate-pulse rounded-3xl border border-orange-950/30 bg-orange-950/20" />
+        </div>
+        <div />
       </div>
     </div>
   );

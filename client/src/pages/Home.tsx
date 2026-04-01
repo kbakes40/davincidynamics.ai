@@ -2,7 +2,7 @@
  * DaVinci Dynamics — Home (structured, conversion-focused)
  */
 
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Check,
@@ -22,6 +22,7 @@ import { useScrollFade } from "@/hooks/useScrollFade";
 import { Helmet } from "react-helmet-async";
 import { onTelegramCta } from "@/lib/telegramCtas";
 import { cn } from "@/lib/utils";
+import { brandPrimaryButton } from "@/lib/brandStyles";
 
 const SITE_TITLE = "DaVinci Dynamics | Fix What's Slowing Your Growth";
 const SITE_DESCRIPTION =
@@ -53,6 +54,17 @@ export default function Home() {
 
   const flowSteps = ["Capture", "Qualify", "Route", "Close"];
 
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "o") {
+        event.preventDefault();
+        setLocation("/control/login");
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setLocation]);
+
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
       <Navigation />
@@ -76,55 +88,50 @@ export default function Home() {
         <meta property="twitter:image" content={OG_IMAGE} />
       </Helmet>
 
-      <div
-        className="absolute inset-0 opacity-[0.18] pointer-events-none"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      />
+      <div className="pointer-events-none absolute inset-0 opacity-90">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_62%_at_50%_-12%,rgba(34,211,238,0.18),transparent_56%),radial-gradient(ellipse_65%_45%_at_92%_12%,rgba(59,130,246,0.1),transparent_50%),linear-gradient(180deg,rgba(2,6,23,0.55)_0%,rgba(2,6,23,0.25)_38%,rgba(2,6,23,0.62)_100%)]" />
+        <div className="absolute inset-0 opacity-[0.2] [background-image:linear-gradient(rgba(56,189,248,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(56,189,248,0.08)_1px,transparent_1px)] [background-size:44px_44px]" />
+      </div>
 
       <main className="relative z-10">
         {/* 1. Hero */}
         <section
           className={cn(
-            "container mx-auto px-4 pt-20 pb-24 md:pt-28 md:pb-32 lg:pt-32 lg:pb-36"
+            "container mx-auto min-h-[82vh] px-4 pb-36 pt-28 md:pb-44 md:pt-36 lg:min-h-[88vh] lg:pb-52 lg:pt-40"
           )}
         >
-          <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
-            <div className="text-center lg:text-left max-w-2xl mx-auto lg:mx-0">
-              <div className="h-px w-16 bg-gradient-to-r from-transparent via-accent to-transparent mx-auto lg:mx-0 mb-10 opacity-80" />
-              <h1 className="font-display font-black text-4xl sm:text-5xl md:text-6xl lg:text-[2.75rem] xl:text-6xl leading-[1.08] tracking-tight text-foreground mb-8">
-                Built for Revenue, Not Just Design
+          <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-24">
+            <div className="mx-auto max-w-[44rem] text-center lg:mx-0 lg:text-left">
+              <div className="mx-auto mb-12 h-px w-20 bg-gradient-to-r from-transparent via-cyan-300/85 to-transparent lg:mx-0" />
+              <h1 className="font-display font-black text-4xl leading-[1.05] tracking-tight text-white/92 sm:text-5xl md:text-6xl lg:max-w-[13ch] lg:text-[4rem] xl:text-[4.35rem]">
+                Built for{" "}
+                <span className="bg-gradient-to-r from-cyan-200 via-cyan-300 to-sky-300 bg-clip-text text-transparent">
+                  Revenue
+                </span>
+                , Not Just Design
               </h1>
-              <p className="font-heading text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
+              <p className="mt-9 max-w-[34rem] font-heading text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
                 We build systems that capture leads, automate follow up, and turn
                 more of your business into actual revenue.
               </p>
-              <ul className="font-heading text-left inline-block mx-auto lg:mx-0 text-muted-foreground/95 space-y-3 mb-10">
+              <ul className="mx-auto mt-10 inline-block space-y-4 text-left font-heading text-muted-foreground/95 lg:mx-0">
                 {[
                   "Capture more leads",
                   "Follow up instantly",
                   "Close more customers",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3 justify-center lg:justify-start">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent border border-accent/30 shadow-[0_0_20px_-4px_rgba(0,200,255,0.35)]">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-cyan-300/35 bg-cyan-400/15 text-cyan-200 shadow-[0_0_20px_-4px_rgba(34,211,238,0.42)]">
                       <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
                     </span>
                     <span className="text-base md:text-lg">{item}</span>
                   </li>
                 ))}
               </ul>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-stretch sm:items-center">
+              <div className="mt-12 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center lg:justify-start">
                 <Button
                   size="lg"
-                  className={cn(
-                    "bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base md:text-lg px-8 py-6 h-auto",
-                    "neon-glow-intense shadow-[0_4px_32px_rgba(0,200,255,0.35),0_0_60px_-12px_rgba(0,200,255,0.45)]",
-                    "hover:shadow-[0_6px_40px_rgba(0,200,255,0.42),0_0_72px_-8px_rgba(0,200,255,0.5)] transition-shadow duration-300"
-                  )}
+                  className={`${brandPrimaryButton} md:text-lg`}
                   type="button"
                   onClick={onTelegramCta("home")}
                 >
@@ -134,109 +141,58 @@ export default function Home() {
                 <Button
                   size="default"
                   variant="ghost"
-                  className="font-heading font-medium text-sm md:text-base text-muted-foreground hover:text-accent hover:bg-transparent h-auto py-3 px-4 sm:px-6"
+                  className="h-auto px-4 py-3 font-heading text-sm font-medium text-muted-foreground hover:bg-transparent hover:text-cyan-200 md:text-base sm:px-6"
                   onClick={() => setLocation("/pricing")}
                 >
                   See Pricing
                 </Button>
               </div>
-              <p className="mt-7 text-sm font-heading text-muted-foreground/75 tracking-wide">
+              <p className="mt-10 text-sm font-heading tracking-wide text-muted-foreground/75">
                 Takes 30 seconds. No signup required.
               </p>
             </div>
 
-            {/* Right: revenue system preview */}
+            {/* Right: premium abstract brand visual */}
             <div
               ref={heroVisualRef.ref}
               className={cn(
-                "relative mx-auto w-full max-w-md lg:max-w-none transition-opacity duration-700",
-                "scroll-fade-section",
+                "scroll-fade-section relative mx-auto w-full max-w-[34rem] transition-opacity duration-700 lg:max-w-none",
                 heroVisualRef.isVisible ? "visible" : ""
               )}
               aria-hidden
             >
-              <div
-                className={cn(
-                  "rounded-2xl border border-accent/20 bg-card/50 backdrop-blur-md overflow-hidden",
-                  "shadow-[0_8px_48px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06),0_0_80px_-20px_rgba(0,200,255,0.22)]"
-                )}
-              >
-                <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] bg-background/40">
-                  <span className="text-[11px] font-heading font-semibold uppercase tracking-wider text-muted-foreground/80">
-                    Revenue system
-                  </span>
-                  <span className="flex items-center gap-1.5 text-[10px] font-heading text-accent/90">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-40" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent" />
-                    </span>
-                    Automation live
-                  </span>
-                </div>
-                <div className="p-4 sm:p-5 space-y-5">
-                  <div>
-                    <p className="text-[10px] font-heading uppercase tracking-wider text-muted-foreground/70 mb-2">
-                      Pipeline
-                    </p>
-                    <div className="grid grid-cols-4 gap-1 rounded-lg border border-white/[0.06] bg-background/30 p-1">
-                      {[
-                        { label: "Lead", on: true },
-                        { label: "Qualified", on: true },
-                        { label: "Proposal", on: false },
-                        { label: "Won", on: false },
-                      ].map((step) => (
-                        <div
-                          key={step.label}
-                          className={cn(
-                            "rounded-md py-2 text-center text-[10px] font-heading font-medium truncate px-0.5",
-                            step.on
-                              ? "bg-accent/15 text-accent border border-accent/25 shadow-[0_0_12px_-2px_rgba(0,200,255,0.25)]"
-                              : "text-muted-foreground/60 border border-transparent"
-                          )}
-                        >
-                          {step.label}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-xl border border-white/[0.06] bg-background/25 px-3 py-3">
-                      <p className="text-[10px] font-heading text-muted-foreground/70 mb-1">
-                        Conversion
-                      </p>
-                      <p className="font-display text-2xl font-black text-foreground tabular-nums">
-                        4.2<span className="text-lg text-accent">%</span>
-                      </p>
-                      <p className="text-[9px] font-heading text-emerald-400/90 mt-0.5">
-                        +0.8% vs last period
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-white/[0.06] bg-background/25 px-3 py-3">
-                      <p className="text-[10px] font-heading text-muted-foreground/70 mb-1">
-                        Follow-up SLA
-                      </p>
-                      <p className="font-display text-2xl font-black text-foreground tabular-nums">
-                        &lt;5
-                        <span className="text-sm font-heading font-semibold text-muted-foreground">
-                          m
-                        </span>
-                      </p>
-                      <p className="text-[9px] font-heading text-muted-foreground/60 mt-0.5">
-                        Avg. first response
-                      </p>
-                    </div>
-                  </div>
-                  <div className="rounded-xl border border-white/[0.06] bg-background/20 px-3 py-2.5">
-                    <div className="flex items-center justify-between text-[10px] font-heading">
-                      <span className="text-muted-foreground/75">Workflow</span>
-                      <span className="text-accent/90">Capture → Route → Nurture</span>
-                    </div>
-                    <div className="mt-2 h-1 rounded-full bg-white/[0.06] overflow-hidden">
-                      <div
-                        className="h-full w-[68%] rounded-full bg-gradient-to-r from-accent/50 to-accent"
-                        style={{ boxShadow: "0 0 12px rgba(0,200,255,0.35)" }}
-                      />
-                    </div>
+              <div className="relative isolate overflow-hidden rounded-[2rem] border border-cyan-300/22 bg-[linear-gradient(160deg,rgba(15,23,42,0.76)_0%,rgba(2,6,23,0.9)_65%,rgba(3,7,18,0.96)_100%)] p-8 shadow-[0_14px_64px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06),0_0_90px_-20px_rgba(34,211,238,0.28)]">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_64%_at_50%_20%,rgba(34,211,238,0.16),transparent_64%)]" />
+                <div className="pointer-events-none absolute -left-16 top-6 h-48 w-48 rounded-full bg-cyan-300/15 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-20 right-0 h-56 w-56 rounded-full bg-blue-400/12 blur-3xl" />
+
+                <div className="relative h-[340px] rounded-2xl border border-white/[0.08] bg-[linear-gradient(180deg,rgba(15,23,42,0.5),rgba(2,6,23,0.78))]">
+                  <div className="absolute inset-0 opacity-45 [background-image:linear-gradient(rgba(56,189,248,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(56,189,248,0.08)_1px,transparent_1px)] [background-size:36px_36px]" />
+                  <div className="absolute left-1/2 top-1/2 h-52 w-52 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/30 shadow-[0_0_38px_rgba(34,211,238,0.22)]" />
+                  <div className="absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-200/45 bg-cyan-300/8 shadow-[0_0_44px_rgba(34,211,238,0.34)]" />
+                  <div className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300/20 blur-sm" />
+                  <div className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-100 shadow-[0_0_22px_rgba(34,211,238,0.95)]" />
+
+                  <div className="absolute left-[50%] top-[50%] h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/20" />
+                  <div className="absolute left-[50%] top-[50%] h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/10" />
+
+                  <div className="absolute left-[22%] top-[30%] h-2.5 w-2.5 rounded-full bg-cyan-300/90 shadow-[0_0_12px_rgba(34,211,238,0.8)]" />
+                  <div className="absolute right-[24%] top-[26%] h-2.5 w-2.5 rounded-full bg-cyan-200/85 shadow-[0_0_12px_rgba(34,211,238,0.8)]" />
+                  <div className="absolute bottom-[28%] left-[26%] h-2.5 w-2.5 rounded-full bg-sky-300/80 shadow-[0_0_12px_rgba(56,189,248,0.72)]" />
+                  <div className="absolute bottom-[24%] right-[24%] h-2.5 w-2.5 rounded-full bg-cyan-300/85 shadow-[0_0_12px_rgba(34,211,238,0.76)]" />
+
+                  <svg className="absolute inset-0 h-full w-full">
+                    <line x1="22%" y1="30%" x2="50%" y2="50%" stroke="rgba(103,232,249,0.28)" strokeWidth="1" />
+                    <line x1="76%" y1="26%" x2="50%" y2="50%" stroke="rgba(103,232,249,0.24)" strokeWidth="1" />
+                    <line x1="26%" y1="72%" x2="50%" y2="50%" stroke="rgba(103,232,249,0.22)" strokeWidth="1" />
+                    <line x1="76%" y1="76%" x2="50%" y2="50%" stroke="rgba(103,232,249,0.2)" strokeWidth="1" />
+                  </svg>
+
+                  <div className="pointer-events-none absolute inset-x-8 bottom-7 h-px bg-gradient-to-r from-transparent via-cyan-300/38 to-transparent" />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-cyan-300/8 to-transparent" />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/60 to-transparent" />
+                  <div className="absolute left-1/2 top-[17%] -translate-x-1/2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-cyan-100/80">
+                    Core Signal
                   </div>
                 </div>
               </div>
@@ -247,7 +203,8 @@ export default function Home() {
         {/* 2. Problem */}
         <section
           className={cn(
-            "border-t border-white/[0.05] bg-card/[0.12]",
+            "border-t border-white/[0.05] bg-card/[0.08]",
+            "mt-8 md:mt-12 lg:mt-16",
             sectionY,
             "scroll-fade-section",
             problemSection.isVisible ? "visible" : ""
@@ -256,7 +213,7 @@ export default function Home() {
         >
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-14 md:mb-16">
-              <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-[2.5rem] text-foreground mb-5 tracking-tight">
+              <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-[2.5rem] text-white/90 mb-5 tracking-tight">
                 Most Businesses Don&apos;t Have a Traffic Problem
               </h2>
               <p className="font-heading text-lg md:text-xl text-muted-foreground leading-relaxed">
@@ -271,7 +228,7 @@ export default function Home() {
               ].map((title) => (
                 <div
                   key={title}
-                  className={cn(cardSurface, "p-8 text-center md:text-left")}
+                  className="rounded-2xl border border-white/[0.06] bg-background/20 p-7 text-center backdrop-blur-sm md:text-left"
                 >
                   <div className="mx-auto md:mx-0 mb-4 h-1 w-10 rounded-full bg-gradient-to-r from-accent/60 to-accent/20" />
                   <h3 className="font-heading font-bold text-lg text-foreground">{title}</h3>
@@ -458,7 +415,7 @@ export default function Home() {
             </p>
             <Button
               size="lg"
-              className="bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base md:text-lg px-10 py-6 h-auto neon-glow"
+              className={brandPrimaryButton}
               type="button"
               onClick={onTelegramCta("audit")}
             >
@@ -708,7 +665,7 @@ export default function Home() {
             </h2>
             <Button
               size="lg"
-              className="bg-accent text-background hover:bg-accent/90 font-heading font-bold text-base md:text-lg px-10 py-6 h-auto neon-glow-intense shadow-[0_4px_28px_rgba(0,200,255,0.3)]"
+              className={`${brandPrimaryButton} md:text-lg`}
               type="button"
               onClick={onTelegramCta("home")}
             >

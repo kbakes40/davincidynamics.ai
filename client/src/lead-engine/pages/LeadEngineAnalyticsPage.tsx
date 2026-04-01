@@ -26,6 +26,19 @@ import { cn } from "@/lib/utils";
 import { leMuted } from "../surface";
 
 const tick = { fill: "oklch(0.55 0 0)", fontSize: 11 };
+const tooltipContentStyle = {
+  background: "oklch(0.12 0 0 / 0.96)",
+  border: "1px solid oklch(0.25 0 0 / 40%)",
+  borderRadius: 12,
+  fontSize: 12,
+  color: "oklch(0.9 0 0)",
+};
+const tooltipLabelStyle = {
+  color: "oklch(0.88 0 0)",
+};
+const tooltipItemStyle = {
+  color: "oklch(0.82 0 0)",
+};
 
 export default function LeadEngineAnalyticsPage() {
   const [data, setData] = useState<AnalyticsOverviewResponse | null>(null);
@@ -109,12 +122,10 @@ export default function LeadEngineAnalyticsPage() {
                 <XAxis dataKey="city" tick={tick} tickLine={false} axisLine={false} />
                 <YAxis tick={tick} tickLine={false} axisLine={false} width={28} />
                 <Tooltip
-                  contentStyle={{
-                    background: "oklch(0.12 0 0)",
-                    border: "1px solid oklch(0.25 0 0 / 40%)",
-                    borderRadius: 12,
-                    fontSize: 12,
-                  }}
+                  contentStyle={tooltipContentStyle}
+                  labelStyle={tooltipLabelStyle}
+                  itemStyle={tooltipItemStyle}
+                  cursor={{ fill: "oklch(0.24 0 0 / 35%)" }}
                 />
                 <Bar dataKey="count" fill="oklch(0.58 0.12 210 / 0.75)" radius={[4, 4, 0, 0]} name="Leads" />
               </BarChart>
@@ -130,12 +141,10 @@ export default function LeadEngineAnalyticsPage() {
                 <XAxis type="number" tick={tick} tickLine={false} axisLine={false} />
                 <YAxis type="category" dataKey="bucket" width={56} tick={tick} tickLine={false} axisLine={false} />
                 <Tooltip
-                  contentStyle={{
-                    background: "oklch(0.12 0 0)",
-                    border: "1px solid oklch(0.25 0 0 / 40%)",
-                    borderRadius: 12,
-                    fontSize: 12,
-                  }}
+                  contentStyle={tooltipContentStyle}
+                  labelStyle={tooltipLabelStyle}
+                  itemStyle={tooltipItemStyle}
+                  cursor={{ fill: "oklch(0.24 0 0 / 35%)" }}
                 />
                 <Bar dataKey="count" fill="oklch(0.5 0.1 210 / 0.65)" radius={[0, 4, 4, 0]} />
               </BarChart>
@@ -163,12 +172,10 @@ export default function LeadEngineAnalyticsPage() {
                 />
                 <YAxis tick={tick} tickLine={false} axisLine={false} width={28} />
                 <Tooltip
-                  contentStyle={{
-                    background: "oklch(0.12 0 0)",
-                    border: "1px solid oklch(0.25 0 0 / 40%)",
-                    borderRadius: 12,
-                    fontSize: 12,
-                  }}
+                  contentStyle={tooltipContentStyle}
+                  labelStyle={tooltipLabelStyle}
+                  itemStyle={tooltipItemStyle}
+                  cursor={{ fill: "oklch(0.24 0 0 / 35%)" }}
                 />
                 <Bar dataKey="count" fill="oklch(0.52 0.11 200 / 0.72)" radius={[4, 4, 0, 0]} name="Leads" />
               </BarChart>
@@ -186,12 +193,10 @@ export default function LeadEngineAnalyticsPage() {
                 <XAxis dataKey="name" tick={tick} tickLine={false} axisLine={false} />
                 <YAxis tick={tick} tickLine={false} axisLine={false} width={28} />
                 <Tooltip
-                  contentStyle={{
-                    background: "oklch(0.12 0 0)",
-                    border: "1px solid oklch(0.25 0 0 / 40%)",
-                    borderRadius: 12,
-                    fontSize: 12,
-                  }}
+                  contentStyle={tooltipContentStyle}
+                  labelStyle={tooltipLabelStyle}
+                  itemStyle={tooltipItemStyle}
+                  cursor={{ stroke: "oklch(0.38 0 0 / 80%)" }}
                 />
                 <Legend />
                 <Line type="monotone" dataKey="value" stroke="oklch(0.65 0.16 210)" strokeWidth={2} dot={{ r: 3 }} name="Count" />
@@ -220,12 +225,10 @@ export default function LeadEngineAnalyticsPage() {
                 />
                 <YAxis tick={tick} tickLine={false} axisLine={false} width={32} />
                 <Tooltip
-                  contentStyle={{
-                    background: "oklch(0.12 0 0)",
-                    border: "1px solid oklch(0.25 0 0 / 40%)",
-                    borderRadius: 12,
-                    fontSize: 12,
-                  }}
+                  contentStyle={tooltipContentStyle}
+                  labelStyle={tooltipLabelStyle}
+                  itemStyle={tooltipItemStyle}
+                  cursor={{ fill: "oklch(0.24 0 0 / 35%)" }}
                   formatter={(v: number, name: string, props: { payload?: { count?: number } }) => [
                     `${v}% (${props.payload?.count ?? 0})`,
                     name,
