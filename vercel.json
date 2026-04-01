@@ -3,11 +3,6 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "rm -rf dist/public && pnpm run build:client && pnpm run build:api",
   "outputDirectory": "dist/public",
-  "functions": {
-    "api/[[...slug]].mjs": {
-      "maxDuration": 60
-    }
-  },
   "headers": [
     {
       "source": "/index.html",
