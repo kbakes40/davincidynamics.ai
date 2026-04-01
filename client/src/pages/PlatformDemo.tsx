@@ -30,22 +30,22 @@ export default function PlatformDemo() {
   return (
     <div className={brandPageRoot}>
       <Helmet>
-        <title>Pricing - DaVinci Dynamics</title>
-        <meta name="description" content="Choose the system that fits your growth stage. Conversion-focused websites, automation, and follow-up systems from DaVinci Dynamics." />
+        <title>Pricing | Own Your Ecommerce Stack</title>
+        <meta name="description" content="Premium ecommerce systems built for control, stronger margins, and ownership. Choose the right DaVinci Dynamics build path for your growth stage." />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://www.davincidynamics.ai/pricing" />
-        <meta property="og:title" content="Pricing - DaVinci Dynamics" />
-        <meta property="og:description" content="Choose the system that fits your growth stage. Conversion-focused websites, automation, and follow-up systems from DaVinci Dynamics." />
-        <meta property="og:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/PXfURBFNVBolMqns.png" />
+        <meta property="og:title" content="Pricing | Own Your Ecommerce Stack" />
+        <meta property="og:description" content="Premium ecommerce systems built for control, stronger margins, and ownership. Choose the right DaVinci Dynamics build path for your growth stage." />
+        <meta property="og:image" content="https://www.davincidynamics.ai/social-preview.svg" />
         
         {/* Twitter */}
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content="https://www.davincidynamics.ai/pricing" />
-        <meta property="twitter:title" content="Pricing - DaVinci Dynamics" />
-        <meta property="twitter:description" content="Choose the system that fits your growth stage. Conversion-focused websites, automation, and follow-up systems from DaVinci Dynamics." />
-        <meta property="twitter:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519663317811544/PXfURBFNVBolMqns.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://www.davincidynamics.ai/pricing" />
+        <meta name="twitter:title" content="Pricing | Own Your Ecommerce Stack" />
+        <meta name="twitter:description" content="Premium ecommerce systems built for control, stronger margins, and ownership. Choose the right DaVinci Dynamics build path for your growth stage." />
+        <meta name="twitter:image" content="https://www.davincidynamics.ai/social-preview.svg" />
       </Helmet>
       <Navigation />
       <div className={brandBackdrop}>

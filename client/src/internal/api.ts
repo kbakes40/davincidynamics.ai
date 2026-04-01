@@ -16,17 +16,21 @@ export async function operatorMe(): Promise<OperatorUser | null> {
 }
 
 export async function operatorLogin(email: string, password: string): Promise<{ ok: true } | { ok: false; message: string }> {
-  const res = await fetch("/api/internal/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ email, password }),
-  });
-  const json = (await res.json()) as { ok: boolean; message?: string };
-  if (!res.ok || !json.ok) {
-    return { ok: false, message: json.message ?? "Login failed." };
+  try {
+    const res = await fetch("/api/internal/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
+    });
+    const json = (await res.json()) as { ok: boolean; message?: string };
+    if (!res.ok || !json.ok) {
+      return { ok: false, message: json.message ?? "Login failed." };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: false, message: "Unable to reach server. Check your local URL and try again." };
   }
-  return { ok: true };
 }
 
 export async function operatorLogout(): Promise<void> {

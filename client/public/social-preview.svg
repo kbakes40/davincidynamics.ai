@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="80" y1="40" x2="1120" y2="590" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A1326"/>
+      <stop offset="0.52" stop-color="#081226"/>
+      <stop offset="1" stop-color="#050B18"/>
+    </linearGradient>
+    <radialGradient id="cyanGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(905 300) rotate(90) scale(232 232)">
+      <stop stop-color="#22D3EE" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="headlineGrad" x1="110" y1="214" x2="690" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E8F8FF"/>
+      <stop offset="0.55" stop-color="#CBF5FF"/>
+      <stop offset="1" stop-color="#7DDFFF"/>
+    </linearGradient>
+    <filter id="softBlur" x="-80" y="-80" width="1360" height="790" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="36"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+  <g opacity="0.28">
+    <path d="M0 0H1200V630H0V0Z" fill="url(#cyanGlow)"/>
+  </g>
+  <g opacity="0.08">
+    <path d="M0 54H1200M0 108H1200M0 162H1200M0 216H1200M0 270H1200M0 324H1200M0 378H1200M0 432H1200M0 486H1200M0 540H1200M0 594H1200" stroke="#63E8FF"/>
+    <path d="M60 0V630M120 0V630M180 0V630M240 0V630M300 0V630M360 0V630M420 0V630M480 0V630M540 0V630M600 0V630M660 0V630M720 0V630M780 0V630M840 0V630M900 0V630M960 0V630M1020 0V630M1080 0V630M1140 0V630" stroke="#63E8FF"/>
+  </g>
+
+  <circle cx="905" cy="300" r="164" stroke="#5BE8FF" stroke-opacity="0.35" stroke-width="2"/>
+  <circle cx="905" cy="300" r="112" stroke="#69EEFF" stroke-opacity="0.48" stroke-width="2"/>
+  <circle cx="905" cy="300" r="64" fill="#24D9F3" fill-opacity="0.12" stroke="#A4F4FF" stroke-opacity="0.6"/>
+  <circle cx="905" cy="300" r="14" fill="#DBFAFF"/>
+  <g filter="url(#softBlur)" opacity="0.22">
+    <circle cx="905" cy="300" r="72" fill="#3DE6FF"/>
+  </g>
+
+  <text x="110" y="126" fill="#9CEFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" letter-spacing="0.24em">
+    DAVINCI DYNAMICS
+  </text>
+  <text x="110" y="230" fill="url(#headlineGrad)" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="76" font-weight="800" letter-spacing="-0.02em">
+    Own Your Ecommerce Stack
+  </text>
+  <text x="110" y="286" fill="#C8D7E8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="27" font-weight="500">
+    Stop renting your business from Shopify, TikTok, and Facebook.
+  </text>
+  <text x="110" y="328" fill="#C8D7E8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="27" font-weight="500">
+    We build custom ecommerce systems for control, better margins, and ownership.
+  </text>
+
+  <rect x="110" y="372" width="520" height="2" fill="#2ADCF4" fill-opacity="0.68"/>
+  <text x="110" y="426" fill="#8BE9FB" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="600">
+    Premium Commerce Infrastructure
+  </text>
+</svg>

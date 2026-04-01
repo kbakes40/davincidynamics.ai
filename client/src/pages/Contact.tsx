@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Phone, Mail, MapPin } from "lucide-react";
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { onTelegramCta } from "@/lib/telegramCtas";
@@ -26,6 +27,12 @@ import {
   brandPrimaryButton,
   brandSecondaryButton,
 } from "@/lib/brandStyles";
+
+const PAGE_TITLE = "Contact | DaVinci Dynamics";
+const PAGE_DESCRIPTION =
+  "Talk with DaVinci Dynamics about owning your ecommerce stack with premium, conversion-focused systems built for control and stronger margins.";
+const PAGE_URL = "https://www.davincidynamics.ai/contact";
+const OG_IMAGE = "https://www.davincidynamics.ai/social-preview.svg";
 
 export default function Contact() {
   const [formData, setFormData] = useState<{
@@ -72,6 +79,20 @@ export default function Contact() {
   return (
     <div className={brandPageRoot}>
       <Navigation />
+      <Helmet>
+        <title>{PAGE_TITLE}</title>
+        <meta name="description" content={PAGE_DESCRIPTION} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={PAGE_URL} />
+        <meta property="og:title" content={PAGE_TITLE} />
+        <meta property="og:description" content={PAGE_DESCRIPTION} />
+        <meta property="og:image" content={OG_IMAGE} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={PAGE_URL} />
+        <meta name="twitter:title" content={PAGE_TITLE} />
+        <meta name="twitter:description" content={PAGE_DESCRIPTION} />
+        <meta name="twitter:image" content={OG_IMAGE} />
+      </Helmet>
 
       <div className={brandBackdrop}>
         <div className={brandBackdropLayerA} />

@@ -23,13 +23,16 @@ export default function OperatorLoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const result = await operatorLogin(email, password);
-    setLoading(false);
-    if (!result.ok) {
-      setError(result.message);
-      return;
+    try {
+      const result = await operatorLogin(email, password);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      setLocation(readNextTarget());
+    } finally {
+      setLoading(false);
     }
-    setLocation(readNextTarget());
   };
 
   return (
