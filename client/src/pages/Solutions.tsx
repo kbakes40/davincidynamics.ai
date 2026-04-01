@@ -182,8 +182,11 @@ export default function Solutions() {
                 key={title}
                 className={`${brandGrayPanel} ${brandGrayPanelHover} flex flex-col p-8 text-left`}
                 style={{
-                  backgroundImage: `url('${CARD_BG}')`,
+                  backgroundImage: `linear-gradient(160deg, rgba(71,85,105,0.62) 0%, rgba(51,65,85,0.74) 46%, rgba(30,41,59,0.86) 100%), url('${CARD_BG}')`,
+                  backgroundBlendMode: "normal, soft-light",
                   backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundColor: "rgba(30,41,59,0.82)",
                 }}
               >
                 <Icon className="w-7 h-7 text-accent mb-5 shrink-0" strokeWidth={1.5} />

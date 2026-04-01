@@ -22,7 +22,7 @@ import { useScrollFade } from "@/hooks/useScrollFade";
 import { Helmet } from "react-helmet-async";
 import { onTelegramCta } from "@/lib/telegramCtas";
 import { cn } from "@/lib/utils";
-import { brandPrimaryButton } from "@/lib/brandStyles";
+import { brandGrayPanel, brandGrayPanelHover, brandPrimaryButton } from "@/lib/brandStyles";
 
 const SITE_TITLE = "DaVinci Dynamics | Fix What's Slowing Your Growth";
 const SITE_DESCRIPTION =
@@ -37,7 +37,15 @@ const CARD_BG =
 const sectionY = "py-24 md:py-32 lg:py-36";
 
 const cardSurface =
-  "rounded-2xl border border-white/[0.08] bg-card/40 backdrop-blur-sm transition-all duration-300 hover:border-accent/25 hover:bg-card/55 hover:shadow-[0_8px_40px_rgba(0,0,0,0.35),0_0_48px_-12px_rgba(0,200,255,0.08)]";
+  `${brandGrayPanel} ${brandGrayPanelHover}`;
+
+const homeGrayCardSurfaceStyle = {
+  backgroundImage: `linear-gradient(160deg, rgba(66,82,106,0.58) 0%, rgba(47,61,84,0.72) 46%, rgba(24,34,53,0.88) 100%), url('${CARD_BG}')`,
+  backgroundBlendMode: "normal, soft-light" as const,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundColor: "rgba(22,32,50,0.84)",
+};
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -228,7 +236,8 @@ export default function Home() {
               ].map((title) => (
                 <div
                   key={title}
-                  className="rounded-2xl border border-white/[0.06] bg-background/20 p-7 text-center backdrop-blur-sm md:text-left"
+                  className={cn(cardSurface, "p-7 text-center md:text-left")}
+                  style={homeGrayCardSurfaceStyle}
                 >
                   <div className="mx-auto md:mx-0 mb-4 h-1 w-10 rounded-full bg-gradient-to-r from-accent/60 to-accent/20" />
                   <h3 className="font-heading font-bold text-lg text-foreground">{title}</h3>
@@ -271,7 +280,11 @@ export default function Home() {
                 line: "Route, remind, and nurture so nothing slips when you are busy.",
               },
             ].map(({ icon: Icon, title, line }) => (
-              <div key={title} className={cn(cardSurface, "p-8 lg:p-9 flex flex-col items-center md:items-start text-center md:text-left")}>
+              <div
+                key={title}
+                className={cn(cardSurface, "p-8 lg:p-9 flex flex-col items-center md:items-start text-center md:text-left")}
+                style={homeGrayCardSurfaceStyle}
+              >
                 <div className="mb-5 rounded-xl border border-accent/20 bg-accent/10 p-3 shadow-[0_0_24px_-8px_rgba(0,200,255,0.35)]">
                   <Icon className="w-7 h-7 text-accent" strokeWidth={1.5} />
                 </div>
@@ -380,6 +393,7 @@ export default function Home() {
                     cardSurface,
                     "p-8 lg:p-9 flex flex-col items-start text-left"
                   )}
+                  style={homeGrayCardSurfaceStyle}
                 >
                   <Icon className="w-7 h-7 text-accent mb-5 opacity-90" strokeWidth={1.5} />
                   <h3 className="font-heading font-bold text-lg text-foreground mb-3">
@@ -456,16 +470,19 @@ export default function Home() {
                 <div
                   className={cn(
                     "group/starter relative flex flex-col overflow-hidden rounded-xl p-7 md:p-8",
-                    "border border-white/[0.08] bg-card/45 backdrop-blur-md",
-                    "shadow-[0_4px_28px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.06)]",
+                    brandGrayPanel,
+                    brandGrayPanelHover,
                     "before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/18 before:to-transparent",
                     "transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
                     "lg:hover:-translate-y-1.5 lg:hover:shadow-[0_16px_48px_rgba(0,0,0,0.48),inset_0_1px_0_rgba(255,255,255,0.08)]",
                     growthHovered && "lg:opacity-[0.68] lg:scale-[0.985]"
                   )}
                   style={{
-                    backgroundImage: `url('${CARD_BG}')`,
+                    backgroundImage: `linear-gradient(160deg, rgba(66,82,106,0.58) 0%, rgba(47,61,84,0.72) 46%, rgba(24,34,53,0.88) 100%), url('${CARD_BG}')`,
+                    backgroundBlendMode: "normal, soft-light",
                     backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundColor: "rgba(22,32,50,0.84)",
                   }}
                 >
                   <h3 className="font-heading text-lg font-bold tracking-tight text-foreground md:text-xl mb-3">
@@ -513,7 +530,9 @@ export default function Home() {
                 <div
                   className={cn(
                     "group/growth relative z-[2] flex flex-col overflow-visible rounded-xl px-7 pb-7 pt-10 md:px-8 md:pb-8 md:pt-11",
-                    "border border-cyan-400/40 bg-card/55 backdrop-blur-md",
+                    brandGrayPanel,
+                    brandGrayPanelHover,
+                    "border border-cyan-400/40",
                     "shadow-[0_0_0_1px_rgba(0,200,255,0.14),0_8px_36px_rgba(0,0,0,0.42),0_0_100px_-28px_rgba(0,200,255,0.18)]",
                     "before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-cyan-400/45 before:to-transparent",
                     "transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
@@ -524,8 +543,11 @@ export default function Home() {
                   onMouseEnter={onGrowthEnter}
                   onMouseLeave={onGrowthLeave}
                   style={{
-                    backgroundImage: `url('${CARD_BG}')`,
+                    backgroundImage: `linear-gradient(160deg, rgba(68,84,108,0.56) 0%, rgba(49,64,88,0.72) 46%, rgba(26,37,58,0.88) 100%), url('${CARD_BG}')`,
+                    backgroundBlendMode: "normal, soft-light",
                     backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundColor: "rgba(24,35,54,0.85)",
                   }}
                 >
                   <div
@@ -586,16 +608,19 @@ export default function Home() {
                 <div
                   className={cn(
                     "group/scale relative flex flex-col overflow-hidden rounded-xl p-7 md:p-8",
-                    "border border-white/[0.08] bg-card/45 backdrop-blur-md",
-                    "shadow-[0_4px_28px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.06)]",
+                    brandGrayPanel,
+                    brandGrayPanelHover,
                     "before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/18 before:to-transparent",
                     "transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
                     "lg:hover:-translate-y-1.5 lg:hover:shadow-[0_16px_48px_rgba(0,0,0,0.48),inset_0_1px_0_rgba(255,255,255,0.08)]",
                     growthHovered && "lg:opacity-[0.68] lg:scale-[0.985]"
                   )}
                   style={{
-                    backgroundImage: `url('${CARD_BG}')`,
+                    backgroundImage: `linear-gradient(160deg, rgba(66,82,106,0.58) 0%, rgba(47,61,84,0.72) 46%, rgba(24,34,53,0.88) 100%), url('${CARD_BG}')`,
+                    backgroundBlendMode: "normal, soft-light",
                     backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundColor: "rgba(22,32,50,0.84)",
                   }}
                 >
                   <h3 className="font-heading text-lg font-bold tracking-tight text-foreground md:text-xl mb-3">
