@@ -1,7 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
 import { Pool } from "pg";
-import { isSupabaseDatabaseDisabled } from "../db";
 
 let _pool: Pool | null = null;
 let _leadEngineDb: ReturnType<typeof drizzle> | null = null;
@@ -89,30 +88,12 @@ function looksLikeMySqlUrl(url: string): boolean {
 export type LeadEngineDbMeta = {
   available: boolean;
   source: "lead_engine_database_url" | "database_url" | "none";
-  reason?:
-    | "missing_url"
-    | "invalid_database_url"
-    | "invalid_lead_engine_database_url"
-    | "database_unavailable"
-    | "missing_table"
-    | "supabase_paused";
+  reason?: "missing_url" | "invalid_database_url" | "invalid_lead_engine_database_url" | "database_unavailable" | "missing_table";
   tableReady?: boolean;
   chosenUrlKind?: "postgres" | "mysql" | "other" | "none";
 };
 
 function selectLeadEngineDatabaseUrl(): { url: string | null; meta: LeadEngineDbMeta } {
-  if (isSupabaseDatabaseDisabled()) {
-    return {
-      url: null,
-      meta: {
-        available: false,
-        source: "none",
-        reason: "supabase_paused",
-        chosenUrlKind: "none",
-      },
-    };
-  }
-
   const explicit = process.env.LEAD_ENGINE_DATABASE_URL?.trim();
   const fallback = process.env.DATABASE_URL?.trim();
 

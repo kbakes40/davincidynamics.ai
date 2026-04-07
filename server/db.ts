@@ -67,11 +67,6 @@ export function isDatabaseConnectivityError(err: unknown): boolean {
 
 let _databaseTargetLogged = false;
 
-/** When `DISABLE_SUPABASE_DB` is exactly `"true"`, skip creating any DB pool (paused / disconnected Supabase). */
-export function isSupabaseDatabaseDisabled(): boolean {
-  return process.env.DISABLE_SUPABASE_DB === "true";
-}
-
 function defaultPortForDatabaseUrl(protocol: string): string {
   const p = protocol.toLowerCase();
   if (p === "mysql:" || p === "mysql2:") return "3306";
@@ -113,13 +108,6 @@ export function logDatabaseTargetAtStartup(): void {
   if (_databaseTargetLogged) return;
   _databaseTargetLogged = true;
 
-  if (isSupabaseDatabaseDisabled()) {
-    console.warn(
-      "[Database] DISABLE_SUPABASE_DB=true — database connections skipped (Supabase paused)."
-    );
-    return;
-  }
-
   const raw = process.env.DATABASE_URL?.trim();
   if (!raw) {
     console.warn(
@@ -142,9 +130,6 @@ export function logDatabaseTargetAtStartup(): void {
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
-  if (isSupabaseDatabaseDisabled()) {
-    return null;
-  }
   if (!_db && process.env.DATABASE_URL) {
     try {
       _db = drizzle(process.env.DATABASE_URL);
