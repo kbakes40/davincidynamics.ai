@@ -1368,9 +1368,7 @@ export async function previewGooglePlacesSearch(params: {
   if (!db) {
     previewMessage = dbStatus.reason === "missing_table"
       ? "preview_available_import_unavailable: missing lead_engine_leads table or migration not applied"
-      : dbStatus.reason === "invalid_database_url" || dbStatus.reason === "invalid_lead_engine_database_url"
-        ? "preview_available_import_unavailable: invalid database url"
-        : "preview_available_import_unavailable: database unavailable";
+      : "preview_available_import_unavailable: database unavailable";
     console.warn("[LeadEngine][preview] no db for duplicate detection", dbStatus);
   } else {
     try {
@@ -1400,7 +1398,7 @@ export async function previewGooglePlacesSearch(params: {
     let importStatus: "new" | "already_imported" | "already_in_pipeline" | "imported_not_in_pipeline" = "new";
     if (dupId && db) {
       const existing = await db.select({ pipelineStage: leadEngineLeads.pipelineStage }).from(leadEngineLeads).where(eq(leadEngineLeads.id, dupId)).limit(1);
-      dupPipelineStage = existing[0]?.pipelineStage ?? null;
+      dupPipelineStage = (existing[0]?.pipelineStage ?? null) as PipelineStage | null;
       importStatus = dupPipelineStage && dupPipelineStage !== "new_lead" ? "already_in_pipeline" : "imported_not_in_pipeline";
     }
 
@@ -1476,7 +1474,7 @@ export async function importSelectedGooglePlaces(params: {
     const status = getLeadEngineDbStatus();
     console.warn("[LeadEngine][import-selected] db unavailable", status);
     if (status.reason === "missing_table") throw new Error("missing_migration_or_table: lead_engine_leads");
-    if (status.reason === "invalid_database_url" || status.reason === "invalid_lead_engine_database_url") throw new Error("invalid_database_url");
+    if (status.reason === "missing_auth_token") throw new Error("invalid_database_url");
     throw new Error("database_unavailable");
   }
   console.info("[LeadEngine][import-selected] starting", { count: params.placeIds.length, dbSource: getLeadEngineDbStatus().source });

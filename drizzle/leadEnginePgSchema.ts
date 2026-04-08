@@ -1,17 +1,8 @@
 /**
- * Lead Engine tables on PostgreSQL (e.g. Supabase).
- * Column names match the former MySQL schema for easier migration of app code.
+ * Lead Engine tables on Turso (libSQL/SQLite).
+ * Column names are unchanged from the prior PostgreSQL schema for zero app-code changes.
  */
-import {
-  decimal,
-  index,
-  integer,
-  pgEnum,
-  pgTable,
-  text,
-  timestamp,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { index, integer, real, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 import {
   leadEngineAgentQueueStatuses,
   leadEngineContactPointTypes,
@@ -23,49 +14,54 @@ import {
   leadEngineVerificationStatuses,
 } from "./leadEngineConstants";
 
-export const leadEngineLeadStatusPg = pgEnum("lead_engine_lead_status", leadEngineLeadStatuses);
-export const leadEngineOutreachStatusPg = pgEnum("lead_engine_outreach_status", leadEngineOutreachStatuses);
-export const leadEnginePriorityPg = pgEnum("lead_engine_priority", leadEnginePriorities);
-export const leadEnginePipelineStagePg = pgEnum("lead_engine_pipeline_stage", leadEnginePipelineStages);
-export const leadEngineVerificationStatusPg = pgEnum("lead_engine_verification_status", leadEngineVerificationStatuses);
-export const leadEngineImportBatchStatusPg = pgEnum("lead_engine_import_batch_status", leadEngineImportBatchStatuses);
-export const leadEngineContactPointTypePg = pgEnum("lead_engine_contact_point_type", leadEngineContactPointTypes);
-export const leadEngineAgentQueueStatusPg = pgEnum("lead_engine_agent_queue_status", leadEngineAgentQueueStatuses);
+// Re-export typed union helpers so downstream code that imported pgEnums can use these instead
+export type LeadEngineLeadStatus = (typeof leadEngineLeadStatuses)[number];
+export type LeadEngineOutreachStatus = (typeof leadEngineOutreachStatuses)[number];
+export type LeadEnginePriority = (typeof leadEnginePriorities)[number];
+export type LeadEnginePipelineStage = (typeof leadEnginePipelineStages)[number];
+export type LeadEngineVerificationStatus = (typeof leadEngineVerificationStatuses)[number];
+export type LeadEngineImportBatchStatus = (typeof leadEngineImportBatchStatuses)[number];
+export type LeadEngineContactPointType = (typeof leadEngineContactPointTypes)[number];
+export type LeadEngineAgentQueueStatus = (typeof leadEngineAgentQueueStatuses)[number];
 
-export const leadEngineLeads = pgTable(
+export const leadEngineLeads = sqliteTable(
   "lead_engine_leads",
   {
-    id: varchar("id", { length: 32 }).primaryKey(),
+    id: text("id").primaryKey(),
     businessName: text("business_name").notNull(),
     ownerName: text("owner_name"),
-    category: varchar("category", { length: 255 }).notNull().default(""),
-    subcategory: varchar("subcategory", { length: 255 }),
-    source: varchar("source", { length: 255 }).notNull().default("import"),
-    sourceRecordId: varchar("source_record_id", { length: 255 }),
-    targetZip: varchar("target_zip", { length: 32 }),
+    category: text("category").notNull().default(""),
+    subcategory: text("subcategory"),
+    source: text("source").notNull().default("import"),
+    sourceRecordId: text("source_record_id"),
+    targetZip: text("target_zip"),
     radiusMiles: integer("radius_miles"),
-    contactedAt: timestamp("contacted_at", { withTimezone: true, mode: "date" }),
-    followUpAt: timestamp("follow_up_at", { withTimezone: true, mode: "date" }),
+    contactedAt: integer("contacted_at", { mode: "timestamp" }),
+    followUpAt: integer("follow_up_at", { mode: "timestamp" }),
     outreachPrep: text("outreach_prep"),
-    leadStatus: leadEngineLeadStatusPg("lead_status").notNull().default("new"),
-    outreachStatus: leadEngineOutreachStatusPg("outreach_status").notNull().default("new"),
-    priority: leadEnginePriorityPg("priority").notNull().default("low"),
+    leadStatus: text("lead_status").notNull().default("new"),
+    outreachStatus: text("outreach_status").notNull().default("new"),
+    priority: text("priority").notNull().default("low"),
     score: integer("score").notNull().default(0),
     scoreReason: text("score_reason"),
     notesJson: text("notes_json"),
     reasonCodesJson: text("reason_codes_json"),
     tagsJson: text("tags_json"),
-    pipelineStage: leadEnginePipelineStagePg("pipeline_stage").notNull().default("new_lead"),
-    verificationStatus: leadEngineVerificationStatusPg("verification_status").notNull().default("unverified"),
-    assignedOwner: varchar("assigned_owner", { length: 64 }),
-    sourceJobId: varchar("source_job_id", { length: 64 }),
-    googleMapsUrl: varchar("google_maps_url", { length: 1024 }),
-    normalizedBusinessName: varchar("normalized_business_name", { length: 512 }).notNull().default(""),
-    normalizedPhone: varchar("normalized_phone", { length: 64 }),
-    normalizedWebsite: varchar("normalized_website", { length: 512 }),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    lastVerifiedAt: timestamp("last_verified_at", { withTimezone: true, mode: "date" }),
+    pipelineStage: text("pipeline_stage").notNull().default("new_lead"),
+    verificationStatus: text("verification_status").notNull().default("unverified"),
+    assignedOwner: text("assigned_owner"),
+    sourceJobId: text("source_job_id"),
+    googleMapsUrl: text("google_maps_url"),
+    normalizedBusinessName: text("normalized_business_name").notNull().default(""),
+    normalizedPhone: text("normalized_phone"),
+    normalizedWebsite: text("normalized_website"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    lastVerifiedAt: integer("last_verified_at", { mode: "timestamp" }),
   },
   t => [
     index("idx_lead_engine_norm_phone").on(t.normalizedPhone),
@@ -79,50 +75,54 @@ export const leadEngineLeads = pgTable(
   ]
 );
 
-export const leadEngineContactPoints = pgTable(
+export const leadEngineContactPoints = sqliteTable(
   "lead_engine_contact_points",
   {
-    id: varchar("id", { length: 32 }).primaryKey(),
-    leadId: varchar("lead_id", { length: 32 }).notNull(),
-    type: leadEngineContactPointTypePg("type").notNull(),
+    id: text("id").primaryKey(),
+    leadId: text("lead_id").notNull(),
+    type: text("type").notNull(),
     value: text("value").notNull(),
     isPrimary: integer("is_primary").notNull().default(1),
     isVerified: integer("is_verified").notNull().default(0),
-    verificationStatus: varchar("verification_status", { length: 32 }).notNull().default("unknown"),
-    source: varchar("source", { length: 64 }).notNull().default("import"),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    verificationStatus: text("verification_status").notNull().default("unknown"),
+    source: text("source").notNull().default("import"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
   },
   t => [index("idx_lead_engine_cp_lead").on(t.leadId)]
 );
 
-export const leadEngineAddresses = pgTable(
+export const leadEngineAddresses = sqliteTable(
   "lead_engine_addresses",
   {
-    id: varchar("id", { length: 32 }).primaryKey(),
-    leadId: varchar("lead_id", { length: 32 }).notNull(),
+    id: text("id").primaryKey(),
+    leadId: text("lead_id").notNull(),
     address1: text("address_1"),
-    city: varchar("city", { length: 128 }).notNull().default(""),
-    state: varchar("state", { length: 64 }).notNull().default(""),
-    zip: varchar("zip", { length: 32 }),
-    country: varchar("country", { length: 64 }).notNull().default("US"),
-    latitude: decimal("latitude", { precision: 10, scale: 7 }),
-    longitude: decimal("longitude", { precision: 10, scale: 7 }),
+    city: text("city").notNull().default(""),
+    state: text("state").notNull().default(""),
+    zip: text("zip"),
+    country: text("country").notNull().default("US"),
+    latitude: text("latitude"),
+    longitude: text("longitude"),
     serviceRadiusMiles: integer("service_radius_miles"),
   },
   t => [index("idx_lead_engine_addr_lead").on(t.leadId)]
 );
 
-export const leadEngineSources = pgTable(
+export const leadEngineSources = sqliteTable(
   "lead_engine_sources",
   {
-    id: varchar("id", { length: 32 }).primaryKey(),
-    leadId: varchar("lead_id", { length: 32 }).notNull(),
-    sourceName: varchar("source_name", { length: 128 }).notNull(),
-    sourceType: varchar("source_type", { length: 64 }).notNull().default("csv"),
-    importBatchId: varchar("import_batch_id", { length: 32 }),
+    id: text("id").primaryKey(),
+    leadId: text("lead_id").notNull(),
+    sourceName: text("source_name").notNull(),
+    sourceType: text("source_type").notNull().default("csv"),
+    importBatchId: text("import_batch_id"),
     rawPayloadJson: text("raw_payload_json"),
-    sourceUrl: varchar("source_url", { length: 1024 }),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    sourceUrl: text("source_url"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
   },
   t => [
     index("idx_lead_engine_src_lead").on(t.leadId),
@@ -130,16 +130,16 @@ export const leadEngineSources = pgTable(
   ]
 );
 
-export const leadEngineEnrichment = pgTable(
+export const leadEngineEnrichment = sqliteTable(
   "lead_engine_enrichment",
   {
-    id: varchar("id", { length: 32 }).primaryKey(),
-    leadId: varchar("lead_id", { length: 32 }).notNull().unique(),
-    websiteStatus: varchar("website_status", { length: 32 }).notNull().default("unknown"),
-    googleBusinessProfile: varchar("google_business_profile", { length: 1024 }),
-    facebook: varchar("facebook", { length: 1024 }),
-    instagram: varchar("instagram", { length: 1024 }),
-    linkedin: varchar("linkedin", { length: 1024 }),
+    id: text("id").primaryKey(),
+    leadId: text("lead_id").notNull(),
+    websiteStatus: text("website_status").notNull().default("unknown"),
+    googleBusinessProfile: text("google_business_profile"),
+    facebook: text("facebook"),
+    instagram: text("instagram"),
+    linkedin: text("linkedin"),
     hasWebsite: integer("has_website").notNull().default(0),
     sslEnabled: integer("ssl_enabled"),
     mobileFriendly: integer("mobile_friendly"),
@@ -149,56 +149,65 @@ export const leadEngineEnrichment = pgTable(
     hasChatWidget: integer("has_chat_widget"),
     hasMetaPixel: integer("has_meta_pixel"),
     hasGoogleAnalytics: integer("has_google_analytics"),
-    ecommercePlatform: varchar("ecommerce_platform", { length: 128 }),
-    crmDetected: varchar("crm_detected", { length: 128 }),
-    emailProvider: varchar("email_provider", { length: 128 }),
+    ecommercePlatform: text("ecommerce_platform"),
+    crmDetected: text("crm_detected"),
+    emailProvider: text("email_provider"),
     techStackJson: text("tech_stack_json"),
     finalUrl: text("final_url"),
     summary: text("summary"),
     socialPresence: text("social_presence"),
-    estimatedMonthlyOrders: varchar("estimated_monthly_orders", { length: 64 }),
-    enrichedAt: timestamp("enriched_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    estimatedMonthlyOrders: text("estimated_monthly_orders"),
+    enrichedAt: integer("enriched_at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
   },
-  t => [index("idx_lead_engine_enrichment_status").on(t.websiteStatus)]
+  t => [
+    index("idx_lead_engine_enrichment_status").on(t.websiteStatus),
+    unique("uq_lead_engine_enrichment_lead").on(t.leadId),
+  ]
 );
 
-export const leadEngineScoringEvents = pgTable(
+export const leadEngineScoringEvents = sqliteTable(
   "lead_engine_scoring_events",
   {
-    id: varchar("id", { length: 32 }).primaryKey(),
-    leadId: varchar("lead_id", { length: 32 }).notNull(),
+    id: text("id").primaryKey(),
+    leadId: text("lead_id").notNull(),
     scoreChange: integer("score_change").notNull(),
     reason: text("reason").notNull(),
-    ruleKey: varchar("rule_key", { length: 64 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    ruleKey: text("rule_key").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
   },
   t => [index("idx_lead_engine_score_lead").on(t.leadId)]
 );
 
-export const leadEngineOutreachEvents = pgTable(
+export const leadEngineOutreachEvents = sqliteTable(
   "lead_engine_outreach_events",
   {
-    id: varchar("id", { length: 32 }).primaryKey(),
-    leadId: varchar("lead_id", { length: 32 }).notNull(),
-    channel: varchar("channel", { length: 32 }).notNull(),
-    direction: varchar("direction", { length: 16 }).notNull(),
-    eventType: varchar("event_type", { length: 64 }).notNull(),
+    id: text("id").primaryKey(),
+    leadId: text("lead_id").notNull(),
+    channel: text("channel").notNull(),
+    direction: text("direction").notNull(),
+    eventType: text("event_type").notNull(),
     subject: text("subject"),
     messagePreview: text("message_preview"),
-    sentBy: varchar("sent_by", { length: 64 }),
-    sentAt: timestamp("sent_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    replyAt: timestamp("reply_at", { withTimezone: true, mode: "date" }),
-    status: varchar("status", { length: 32 }),
-    externalMessageId: varchar("external_message_id", { length: 128 }),
+    sentBy: text("sent_by"),
+    sentAt: integer("sent_at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    replyAt: integer("reply_at", { mode: "timestamp" }),
+    status: text("status"),
+    externalMessageId: text("external_message_id"),
   },
   t => [index("idx_lead_engine_outreach_lead").on(t.leadId)]
 );
 
-export const leadEngineImportBatches = pgTable("lead_engine_import_batches", {
-  id: varchar("id", { length: 32 }).primaryKey(),
-  sourceName: varchar("source_name", { length: 128 }).notNull().default("csv"),
-  fileName: varchar("file_name", { length: 512 }),
-  status: leadEngineImportBatchStatusPg("status").notNull().default("pending"),
+export const leadEngineImportBatches = sqliteTable("lead_engine_import_batches", {
+  id: text("id").primaryKey(),
+  sourceName: text("source_name").notNull().default("csv"),
+  fileName: text("file_name"),
+  status: text("status").notNull().default("pending"),
   totalRows: integer("total_rows").notNull().default(0),
   insertedRows: integer("inserted_rows").notNull().default(0),
   updatedRows: integer("updated_rows").notNull().default(0),
@@ -206,90 +215,105 @@ export const leadEngineImportBatches = pgTable("lead_engine_import_batches", {
   failedRows: integer("failed_rows").notNull().default(0),
   errorLog: text("error_log"),
   linkedLeadIdsJson: text("linked_lead_ids_json"),
-  startedAt: timestamp("started_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-  completedAt: timestamp("completed_at", { withTimezone: true, mode: "date" }),
+  startedAt: integer("started_at", { mode: "timestamp" })
+    .$defaultFn(() => new Date())
+    .notNull(),
+  completedAt: integer("completed_at", { mode: "timestamp" }),
 });
 
-export const leadEngineAgentQueues = pgTable(
+export const leadEngineAgentQueues = sqliteTable(
   "lead_engine_agent_queues",
   {
-    id: varchar("id", { length: 32 }).primaryKey(),
-    leadId: varchar("lead_id", { length: 32 }).notNull(),
-    assignedAgent: varchar("assigned_agent", { length: 32 }).notNull(),
-    queueStatus: leadEngineAgentQueueStatusPg("queue_status").notNull().default("pending"),
+    id: text("id").primaryKey(),
+    leadId: text("lead_id").notNull(),
+    assignedAgent: text("assigned_agent").notNull(),
+    queueStatus: text("queue_status").notNull().default("pending"),
     reason: text("reason"),
-    scheduledFor: timestamp("scheduled_for", { withTimezone: true, mode: "date" }),
-    completedAt: timestamp("completed_at", { withTimezone: true, mode: "date" }),
+    scheduledFor: integer("scheduled_for", { mode: "timestamp" }),
+    completedAt: integer("completed_at", { mode: "timestamp" }),
   },
   t => [index("idx_lead_engine_aq_lead").on(t.leadId)]
 );
 
-export const leadEnginePipelineEvents = pgTable(
+export const leadEnginePipelineEvents = sqliteTable(
   "lead_engine_pipeline_events",
   {
-    id: varchar("id", { length: 32 }).primaryKey(),
-    leadId: varchar("lead_id", { length: 32 }).notNull(),
-    fromStage: varchar("from_stage", { length: 32 }),
-    toStage: varchar("to_stage", { length: 32 }).notNull(),
-    at: timestamp("at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    actor: varchar("actor", { length: 64 }).notNull().default("system"),
+    id: text("id").primaryKey(),
+    leadId: text("lead_id").notNull(),
+    fromStage: text("from_stage"),
+    toStage: text("to_stage").notNull(),
+    at: integer("at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    actor: text("actor").notNull().default("system"),
     note: text("note"),
   },
   t => [index("idx_lead_engine_pe_lead").on(t.leadId)]
 );
 
-export const leadEngineActivityLog = pgTable(
+export const leadEngineActivityLog = sqliteTable(
   "lead_engine_activity_log",
   {
-    id: varchar("id", { length: 32 }).primaryKey(),
-    leadId: varchar("lead_id", { length: 32 }).notNull(),
-    type: varchar("type", { length: 32 }).notNull(),
+    id: text("id").primaryKey(),
+    leadId: text("lead_id").notNull(),
+    type: text("type").notNull(),
     message: text("message").notNull(),
-    at: timestamp("at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    actor: varchar("actor", { length: 64 }).notNull().default("system"),
+    at: integer("at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    actor: text("actor").notNull().default("system"),
   },
   t => [index("idx_lead_engine_act_lead").on(t.leadId)]
 );
 
-export const leadEngineCampaigns = pgTable(
+export const leadEngineCampaigns = sqliteTable(
   "lead_engine_campaigns",
   {
-    id: varchar("id", { length: 32 }).primaryKey(),
+    id: text("id").primaryKey(),
     campaignName: text("campaign_name").notNull(),
-    campaignType: varchar("campaign_type", { length: 64 }).notNull().default("outbound"),
-    category: varchar("category", { length: 128 }),
+    campaignType: text("campaign_type").notNull().default("outbound"),
+    category: text("category"),
     targetAudience: text("target_audience"),
-    channel: varchar("channel", { length: 32 }).notNull().default("email"),
+    channel: text("channel").notNull().default("email"),
     objective: text("objective"),
-    status: varchar("status", { length: 32 }).notNull().default("draft"),
-    owner: varchar("owner", { length: 64 }),
+    status: text("status").notNull().default("draft"),
+    owner: text("owner"),
     notes: text("notes"),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
   },
   t => [index("idx_le_campaign_status").on(t.status), index("idx_le_campaign_channel").on(t.channel)]
 );
 
-export const leadEngineCampaignLeads = pgTable(
+export const leadEngineCampaignLeads = sqliteTable(
   "lead_engine_campaign_leads",
   {
-    id: varchar("id", { length: 32 }).primaryKey(),
-    campaignId: varchar("campaign_id", { length: 32 }).notNull(),
-    leadId: varchar("lead_id", { length: 32 }).notNull(),
-    pipelineId: varchar("pipeline_id", { length: 32 }),
-    stage: varchar("stage", { length: 32 }).notNull().default("new_lead"),
-    outreachStatus: varchar("outreach_status", { length: 32 }).notNull().default("not_started"),
-    assignedTo: varchar("assigned_to", { length: 64 }),
+    id: text("id").primaryKey(),
+    campaignId: text("campaign_id").notNull(),
+    leadId: text("lead_id").notNull(),
+    pipelineId: text("pipeline_id"),
+    stage: text("stage").notNull().default("new_lead"),
+    outreachStatus: text("outreach_status").notNull().default("not_started"),
+    assignedTo: text("assigned_to"),
     sequenceStep: integer("sequence_step").notNull().default(1),
-    lastContactedAt: timestamp("last_contacted_at", { withTimezone: true, mode: "date" }),
-    nextFollowUpAt: timestamp("next_follow_up_at", { withTimezone: true, mode: "date" }),
+    lastContactedAt: integer("last_contacted_at", { mode: "timestamp" }),
+    nextFollowUpAt: integer("next_follow_up_at", { mode: "timestamp" }),
     notes: text("notes"),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
   },
   t => [
     index("idx_le_campaign_leads_campaign").on(t.campaignId),
     index("idx_le_campaign_leads_lead").on(t.leadId),
+    unique("uq_le_campaign_lead").on(t.campaignId, t.leadId),
   ]
 );
 
